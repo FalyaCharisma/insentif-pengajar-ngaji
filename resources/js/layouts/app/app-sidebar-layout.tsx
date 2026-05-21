@@ -1,4 +1,5 @@
-import { Link } from "@inertiajs/react";
+import { useState } from "react";
+import { Link, usePage } from "@inertiajs/react";
 
 import {
     LayoutDashboard,
@@ -6,50 +7,207 @@ import {
     Users,
     FileText,
     Settings,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Menu,
+    X,
 } from "lucide-react";
 
-export default function AppSidebarLayout() {
+type Props = {
+    collapsed: boolean;
+    setCollapsed: (value: boolean) => void;
+};
+
+export default function AppSidebarLayout({
+    collapsed,
+    setCollapsed,
+}: Props) {
+
+    const { url } = usePage();
+
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [masterOpen, setMasterOpen] = useState(false);
+
+    const isActive = (path: string) => {
+        return url.startsWith(path);
+    };
+
+    const menuClass = (path: string) =>
+        `
+        flex items-center
+        ${collapsed ? "justify-center px-2" : "gap-3 px-4"}
+        py-3 rounded-2xl transition-all duration-200
+        ${
+            isActive(path)
+                ? "bg-indigo-600 text-white shadow-lg"
+                : "text-slate-300 hover:bg-slate-800"
+        }
+    `;
+
     return (
-        <aside className="w-72 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white flex flex-col shadow-2xl">
-            {/* Logo */}
-            <div className="h-16 flex items-center px-8 border-b border-slate-800">
-                <div>
-                    <h1 className="text-xl font-extrabold tracking-wide bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-                        Insentif Pengajar Ngaji
-                    </h1>
+        <>
+            {/* MOBILE BUTTON */}
+            <button
+                onClick={() => setMobileOpen(true)}
+                className="lg:hidden fixed top-4 left-4 z-50 bg-slate-900 text-white p-2 rounded-xl"
+            >
+                <Menu size={22} />
+            </button>
 
-                    <p className="text-xs text-slate-400 mt-1">
-                        Admin Dashboard
-                    </p>
+            {/* OVERLAY */}
+            {mobileOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    onClick={() => setMobileOpen(false)}
+                />
+            )}
+
+            {/* SIDEBAR */}
+            <aside
+                className={`
+                    fixed top-0 left-0 z-50 h-screen
+                    bg-slate-950 border-r border-slate-800
+                    flex flex-col
+                    transition-all duration-300
+                    ${collapsed ? "w-20" : "w-72"}
+                    ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+                    lg:translate-x-0
+                `}
+            >
+                {/* HEADER */}
+                <div className="h-16 border-b border-slate-800 flex items-center justify-between px-4">
+                    {!collapsed && (
+                        <div>
+                            <h1 className="font-bold text-white text-lg">
+                                Insentif Pengajar
+                            </h1>
+
+                            <p className="text-xs text-slate-400">
+                                Admin Dashboard
+                            </p>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-2">
+                        {/* Desktop Collapse */}
+                        <button
+                            onClick={() => setCollapsed(!collapsed)}
+                            className="hidden lg:flex text-slate-400 hover:text-white"
+                        >
+                            {collapsed ? (
+                                <ChevronRight size={20} />
+                            ) : (
+                                <ChevronLeft size={20} />
+                            )}
+                        </button>
+
+                        {/* Mobile Close */}
+                        <button
+                            onClick={() => setMobileOpen(false)}
+                            className="lg:hidden text-slate-400"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 px-5 py-6 space-y-2">
-                <p className="text-xs uppercase tracking-widest text-slate-500 px-4 mb-3">
-                    Main Menu
-                </p>
+                {/* MENU */}
+                <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-2">
 
-                <Link
-                    href="/dashboard"
-                    className="flex items-center gap-4 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 shadow-lg shadow-indigo-500/20"
-                >
-                    <LayoutDashboard size={20} />
-                    <span className="font-medium">
-                        Dashboard
-                    </span>
-                </Link>
+                    {/* Dashboard */}
+                    <Link
+                        href="/dashboard"
+                        className={menuClass("/dashboard")}
+                    >
+                        <LayoutDashboard size={20} />
 
-                <Link
-                    href="/kategori"
-                    className="flex items-center gap-4 px-4 py-2.5 rounded-2xl hover:bg-slate-800/80 transition-all duration-200"
-                >
-                    <FolderKanban size={20} />
-                    <span className="font-medium">
-                        Kategori
-                    </span>
-                </Link>
-            </nav>
-        </aside>
+                        {!collapsed && (
+                            <span className="font-medium">
+                                Dashboard
+                            </span>
+                        )}
+                    </Link>
+
+                    {/* MASTER DATA */}
+                    <div>
+                        <button
+                            onClick={() => setMasterOpen(!masterOpen)}
+                            className={`
+                                        w-full flex items-center
+                                        ${collapsed ? "justify-center px-2" : "justify-between px-4"}
+                                        py-3 rounded-2xl text-slate-300 hover:bg-slate-800 transition
+                                    `}
+                            >
+                            <div className="flex items-center gap-3">
+                                <FolderKanban size={20} />
+
+                                {!collapsed && (
+                                    <span className="font-medium">
+                                        Master Data
+                                    </span>
+                                )}
+                            </div>
+
+                            {!collapsed && (
+                                <ChevronDown
+                                    size={18}
+                                    className={`transition-transform ${
+                                        masterOpen ? "rotate-180" : ""
+                                    }`}
+                                />
+                            )}
+                        </button>
+
+                        {/* SUBMENU */}
+                        {!collapsed && masterOpen && (
+                            <div className="ml-4 mt-2 space-y-2 border-l border-slate-800 pl-3">
+
+                                <Link
+                                    href="/kategori"
+                                    className={menuClass("/kategori")}
+                                >
+                                    <FolderKanban size={18} />
+
+                                    <span>Kategori</span>
+                                </Link>
+
+                                <Link
+                                    href="/lembaga"
+                                    className={menuClass("/lembaga")}
+                                >
+                                    <Users size={18} />
+
+                                    <span>Lembaga</span>
+                                </Link>
+
+                                <Link
+                                    href="/forum"
+                                    className={menuClass("/forum")}
+                                >
+                                    <FileText size={18} />
+
+                                    <span>Forum</span>
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* SETTINGS */}
+                    <Link
+                        href="/settings"
+                        className={menuClass("/settings")}
+                    >
+                        <Settings size={20} />
+
+                        {!collapsed && (
+                            <span className="font-medium">
+                                Settings
+                            </span>
+                        )}
+                    </Link>
+                </nav>
+            </aside>
+        </>
     );
 }
