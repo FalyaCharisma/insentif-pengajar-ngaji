@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 
 import {
@@ -26,8 +26,19 @@ export default function AppSidebarLayout({
 
     const { url } = usePage();
 
+    const isMasterActive =
+        url.startsWith("/kategori") ||
+        url.startsWith("/lembaga") ||
+        url.startsWith("/forum");
+
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [masterOpen, setMasterOpen] = useState(false);
+    const [masterOpen, setMasterOpen] = useState(isMasterActive);
+
+    useEffect(() => {
+        if (isMasterActive) {
+            setMasterOpen(true);
+        }
+    }, [url]);
 
     const isActive = (path: string) => {
         return url.startsWith(path);

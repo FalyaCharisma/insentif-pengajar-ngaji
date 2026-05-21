@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\ForumController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -20,6 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('kategori', KategoriController::class);
+    Route::resource('forum', ForumController::class);
 
 });
 
