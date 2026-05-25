@@ -1,8 +1,8 @@
 import { Pencil, Trash2 } from "lucide-react";
 
 export const columns = (
-    onEdit: (kategori: any) => void,
-    onDelete: (kategori: any) => void
+    onEdit: (pengurus: any) => void,
+    onDelete: (pengurus: any) => void
 ) => [
 
     {
@@ -16,8 +16,23 @@ export const columns = (
     },
 
     {
+        accessorKey: "nik",
+        header: "NIK",
+    },
+
+    {
         accessorKey: "nama",
-        header: "Nama Kategori",
+        header: "Nama",
+    },
+
+    {
+        accessorKey: "jabatan",
+        header: "Jabatan",
+    },
+
+    {
+        accessorKey: "no_hp",
+        header: "No HP",
     },
 
     {
@@ -25,14 +40,13 @@ export const columns = (
         header: () => <div className="w-full text-center">Aksi</div>,
         cell: ({ row }: any) => {
 
-            const kategori = row.original;
+            const pengurus = row.original;
 
             return (
-
                 <div className="flex items-center justify-center gap-2 w-full">
 
                     <button
-                        onClick={() => onEdit(kategori)}
+                        onClick={() => onEdit(pengurus)}
                         className="flex items-center gap-1 rounded-lg bg-amber-500 px-3 py-1.5 text-xs text-white"
                     >
                         <Pencil className="w-3.5 h-3.5" />
@@ -40,7 +54,7 @@ export const columns = (
                     </button>
 
                     <button
-                        onClick={() => onDelete(kategori)}
+                        onClick={() => onDelete(pengurus)}
                         className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white"
                     >
                         <Trash2 className="w-3.5 h-3.5" />

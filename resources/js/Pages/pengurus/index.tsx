@@ -7,25 +7,23 @@ import { useQueryParams } from "@/hooks/use-query-params";
 import TableToolbar from "@/Components/table-toolbar";
 import PageHeader from "@/Components/page-header";
 import { useState, useEffect } from "react";
-import FormModal from "./form-modal";
 import { router, usePage } from "@inertiajs/react";
 import { deleteConfirm, successAlert } from "@/lib/alert";
 
 type Props = {
-    forum: any;
-    kategori: any[];
+    pengurus: any;
     filters: any;
 };
 
-export default function Index({ forum, kategori, filters }: Props) {
+export default function Index({ pengurus, filters }: Props) {
 
     const { setParams } = useQueryParams(
-        route("forum.index"),
+        route("pengurus.index"),
         filters,
     );
 
     const [open, setOpen] = useState(false);
-    const [selectedForum, setSelectedForum] = useState<any>(null);
+    const [selectedPengurus, setSelectedPengurus] = useState<any>(null);
 
     const pageProps: any = usePage().props;
     const flash = pageProps.flash || {};
@@ -37,15 +35,15 @@ export default function Index({ forum, kategori, filters }: Props) {
     }, [flash]);
 
     return (
-        <> 
-            <Head title="Data Forum" />
+        <>
+            <Head title="Data Pengurus" />
             <AdminLayout>
                 <div className="space-y-5 w-full overflow-hidden">
 
                     {/* HEADER */}
                     <PageHeader
-                        title="Forum"
-                        subtitle="Kelola data forum"
+                        title="Pengurus"
+                        subtitle="Kelola data pengurus"
                     />
 
                     {/* TOOLBAR */}
@@ -53,10 +51,10 @@ export default function Index({ forum, kategori, filters }: Props) {
                         <TableToolbar
                             filters={filters}
                             setParams={setParams}
-                            searchPlaceholder="Cari forum..."
-                            addButtonLabel="Tambah Forum"
+                            searchPlaceholder="Cari pengurus..."
+                            addButtonLabel="Tambah Pengurus"
                             onAdd={() => {
-                                setSelectedForum(null); // penting untuk mode create
+                                setSelectedPengurus(null);
                                 setOpen(true);
                             }}
                             sortOptions={[
@@ -72,41 +70,30 @@ export default function Index({ forum, kategori, filters }: Props) {
                         <DataTable
                             columns={columns(
                                 (row) => {
-                                    setSelectedForum(row); // EDIT MODE
+                                    setSelectedPengurus(row); // EDIT MODE
                                     setOpen(true);
                                 },
 
                                 (row) => {
                                     deleteConfirm(
-                                        `Forum "${row.nama}" akan dihapus`,
+                                        `Pengurus "${row.nama}" akan dihapus`,
                                     ).then((result) => {
                                         if (result.isConfirmed) {
                                             router.delete(
-                                                route("forum.destroy", row.id),
+                                                route("pengurus.destroy", row.id),
                                             );
                                         }
                                     });
                                 },
                             )}
-                            data={forum.data}
+                            data={pengurus?.data ?? []}
                         />
                     </div>
 
                     {/* PAGINATION */}
                     <div className="overflow-x-auto">
-                        <Pagination links={forum.links} />
+                        <Pagination links={pengurus?.links ?? []} />
                     </div>
-
-                    {/* MODAL */}
-                    <FormModal
-                        open={open}
-                        onClose={() => {
-                            setOpen(false);
-                            setSelectedForum(null);
-                        }}
-                        forum={selectedForum}
-                        kategori={kategori}
-                    />
 
                 </div>
             </AdminLayout>

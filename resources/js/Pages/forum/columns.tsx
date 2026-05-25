@@ -7,39 +7,36 @@ export const columns = (
 
     {
         id: "no",
-
-        header: "No",
-
-        cell: ({ row }: any) => row.index + 1,
+        header: () => <div className="w-full text-center">No</div>,
+        cell: ({ row }: any) => (
+            <div className="text-center">
+                {row.index + 1}
+            </div>
+        ),
     },
     {
         accessorKey: "nik",
-
         header: "NIK",
     },
     {
         accessorKey: "nama",
-
         header: "Nama Forum",
     },
 
     {
         accessorKey: "kategori.nama",
-
         header: "Kategori",
     },
     {
         id: "aksi",
-
-        header: "Aksi",
-
+        header: () => <div className="w-full text-center">Aksi</div>,
         cell: ({ row }: any) => {
 
             const forum = row.original;
 
             return (
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2 w-full">
 
                     <button
                         onClick={() => onEdit(forum)}

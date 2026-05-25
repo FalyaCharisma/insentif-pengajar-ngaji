@@ -1,3 +1,4 @@
+import { Head } from "@inertiajs/react";
 import AdminLayout from "@/layouts/app-layout";
 import { columns } from "./columns";
 import DataTable from "@/Components/data-table";
@@ -36,91 +37,94 @@ export default function Index({ kategori, filters }: Props) {
     }, [flash]);
 
     return (
-        <AdminLayout>
-            <div className="space-y-5 w-full overflow-hidden">
+        <>
+            <Head title="Data Kategori" />
+            <AdminLayout>
+                <div className="space-y-5 w-full overflow-hidden">
 
-                {/* Header */}
-                <PageHeader
-                    title="Kategori"
-                    subtitle="Kelola data kategori"
-                />
+                    {/* Header */}
+                    <PageHeader
+                        title="Kategori"
+                        subtitle="Kelola data kategori"
+                    />
 
-                {/* Toolbar */}
-                <div className="w-full overflow-hidden">
-                    <TableToolbar
-                        filters={filters}
-                        setParams={setParams}
-                        searchPlaceholder="Cari kategori..."
-                        addButtonLabel="Tambah Kategori"
-                        onAdd={() => setOpen(true)}
-                        sortOptions={[
-                            {
-                                label: "Terbaru",
-                                value: "id",
-                            },
+                    {/* Toolbar */}
+                    <div className="w-full overflow-hidden">
+                        <TableToolbar
+                            filters={filters}
+                            setParams={setParams}
+                            searchPlaceholder="Cari kategori..."
+                            addButtonLabel="Tambah Kategori"
+                            onAdd={() => setOpen(true)}
+                            sortOptions={[
+                                {
+                                    label: "Terbaru",
+                                    value: "id",
+                                },
 
-                            {
-                                label: "Nama",
-                                value: "nama",
-                            },
+                                {
+                                    label: "Nama",
+                                    value: "nama",
+                                },
 
-                            {
-                                label: "Tanggal",
-                                value: "created_at",
-                            },
-                        ]}
+                                {
+                                    label: "Tanggal",
+                                    value: "created_at",
+                                },
+                            ]}
+                        />
+                    </div>
+
+                    {/* Table */}
+                    <div
+                        className="
+                            overflow-x-auto
+                            rounded-2xl
+                            border border-slate-200
+                        "
+                    >
+                        <DataTable
+                            columns={columns(
+                                (kategori) => {
+                                    setSelectedKategori(kategori);
+                                    setOpen(true);
+                                },
+
+                                (kategori) => {
+                                    deleteConfirm(
+                                        `Kategori "${kategori.nama}" akan dihapus`,
+                                    ).then((result) => {
+                                        if (result.isConfirmed) {
+                                            router.delete(
+                                                route(
+                                                    "kategori.destroy",
+                                                    kategori.id,
+                                                ),
+                                            );
+                                        }
+                                    });
+                                },
+                            )}
+                            data={kategori.data}
+                        />
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="overflow-x-auto">
+                        <Pagination links={kategori.links} />
+                    </div>
+
+                    {/* Modal */}
+                    <FormModal
+                        open={open}
+                        onClose={() => {
+                            setOpen(false);
+                            setSelectedKategori(null);
+                        }}
+                        kategori={selectedKategori}
                     />
                 </div>
-
-                {/* Table */}
-                <div
-                    className="
-                        overflow-x-auto
-                        rounded-2xl
-                        border border-slate-200
-                    "
-                >
-                    <DataTable
-                        columns={columns(
-                            (kategori) => {
-                                setSelectedKategori(kategori);
-                                setOpen(true);
-                            },
-
-                            (kategori) => {
-                                deleteConfirm(
-                                    `Kategori "${kategori.nama}" akan dihapus`,
-                                ).then((result) => {
-                                    if (result.isConfirmed) {
-                                        router.delete(
-                                            route(
-                                                "kategori.destroy",
-                                                kategori.id,
-                                            ),
-                                        );
-                                    }
-                                });
-                            },
-                        )}
-                        data={kategori.data}
-                    />
-                </div>
-
-                {/* Pagination */}
-                <div className="overflow-x-auto">
-                    <Pagination links={kategori.links} />
-                </div>
-
-                {/* Modal */}
-                <FormModal
-                    open={open}
-                    onClose={() => {
-                        setOpen(false);
-                        setSelectedKategori(null);
-                    }}
-                    kategori={selectedKategori}
-                />
-            </div>
-        </AdminLayout>
+            </AdminLayout>
+        </>
     );
 }

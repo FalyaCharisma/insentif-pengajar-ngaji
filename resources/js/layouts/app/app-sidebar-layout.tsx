@@ -12,6 +12,7 @@ import {
     ChevronRight,
     Menu,
     X,
+    Building2
 } from "lucide-react";
 
 type Props = {
@@ -29,7 +30,8 @@ export default function AppSidebarLayout({
     const isMasterActive =
         url.startsWith("/kategori") ||
         url.startsWith("/lembaga") ||
-        url.startsWith("/forum");
+        url.startsWith("/forum") ||
+        url.startsWith("/pengurus"); 
 
     const [mobileOpen, setMobileOpen] = useState(false);
     const [masterOpen, setMasterOpen] = useState(isMasterActive);
@@ -187,7 +189,7 @@ export default function AppSidebarLayout({
                                     href="/lembaga"
                                     className={menuClass("/lembaga")}
                                 >
-                                    <Users size={18} />
+                                    <Building2 size={18} />
 
                                     <span>Lembaga</span>
                                 </Link>
@@ -199,6 +201,13 @@ export default function AppSidebarLayout({
                                     <FileText size={18} />
 
                                     <span>Forum</span>
+                                </Link>
+                                <Link
+                                    href="/pengurus"
+                                    className={menuClass("/pengurus")}
+                                >
+                                    <Users size={18} />
+                                    <span>Pengurus</span>
                                 </Link>
                             </div>
                         )}
