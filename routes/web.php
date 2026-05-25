@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\LembagaController;
 use App\Http\Controllers\PengurusController;
 
 Route::get('/', function () {
@@ -23,6 +24,8 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('kategori', KategoriController::class);
     Route::resource('forum', ForumController::class);
+    Route::resource('lembaga', LembagaController::class);
+
     Route::resource('pengurus', PengurusController::class);
 });
 

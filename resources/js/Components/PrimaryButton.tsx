@@ -1,20 +1,28 @@
-import { ButtonHTMLAttributes } from 'react';
+import { ButtonHTMLAttributes } from "react";
+
+type Props =
+    ButtonHTMLAttributes<HTMLButtonElement>;
 
 export default function PrimaryButton({
-    className = '',
+    className = "",
     disabled,
     children,
     ...props
-}: ButtonHTMLAttributes<HTMLButtonElement>) {
+}: Props) {
     return (
         <button
             {...props}
-            className={
-                `inline-flex items-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900 ${
-                    disabled && 'opacity-25'
-                } ` + className
-            }
             disabled={disabled}
+            className={`
+                rounded-xl bg-indigo-600
+                px-5 py-2 text-sm text-white
+                transition hover:bg-indigo-700
+
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+
+                ${className}
+            `}
         >
             {children}
         </button>
