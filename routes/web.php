@@ -8,9 +8,30 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\LembagaController;
 use App\Http\Controllers\PengurusController;
 
+
 Route::get('/', function () {
-    return redirect()->route('login');
-});
+    return Inertia::render('frontend/Beranda');
+})->name('portal.beranda');
+
+Route::get('/peta-sebaran', function () {
+    return Inertia::render('frontend/PetaSebaran');
+})->name('portal.peta-sebaran');
+
+Route::get('/layanan', function () {
+    return Inertia::render('frontend/Layanan');
+})->name('portal.layanan');
+
+Route::get('/berita', function () {
+    return Inertia::render('frontend/Berita');
+})->name('portal.berita');
+
+Route::get('/kontak', function () {
+    return Inertia::render('frontend/Kontak');
+})->name('portal.kontak');
+
+// Route::get('/', function () {
+//     return redirect()->route('login');
+// });
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
