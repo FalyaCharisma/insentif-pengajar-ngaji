@@ -1,61 +1,98 @@
-import { Head } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
+import { useEffect, useState } from "react";
+
 import AdminLayout from "@/layouts/app-layout";
-import { columns } from "./columns";
+
 import DataTable from "@/Components/DataTable";
 import Pagination from "@/Components/pagination";
-import { useQueryParams } from "@/hooks/use-query-params";
 import TableToolbar from "@/Components/TableToolbar";
 import PageHeader from "@/Components/PageHeader";
-import { useState, useEffect } from "react";
-import FormModal from "./form-modal";
-import { router, usePage } from "@inertiajs/react";
+
+import { useQueryParams } from "@/hooks/use-query-params";
+
 import { deleteConfirm, successAlert } from "@/lib/alert";
 
+import { columns } from "./columns";
+import FormModal from "./form-modal";
+import { PengajuanProposal } from "@/types/pengajuan-proposal";
+import { useAuth } from "@/lib/auth";
+
 type Props = {
-    kategori: any;
+    pengajuanProposal: {
+        data: PengajuanProposal[];
+        links: any[];
+    };
+
+    lembaga: any[];
+
     filters: any;
 };
 
-export default function Index({ kategori, filters }: Props) {
+export default function Index({
+    pengajuanProposal,
+    lembaga,
+    filters,
+}: Props) {
+
+    const { hasRole } = useAuth();
 
     const { setParams } = useQueryParams(
-        route("kategori.index"),
+        route("pengajuan-proposal.index"),
         filters,
     );
 
     const [open, setOpen] = useState(false);
 
-    const [selectedKategori, setSelectedKategori] = useState(null);
+    const [
+        selectedProposal,
+        setSelectedProposal,
+    ] = useState<PengajuanProposal | null>(null);
 
     const pageProps: any = usePage().props;
+
     const flash = pageProps.flash || {};
 
     useEffect(() => {
+
         if (flash?.success) {
             successAlert(flash.success);
         }
+
     }, [flash]);
 
     return (
         <>
-            <Head title="Data Kategori" />
+            <Head title="Pengajuan Proposal" />
+
             <AdminLayout>
+
                 <div className="space-y-5 w-full overflow-hidden">
 
-                    {/* Header */}
+                    {/* HEADER */}
                     <PageHeader
-                        title="Kategori"
-                        subtitle="Kelola data kategori"
+                        title="Pengajuan Proposal"
+                        subtitle="Kelola data pengajuan proposal"
                     />
 
-                    {/* Toolbar */}
+                    {/* TOOLBAR */}
                     <div className="w-full overflow-hidden">
+
                         <TableToolbar
                             filters={filters}
+
                             setParams={setParams}
-                            searchPlaceholder="Cari kategori..."
-                            addButtonLabel="Tambah Kategori"
-                            onAdd={() => setOpen(true)}
+
+                            searchPlaceholder="Cari proposal..."
+
+                            addButtonLabel="Tambah Proposal"
+
+                            onAdd={() => {
+
+                                setSelectedProposal(null);
+
+                                setOpen(true);
+                            }}
+
                             sortOptions={[
                                 {
                                     label: "Terbaru",
@@ -63,66 +100,88 @@ export default function Index({ kategori, filters }: Props) {
                                 },
 
                                 {
-                                    label: "Nama",
-                                    value: "nama",
+                                    label: "Tahun",
+                                    value: "tahun",
                                 },
 
                                 {
-                                    label: "Tanggal",
-                                    value: "created_at",
+                                    label: "Jumlah Guru",
+                                    value: "jumlah_guru",
+                                },
+
+                                {
+                                    label: "Jumlah Siswa",
+                                    value: "jumlah_siswa",
                                 },
                             ]}
                         />
                     </div>
 
-                    {/* Table */}
+                    {/* TABLE */}
                     <div
                         className="
-                            overflow-x-auto
-                            rounded-2xl
+                            overflow-x-auto rounded-2xl
                             border border-slate-200
                         "
                     >
+
                         <DataTable
                             columns={columns(
-                                (kategori) => {
-                                    setSelectedKategori(kategori);
+
+                                (row) => {
+
+                                    setSelectedProposal(row);
+
                                     setOpen(true);
                                 },
 
-                                (kategori) => {
+                                (row) => {
+
                                     deleteConfirm(
-                                        `Kategori "${kategori.nama}" akan dihapus`,
+                                        `Proposal tahun ${row.tahun} akan dihapus`,
                                     ).then((result) => {
+
                                         if (result.isConfirmed) {
+
                                             router.delete(
                                                 route(
-                                                    "kategori.destroy",
-                                                    kategori.id,
+                                                    "pengajuan-proposal.destroy",
+                                                    row.id,
                                                 ),
                                             );
                                         }
                                     });
                                 },
                             )}
-                            data={kategori.data}
+
+                            data={pengajuanProposal.data}
                         />
                     </div>
 
-                    {/* Pagination */}
+                    {/* PAGINATION */}
                     <div className="overflow-x-auto">
-                        <Pagination links={kategori.links} />
+
+                        <Pagination
+                            links={pengajuanProposal.links}
+                        />
                     </div>
 
-                    {/* Modal */}
+                    {/* MODAL */}
                     <FormModal
                         open={open}
+
                         onClose={() => {
+
                             setOpen(false);
-                            setSelectedKategori(null);
+
+                            setSelectedProposal(null);
                         }}
-                        kategori={selectedKategori}
+
+                        proposal={selectedProposal}
+
+                        lembaga={lembaga}
                     />
+
                 </div>
             </AdminLayout>
         </>

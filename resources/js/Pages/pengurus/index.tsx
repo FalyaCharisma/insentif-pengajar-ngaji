@@ -1,7 +1,7 @@
 import { Head } from "@inertiajs/react";
 import AdminLayout from "@/layouts/app-layout";
 import { columns } from "./columns";
-import DataTable from "@/Components/Datatable";
+import DataTable from "@/Components/DataTable";
 import Pagination from "@/Components/pagination";
 import { useQueryParams } from "@/hooks/use-query-params";
 import TableToolbar from "@/Components/TableToolbar";

@@ -12,26 +12,24 @@ import {
     ChevronRight,
     Menu,
     X,
-    Building2
+    Building2,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 type Props = {
     collapsed: boolean;
     setCollapsed: (value: boolean) => void;
 };
 
-export default function AppSidebarLayout({
-    collapsed,
-    setCollapsed,
-}: Props) {
-
+export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
+    const { hasRole } = useAuth();
     const { url } = usePage();
 
     const isMasterActive =
         url.startsWith("/kategori") ||
         url.startsWith("/lembaga") ||
         url.startsWith("/forum") ||
-        url.startsWith("/pengurus"); 
+        url.startsWith("/pengurus");
 
     const [mobileOpen, setMobileOpen] = useState(false);
     const [masterOpen, setMasterOpen] = useState(isMasterActive);
@@ -127,103 +125,107 @@ export default function AppSidebarLayout({
 
                 {/* MENU */}
                 <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-2">
-
                     {/* Dashboard */}
-                    <Link
-                        href="/dashboard"
-                        className={menuClass("/dashboard")}
-                    >
+                    <Link href="/dashboard" className={menuClass("/dashboard")}>
                         <LayoutDashboard size={20} />
 
                         {!collapsed && (
-                            <span className="font-medium">
-                                Dashboard
-                            </span>
+                            <span className="font-medium">Dashboard</span>
                         )}
                     </Link>
 
-                    {/* MASTER DATA */}
-                    <div>
-                        <button
-                            onClick={() => setMasterOpen(!masterOpen)}
-                            className={`
+                    {hasRole("superadmin") && (
+                        <>
+                            {/* MASTER DATA */}
+                            <div>
+                                <button
+                                    onClick={() => setMasterOpen(!masterOpen)}
+                                    className={`
                                         w-full flex items-center
                                         ${collapsed ? "justify-center px-2" : "justify-between px-4"}
                                         py-3 rounded-2xl text-slate-300 hover:bg-slate-800 transition
                                     `}
-                            >
-                            <div className="flex items-center gap-3">
-                                <FolderKanban size={20} />
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <FolderKanban size={20} />
 
-                                {!collapsed && (
-                                    <span className="font-medium">
-                                        Master Data
-                                    </span>
+                                        {!collapsed && (
+                                            <span className="font-medium">
+                                                Master Data
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {!collapsed && (
+                                        <ChevronDown
+                                            size={18}
+                                            className={`transition-transform ${
+                                                masterOpen ? "rotate-180" : ""
+                                            }`}
+                                        />
+                                    )}
+                                </button>
+
+                                {/* SUBMENU */}
+                                {!collapsed && masterOpen && (
+                                    <div className="ml-4 mt-2 space-y-2 border-l border-slate-800 pl-3">
+                                        <Link
+                                            href="/kategori"
+                                            className={menuClass("/kategori")}
+                                        >
+                                            <FolderKanban size={18} />
+
+                                            <span>Kategori</span>
+                                        </Link>
+
+                                        <Link
+                                            href="/lembaga"
+                                            className={menuClass("/lembaga")}
+                                        >
+                                            <Building2 size={18} />
+
+                                            <span>Lembaga</span>
+                                        </Link>
+
+                                        <Link
+                                            href="/forum"
+                                            className={menuClass("/forum")}
+                                        >
+                                            <FileText size={18} />
+
+                                            <span>Forum</span>
+                                        </Link>
+                                        <Link
+                                            href="/pengurus"
+                                            className={menuClass("/pengurus")}
+                                        >
+                                            <Users size={18} />
+                                            <span>Pengurus</span>
+                                        </Link>
+                                    </div>
                                 )}
                             </div>
+                        </>
+                    )}
 
-                            {!collapsed && (
-                                <ChevronDown
-                                    size={18}
-                                    className={`transition-transform ${
-                                        masterOpen ? "rotate-180" : ""
-                                    }`}
-                                />
-                            )}
-                        </button>
-
-                        {/* SUBMENU */}
-                        {!collapsed && masterOpen && (
-                            <div className="ml-4 mt-2 space-y-2 border-l border-slate-800 pl-3">
-
-                                <Link
-                                    href="/kategori"
-                                    className={menuClass("/kategori")}
-                                >
-                                    <FolderKanban size={18} />
-
-                                    <span>Kategori</span>
-                                </Link>
-
-                                <Link
-                                    href="/lembaga"
-                                    className={menuClass("/lembaga")}
-                                >
-                                    <Building2 size={18} />
-
-                                    <span>Lembaga</span>
-                                </Link>
-
-                                <Link
-                                    href="/forum"
-                                    className={menuClass("/forum")}
-                                >
-                                    <FileText size={18} />
-
-                                    <span>Forum</span>
-                                </Link>
-                                <Link
-                                    href="/pengurus"
-                                    className={menuClass("/pengurus")}
-                                >
-                                    <Users size={18} />
-                                    <span>Pengurus</span>
-                                </Link>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* SETTINGS */}
                     <Link
-                        href="/settings"
-                        className={menuClass("/settings")}
+                        href="/pengajuan-proposal"
+                        className={menuClass("/pengajuan-proposal")}
                     >
-                        <Settings size={20} />
+                        <FileText size={20} />
 
                         {!collapsed && (
                             <span className="font-medium">
-                                Settings
+                                Pengajuan Proposal
                             </span>
+                        )}
+                    </Link>
+                    {/* SETTINGS */}
+                    <Link href="/settings" className={menuClass("/settings")}>
+                        <Settings size={20} />
+
+                        {!collapsed && (
+                            <span className="font-medium">Settings</span>
                         )}
                     </Link>
                 </nav>

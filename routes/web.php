@@ -7,7 +7,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\LembagaController;
 use App\Http\Controllers\PengurusController;
-
+use App\Http\Controllers\PengajuanProposalController;
 
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
@@ -48,6 +48,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('lembaga', LembagaController::class);
 
     Route::resource('pengurus', PengurusController::class);
+
+    Route::resource('pengajuan-proposal', PengajuanProposalController::class);
 });
 
 require __DIR__.'/auth.php';
