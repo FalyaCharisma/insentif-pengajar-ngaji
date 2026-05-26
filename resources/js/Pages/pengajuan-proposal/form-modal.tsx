@@ -20,91 +20,61 @@ type Props = {
     lembaga: any[];
 };
 
-export default function FormModal({
-    open,
-    onClose,
-    proposal,
-    lembaga,
-}: Props) {
-
+export default function FormModal({ open, onClose, proposal, lembaga }: Props) {
     const isEdit = !!proposal;
 
-    const {
-        data,
-        setData,
-        post,
-        processing,
-        errors,
-        reset,
-    } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         _method: "",
 
-        lembaga_id: "",
+        lembaga_id: lembaga?.[0]?.id?.toString() || "",
 
         tahun: new Date().getFullYear(),
 
-        jumlah_guru: 0,
+        jumlah_guru: "",
 
-        jumlah_siswa: 0,
+        jumlah_siswa: "",
 
         bukti_dukung: null as File | null,
     });
 
     useEffect(() => {
-
         if (proposal) {
-
             setData({
                 _method: "",
 
-                lembaga_id:
-                    proposal.lembaga_id?.toString() || "",
+                lembaga_id: proposal.lembaga_id?.toString() || "",
 
                 tahun: proposal.tahun || new Date().getFullYear(),
 
-                jumlah_guru:
-                    proposal.jumlah_guru || 0,
+                jumlah_guru: proposal.jumlah_guru?.toString() || "",
 
-                jumlah_siswa:
-                    proposal.jumlah_siswa || 0,
+                jumlah_siswa: proposal.jumlah_siswa?.toString() || "",
 
                 bukti_dukung: null,
             });
-
         } else {
-
             reset();
         }
-
     }, [proposal, open]);
 
     const submit = (e: any) => {
-
         e.preventDefault();
 
         if (isEdit) {
-
             setData("_method", "put");
 
-            post(
-                route(
-                    "pengajuan-proposal.update",
-                    proposal.id,
-                ),
-                {
-                    forceFormData: true,
+            post(route("pengajuan-proposal.update", proposal.id), {
+                forceFormData: true,
 
-                    onSuccess: () => {
-                        onClose();
-                    },
+                onSuccess: () => {
+                    onClose();
                 },
-            );
+            });
 
             return;
         }
 
         post(route("pengajuan-proposal.store"), {
-
             forceFormData: true,
 
             onSuccess: () => {
@@ -122,21 +92,18 @@ export default function FormModal({
                 overflow-y-auto bg-black/40 p-6
             "
         >
-
             <div
                 className="
                     flex min-h-full
                     items-center justify-center
                 "
             >
-
                 <div
                     className="
                         w-full max-w-3xl
                         rounded-2xl bg-white p-6
                     "
                 >
-
                     {/* Header */}
                     <div
                         className="
@@ -144,18 +111,14 @@ export default function FormModal({
                             justify-between gap-4
                         "
                     >
-
                         <div>
-
                             <h2
                                 className="
                                     text-xl font-semibold
                                     text-slate-800
                                 "
                             >
-                                {isEdit
-                                    ? "Edit Proposal"
-                                    : "Tambah Proposal"}
+                                {isEdit ? "Edit Proposal" : "Tambah Proposal"}
                             </h2>
 
                             <p
@@ -168,151 +131,82 @@ export default function FormModal({
                             </p>
                         </div>
 
-                        <SecondaryButton
-                            onClick={onClose}
-                        >
+                        <SecondaryButton onClick={onClose}>
                             <X className="h-4 w-4" />
                         </SecondaryButton>
                     </div>
 
                     {/* Form */}
-                    <form
-                        onSubmit={submit}
-                        className="space-y-5"
-                    >
-
+                    <form onSubmit={submit} className="space-y-5">
                         <div
                             className="
                                 grid grid-cols-1
                                 gap-4 md:grid-cols-2
                             "
                         >
-
                             {/* Lembaga */}
                             <div className="md:col-span-2">
-
-                                <FormSelect
+                                <FormInput
                                     label="Lembaga"
-
-                                    value={data.lembaga_id}
-
-                                    onChange={(e) =>
-                                        setData(
-                                            "lembaga_id",
-                                            e.target.value,
-                                        )
-                                    }
-
-                                    error={
-                                        errors.lembaga_id
-                                    }
-                                >
-
-                                    <option value="">
-                                        Pilih lembaga
-                                    </option>
-
-                                    {lembaga.map(
-                                        (item) => (
-
-                                            <option
-                                                key={item.id}
-                                                value={item.id}
-                                            >
-                                                {item.nama}
-                                            </option>
-                                        ),
-                                    )}
-                                </FormSelect>
+                                    value={lembaga?.[0]?.nama || ""}
+                                    disabled
+                                />
                             </div>
-
-                            {/* Tahun */}
-                            <FormInput
-                                label="Tahun"
-
-                                type="number"
-
-                                value={data.tahun}
-
-                                onChange={(e) =>
-                                    setData(
-                                        "tahun",
-                                        Number(
-                                            e.target.value,
-                                        ),
-                                    )
-                                }
-
-                                placeholder="Masukkan tahun"
-
-                                error={errors.tahun}
-                            />
 
                             {/* Jumlah Guru */}
                             <FormInput
                                 label="Jumlah Guru"
-
                                 type="number"
-
                                 value={data.jumlah_guru}
-
                                 onChange={(e) =>
-                                    setData(
-                                        "jumlah_guru",
-                                        Number(
-                                            e.target.value,
-                                        ),
-                                    )
+                                    setData("jumlah_guru", e.target.value)
                                 }
-
                                 placeholder="0"
-
-                                error={
-                                    errors.jumlah_guru
-                                }
+                                error={errors.jumlah_guru}
                             />
 
                             {/* Jumlah Siswa */}
                             <FormInput
                                 label="Jumlah Siswa"
-
                                 type="number"
-
                                 value={data.jumlah_siswa}
-
                                 onChange={(e) =>
-                                    setData(
-                                        "jumlah_siswa",
-                                        Number(
-                                            e.target.value,
-                                        ),
-                                    )
+                                    setData("jumlah_siswa", e.target.value)
                                 }
-
                                 placeholder="0"
+                                error={errors.jumlah_siswa}
+                            />
 
-                                error={
-                                    errors.jumlah_siswa
+                            {/* Tahun */}
+                            <FormInput
+                                label="Tahun"
+                                type="number"
+                                value={data.tahun}
+                                onChange={(e) =>
+                                    setData("tahun", Number(e.target.value))
                                 }
+                                placeholder="Masukkan tahun"
+                                error={errors.tahun}
                             />
 
                             {/* File */}
                             <FormFile
                                 label="Bukti Dukung"
-
                                 onChange={(e) =>
                                     setData(
                                         "bukti_dukung",
-                                        e.target
-                                            .files?.[0] ||
-                                            null,
+                                        e.target.files?.[0] || null,
                                     )
                                 }
-
-                                error={
-                                    errors.bukti_dukung
+                                fileName={
+                                    data.bukti_dukung instanceof File
+                                        ? data.bukti_dukung.name
+                                        : ""
                                 }
+                                currentFile={proposal?.bukti_dukung}
+                                error={errors.bukti_dukung}
                             />
+                           
                         </div>
 
                         {/* Footer */}
@@ -322,22 +216,15 @@ export default function FormModal({
                                 justify-end gap-3 pt-4
                             "
                         >
-
                             <SecondaryButton
                                 type="button"
-
                                 onClick={onClose}
-
                                 disabled={processing}
                             >
                                 Batal
                             </SecondaryButton>
 
-                            <PrimaryButton
-                                type="submit"
-
-                                disabled={processing}
-                            >
+                            <PrimaryButton type="submit" disabled={processing}>
                                 {processing
                                     ? "Menyimpan..."
                                     : isEdit
