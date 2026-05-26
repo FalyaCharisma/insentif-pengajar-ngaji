@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { router, usePage } from "@inertiajs/react";
 
 import AdminLayout from "@/layouts/app-layout";
-import DataTable from "@/Components/data-table";
+import DataTable from "@/Components/DataTable";
 import Pagination from "@/Components/pagination";
-import TableToolbar from "@/Components/table-toolbar";
-import PageHeader from "@/Components/page-header";
+import TableToolbar from "@/Components/TableToolbar";
+import PageHeader from "@/Components/PageHeader";
 
 import { columns } from "./columns";
 

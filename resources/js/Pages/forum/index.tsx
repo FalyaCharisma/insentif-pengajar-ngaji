@@ -1,11 +1,11 @@
 import { Head } from "@inertiajs/react";
 import AdminLayout from "@/layouts/app-layout";
 import { columns } from "./columns";
-import DataTable from "@/Components/data-table";
+import DataTable from "@/Components/Datatable";
 import Pagination from "@/Components/pagination";
 import { useQueryParams } from "@/hooks/use-query-params";
-import TableToolbar from "@/Components/table-toolbar";
-import PageHeader from "@/Components/page-header";
+import TableToolbar from "@/Components/TableToolbar";
+import PageHeader from "@/Components/PageHeader";
 import { useState, useEffect } from "react";
 import FormModal from "./form-modal";
 import { router, usePage } from "@inertiajs/react";

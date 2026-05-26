@@ -65,17 +65,39 @@ class PengurusController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'nik' => 'required|unique:users,nik',
-            'nama' => 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-            'lembaga_id' => 'required',
+        $validated = $request->validate([
+            'nik' => 'required|digits:16|numeric|unique:pengurus,nik',
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:pengurus,email',
+            'tempat_lahir' => 'required|string|max:100',
+            'tgl_lahir' => 'required|date',
+            'jk' => 'required|in:L,P',
+            'jabatan' => 'required|string|max:100',
+            'pendidikan_terakhir' => 'required|string|max:100',
+            'jurusan' => 'required|string|max:100',
+            'sekolah_universitas' => 'required|string|max:255',
+            'tahun_lulus' => 'required|digits:4',
+            'agama' => 'required|string|max:50',
+            'provinsi' => 'required',
+            'kabkota' => 'required',
+            'kecamatan' => 'required',
+            'kelurahan' => 'required',
+            'alamat' => 'required|string',
+            'no_hp' => 'required|string|max:20',
+            'bank' => 'required|string|max:100',
+            'no_rekening' => 'required|string|max:50',
+            'no_bpjs' => 'required|string|max:50',
+            'pas_foto' => 'required|image|mimes:jpg,jpeg,png|max:1048',
+            'status_insentif' => 'required|in:aktif,nonaktif',
         ]);
+
+        if ($request->hasFile('pas_foto')) {
+            $validated['pas_foto'] = $request->file('pas_foto')
+                ->store('pengurus/foto', 'public');
+        }
 
         DB::transaction(function () use ($request) {
 
-            // 1. buat user
             $user = User::create([
                 'nik' => $request->nik,
                 'name' => $request->nama,
@@ -84,7 +106,6 @@ class PengurusController extends Controller
                 'role' => 2, // staff
             ]);
 
-            // 2. buat pengurus
             Pengurus::create([
                 'lembaga_id' => $request->lembaga_id,
                 'nik' => $user->nik,

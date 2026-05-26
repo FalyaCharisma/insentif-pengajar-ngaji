@@ -1,7 +1,10 @@
 import { useEffect } from "react";
 import { useForm } from "@inertiajs/react";
 
+import Modal from "@/Components/Modal";
+
 import FormInput from "@/Components/forms/FormInput";
+
 import PrimaryButton from "@/Components/PrimaryButton";
 import SecondaryButton from "@/Components/SecondaryButton";
 
@@ -28,7 +31,6 @@ export default function FormModal({
         reset,
     } = useForm({
         _method: "",
-
         nama: "",
     });
 
@@ -38,7 +40,6 @@ export default function FormModal({
 
             setData({
                 _method: "",
-
                 nama: kategori.nama || "",
             });
 
@@ -50,18 +51,21 @@ export default function FormModal({
     }, [kategori, open]);
 
     const submit = (e: any) => {
+
         e.preventDefault();
 
         if (isEdit) {
 
             setData("_method", "put");
 
-            post(route("kategori.update", kategori.id), {
-
-                onSuccess: () => {
-                    onClose();
+            post(
+                route("kategori.update", kategori.id),
+                {
+                    onSuccess: () => {
+                        onClose();
+                    },
                 },
-            });
+            );
 
             return;
         }
@@ -74,15 +78,19 @@ export default function FormModal({
         });
     };
 
-    if (!open) return null;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
 
-            <div className="w-full max-w-md rounded-2xl bg-white p-6">
+        <Modal
+            show={open}
+            onClose={onClose}
+            maxWidth="md"
+        >
 
-                {/* Header */}
+            <div className="p-6">
+
+                {/* HEADER */}
                 <div className="mb-6">
+
                     <h2 className="text-xl font-semibold text-slate-800">
                         {isEdit
                             ? "Edit Kategori"
@@ -92,9 +100,10 @@ export default function FormModal({
                     <p className="mt-1 text-sm text-slate-500">
                         Isi form di bawah ini
                     </p>
+
                 </div>
 
-                {/* Form */}
+                {/* FORM */}
                 <form
                     onSubmit={submit}
                     className="space-y-5"
@@ -106,14 +115,14 @@ export default function FormModal({
                         onChange={(e) =>
                             setData(
                                 "nama",
-                                e.target.value
+                                e.target.value,
                             )
                         }
                         placeholder="Masukkan nama kategori"
                         error={errors.nama}
                     />
 
-                    {/* Footer */}
+                    {/* FOOTER */}
                     <div className="flex items-center justify-end gap-3 pt-4">
 
                         <SecondaryButton
@@ -131,13 +140,16 @@ export default function FormModal({
                             {processing
                                 ? "Menyimpan..."
                                 : isEdit
-                                  ? "Update"
-                                  : "Simpan"}
+                                    ? "Update"
+                                    : "Simpan"}
                         </PrimaryButton>
 
                     </div>
+
                 </form>
+
             </div>
-        </div>
+
+        </Modal>
     );
 }
