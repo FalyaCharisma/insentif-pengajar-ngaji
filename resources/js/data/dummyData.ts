@@ -209,12 +209,10 @@ export const statistik = [
 ];
 
 export const layanan = [
+    { title: 'Pengajuan Proposal', desc: 'Usulan penerima insentif pendidik non formal.', icon: HandCoins },
     { title: 'Pengajuan Insentif', desc: 'Usulan penerima insentif pendidik non formal.', icon: HandCoins },
-    { title: 'Validasi Lembaga', desc: 'Pemeriksaan data profil dan legalitas lembaga.', icon: ShieldCheck },
-    { title: 'Data Pendidik', desc: 'Pendataan pengajar, tutor, dan tenaga pendidikan.', icon: Users },
-    { title: 'Berkas Persyaratan', desc: 'Unggah dan cek kelengkapan dokumen program.', icon: FileText },
-    { title: 'Monitoring Program', desc: 'Pantau rekap data per kecamatan dan status validasi.', icon: MonitorCheck },
-    { title: 'Pusat Bantuan', desc: 'Panduan, kontak admin, dan bantuan teknis layanan.', icon: HelpCircle },
+    { title: 'Verifikasi Data', desc: 'Verifikasi data penerima insentif pendidik non formal.', icon: HandCoins },
+  
 ];
 
 export const berita: BeritaItem[] = [

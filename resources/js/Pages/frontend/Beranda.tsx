@@ -15,13 +15,7 @@ import {
 import PortalLayout from "@/layouts/layout";
 import SectionBadge from "@/Components/SectionBadge";
 import StatCard from "@/Components/StatCard";
-import {
-    berita,
-    kecamatanData,
-    layanan,
-    quickLinks,
-    statistik,
-} from "@/data/dummyData";
+import { berita, layanan, quickLinks } from "@/data/dummyData";
 
 import Highcharts from "highcharts/highmaps";
 import HighchartsReactImport from "highcharts-react-official";
@@ -244,6 +238,10 @@ const kediriMapGeoJSON = {
 };
 
 function Beranda() {
+    const [kecamatanData, setKecamatanData] = useState<any[]>([]);
+    const [statistik, setStatistik] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [selectedId, setSelectedId] = useState("kota");
     const [query, setQuery] = useState("");
     const [selectedLembaga, setSelectedLembaga] = useState<any>(null);
@@ -254,6 +252,7 @@ function Beranda() {
         kecamatanData[0];
 
     const filteredLembaga = useMemo(() => {
+        if (!selected || !selected.lembaga) return [];
         const keyword = query.toLowerCase().trim();
 
         if (!keyword) return selected.lembaga;
@@ -267,6 +266,44 @@ function Beranda() {
     }, [query, selected]);
 
     useEffect(() => {
+        setLoading(true);
+        fetch("/api/portal/statistik")
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) {
+                    setStatistik(data.data);
+                    setError(null);
+                } else {
+                    setError("Gagal memuat data kecamatan");
+                }
+            })
+            .catch((err) => {
+                setError("Error: " + err.message);
+                console.error(err);
+            })
+            .finally(() => setLoading(false));
+    }, []);
+
+    useEffect(() => {
+        setLoading(true);
+        fetch("/api/kecamatan")
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) {
+                    setKecamatanData(data.data);
+                    setError(null);
+                } else {
+                    setError("Gagal memuat data lembaga");
+                }
+            })
+            .catch((err) => {
+                setError("Error: " + err.message);
+                console.error(err);
+            })
+            .finally(() => setLoading(false));
+    }, []);
+
+    useEffect(() => {
         if (tableRef.current) {
             tableRef.current.scrollTop = 0;
         }
@@ -276,9 +313,9 @@ function Beranda() {
     }, [selectedId]);
 
     const baseColors: Record<string, string> = {
-        mojoroto: "#f4d83d",
-        kota: "#8ccf6a",
-        pesantren: "#efc2c2",
+        mojoroto: "#ced4d4",
+        kota: "#ced4d4",
+        pesantren: "#ced4d4",
     };
 
     const mapSeriesData = useMemo(() => {
@@ -290,13 +327,14 @@ function Beranda() {
             lembaga: item.stats.lembaga,
             pendidik: item.stats.pendidik,
             tervalidasi: item.stats.tervalidasi,
-            insentif: item.stats.insentif,
+            tidak_tervalidasi: item.stats.tidak_tervalidasi,
             color: selectedId === item.id ? "#16895a" : baseColors[item.id],
             borderColor: "#ffffff",
         }));
-    }, [selectedId]);
+    }, [selectedId, kecamatanData]);
 
     const lembagaMarkers = useMemo(() => {
+        if (!selected || !selected.lembaga) return [];
         return selected.lembaga
             .filter((item: any) => item.latitude && item.longitude)
             .map((item: any) => ({
@@ -313,7 +351,7 @@ function Beranda() {
                     lineWidth: 2,
                 },
             }));
-    }, [selected.lembaga, selectedLembaga]);
+    }, [selected?.lembaga, selectedLembaga]);
 
     const mapOptions = useMemo<Highcharts.Options>(() => {
         return {
@@ -367,22 +405,22 @@ function Beranda() {
 
                     if (point.lembaga) {
                         return `
-                               <div style="min-width:180px">
-                                   <strong>${point.name}</strong><br/>
-                                   <span style="color:#64748b">Klik untuk melihat detail lembaga</span>
-                               </div>
-                           `;
+                            <div style="min-width:180px">
+                                <strong>${point.name}</strong><br/>
+                                <span style="color:#64748b">Klik untuk melihat detail lembaga</span>
+                            </div>
+                        `;
                     }
 
                     return `
-                           <div style="min-width:210px">
-                               <strong>Kecamatan ${point.name}</strong><br/>
-                               <span>Lembaga: <b>${point.options.lembaga}</b></span><br/>
-                               <span>Pendidik: <b>${point.options.pendidik}</b></span><br/>
-                               <span>Tervalidasi: <b>${point.options.tervalidasi}</b></span><br/>
-                               <span>Insentif: <b>${point.options.insentif}</b></span>
-                           </div>
-                       `;
+                        <div style="min-width:210px">
+                            <strong>Kecamatan ${point.name}</strong><br/>
+                            <span>Lembaga: <b>${point.options.lembaga}</b></span><br/>
+                            <span>Pendidik: <b>${point.options.pendidik}</b></span><br/>
+                            <span>Tervalidasi: <b>${point.options.tervalidasi}</b></span><br/>
+                            <span>Tidak Tervalidasi: <b>${point.options.tidak_tervalidasi}</b></span>
+                        </div>
+                    `;
                 },
             },
             plotOptions: {
@@ -408,10 +446,10 @@ function Beranda() {
                             return (this.point as any).name;
                         },
                         style: {
-                            color: "#1f2937",
+                            color: "#ffffff",
                             fontWeight: "800",
                             fontSize: "12px",
-                            textOutline: "none",
+                            textOutline: "2px rgba(15, 23, 42, 0.35)",
                         },
                     },
                     point: {
@@ -615,40 +653,70 @@ function Beranda() {
                                                 Kota Kediri
                                             </h3>
                                         </div>
-                                        <button className="btn btn-light rounded-pill fw-bold small">
+                                        <button className="btn btn-light rounded-pill fw-bold small d-inline-flex align-items-center gap-1">
                                             3 Kecamatan{" "}
                                             <ChevronDown size={16} />
                                         </button>
                                     </div>
 
                                     <div className="portal-highcharts-map-wrapper">
-                                        <HighchartsReact
-                                            highcharts={Highcharts}
-                                            constructorType="mapChart"
-                                            options={mapOptions}
-                                        />
+                                        {loading ? (
+                                            <div className="text-center py-5">
+                                                <div
+                                                    className="spinner-border text-success"
+                                                    role="status"
+                                                >
+                                                    <span className="visually-hidden">
+                                                        Loading...
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ) : error ? (
+                                            <div className="alert alert-warning mb-0">
+                                                {error}
+                                            </div>
+                                        ) : mapSeriesData.length > 0 ? (
+                                            <HighchartsReact
+                                                highcharts={Highcharts}
+                                                constructorType="mapChart"
+                                                options={mapOptions}
+                                            />
+                                        ) : (
+                                            <div className="text-center text-muted py-5">
+                                                Tidak ada data peta
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="row g-2 mt-3">
-                                        {kecamatanData.map((item) => (
-                                            <div
-                                                className="col-4"
-                                                key={item.id}
-                                            >
-                                                <button
-                                                    onClick={() =>
-                                                        setSelectedId(item.id)
-                                                    }
-                                                    className={`btn w-100 rounded-pill fw-bold small ${
-                                                        selectedId === item.id
-                                                            ? "btn-success"
-                                                            : "btn-light"
-                                                    }`}
+                                        {kecamatanData.length > 0 ? (
+                                            kecamatanData.map((item) => (
+                                                <div
+                                                    className="col-4"
+                                                    key={item.id}
                                                 >
-                                                    {item.name}
-                                                </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            setSelectedId(
+                                                                item.id,
+                                                            )
+                                                        }
+                                                        className={`btn w-100 rounded-pill fw-bold small ${
+                                                            selectedId ===
+                                                            item.id
+                                                                ? "btn-success"
+                                                                : "btn-light"
+                                                        }`}
+                                                    >
+                                                        {item.name}
+                                                    </button>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-muted small">
+                                                Loading kecamatan...
                                             </div>
-                                        ))}
+                                        )}
                                     </div>
 
                                     <div className="mt-3 small text-muted">
@@ -662,110 +730,150 @@ function Beranda() {
                         </div>
 
                         <div className="col-lg-7">
-                            <div className="card border-0 portal-card h-100">
-                                <div className="card-body p-4">
-                                    <div className="d-flex flex-column flex-md-row justify-content-between gap-3 border-bottom pb-3 mb-4">
-                                        <div>
-                                            <div className="text-muted small fw-semibold">
-                                                Data Kecamatan Terpilih
-                                            </div>
-                                            <h3 className="h2 fw-black mb-0">
-                                                {selected.name}
-                                            </h3>
-                                        </div>
-                                        <div>
-                                            <SectionBadge variant="success">
-                                                Update 25 Mei 2026
-                                            </SectionBadge>
-                                        </div>
-                                    </div>
-
-                                    <div className="row g-3 mb-4">
-                                        <div className="col-6 col-lg-3">
-                                            <div className="portal-mini-stat">
-                                                <b>{selected.stats.lembaga}</b>
-                                                <span>Lembaga</span>
-                                            </div>
-                                        </div>
-                                        <div className="col-6 col-lg-3">
-                                            <div className="portal-mini-stat">
-                                                <b>{selected.stats.pendidik}</b>
-                                                <span>Pendidik</span>
-                                            </div>
-                                        </div>
-                                        <div className="col-6 col-lg-3">
-                                            <div className="portal-mini-stat">
-                                                <b>
-                                                    {selected.stats.tervalidasi}
-                                                </b>
-                                                <span>Tervalidasi</span>
-                                            </div>
-                                        </div>
-                                        <div className="col-6 col-lg-3">
-                                            <div className="portal-mini-stat">
-                                                <b>{selected.stats.insentif}</b>
-                                                <span>
-                                                    Tidak Menerima Insentif
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
+                            {loading ? (
+                                <div className="text-center py-5">
                                     <div
-                                        className="table-responsive portal-table-wrapper"
-                                        ref={tableRef}
-                                        style={{
-                                            maxHeight: "250px",
-                                            overflowY: "auto",
-                                        }}
+                                        className="spinner-border text-success"
+                                        role="status"
                                     >
-                                        <table className="table table-hover align-middle mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Lembaga</th>
-                                                    <th>Jenis</th>
-                                                    <th>Kelurahan</th>
-                                                    <th>Guru</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {filteredLembaga.map((item) => (
-                                                    <tr key={item.nama}>
-                                                        <td className="fw-bold text-dark">
-                                                            {item.nama}
-                                                        </td>
-                                                        <td>{item.jenis}</td>
-                                                        <td>
-                                                            {item.kelurahan}
-                                                        </td>
-                                                        <td className="fw-bold">
-                                                            {item.pendidik}
-                                                        </td>
-                                                        <td>
-                                                            <span
-                                                                className={`badge rounded-pill ${item.status === "Tervalidasi" ? "text-bg-success" : item.status === "Proses" ? "text-bg-warning" : "text-bg-danger"}`}
-                                                            >
-                                                                {item.status}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <div className="text-end mt-4">
-                                        <Link
-                                            href="/peta-sebaran"
-                                            className="btn btn-outline-success rounded-pill fw-bold px-4 d-inline-flex align-items-center gap-2"
-                                        >
-                                            Detail Peta Sebaran{" "}
-                                            <ArrowRight size={16} />
-                                        </Link>
+                                        <span className="visually-hidden">
+                                            Loading...
+                                        </span>
                                     </div>
                                 </div>
-                            </div>
+                            ) : error ? (
+                                <div className="alert alert-danger">
+                                    {error}
+                                </div>
+                            ) : selected && selected.stats ? (
+                                <div className="card border-0 portal-card h-100">
+                                    <div className="card-body p-4">
+                                        <div className="d-flex flex-column flex-md-row justify-content-between gap-3 border-bottom pb-3 mb-4">
+                                            <div>
+                                                <div className="text-muted small fw-semibold">
+                                                    Data Kecamatan Terpilih
+                                                </div>
+                                                <h3 className="h2 fw-black mb-0">
+                                                    {selected.name}
+                                                </h3>
+                                            </div>
+                                            <div>
+                                                <SectionBadge variant="success">
+                                                    Update 25 Mei 2026
+                                                </SectionBadge>
+                                            </div>
+                                        </div>
+
+                                        <div className="row g-3 mb-4">
+                                            <div className="col-6 col-lg-3">
+                                                <div className="portal-mini-stat">
+                                                    <b>
+                                                        {selected.stats.lembaga}
+                                                    </b>
+                                                    <span>Lembaga</span>
+                                                </div>
+                                            </div>
+                                            <div className="col-6 col-lg-3">
+                                                <div className="portal-mini-stat">
+                                                    <b>
+                                                        {
+                                                            selected.stats
+                                                                .pendidik
+                                                        }
+                                                    </b>
+                                                    <span>Pendidik</span>
+                                                </div>
+                                            </div>
+                                            <div className="col-6 col-lg-3">
+                                                <div className="portal-mini-stat">
+                                                    <b>
+                                                        {
+                                                            selected.stats
+                                                                .tervalidasi
+                                                        }
+                                                    </b>
+                                                    <span>
+                                                        Menerima Insentif
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="col-6 col-lg-3">
+                                                <div className="portal-mini-stat">
+                                                    <b>
+                                                        {
+                                                            selected.stats
+                                                                .tidak_tervalidasi
+                                                        }
+                                                    </b>
+                                                    <span>
+                                                        Tidak Menerima Insentif
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            className="table-responsive portal-table-wrapper"
+                                            ref={tableRef}
+                                            style={{
+                                                maxHeight: "250px",
+                                                overflowY: "auto",
+                                            }}
+                                        >
+                                            <table className="table table-hover align-middle mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Lembaga</th>
+                                                        <th>Jenis Forum</th>
+                                                        <th>Kelurahan</th>
+                                                        <th>Guru</th>
+                                                        <th>Siswa</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {filteredLembaga.map(
+                                                        (item) => (
+                                                            <tr key={item.nama}>
+                                                                <td className="fw-bold text-dark">
+                                                                    {item.nama}
+                                                                </td>
+                                                                <td>
+                                                                    {item.kategori.nama}
+                                                                </td>
+                                                                <td>
+                                                                    {
+                                                                        item.kelurahan
+                                                                    }
+                                                                </td>
+                                                                <td className="fw-bold">
+                                                                    {
+                                                                        item.jumlah_guru
+                                                                    }
+                                                                </td>
+                                                                <td className="fw-bold">
+                                                                    {
+                                                                        item.jumlah_siswa
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        ),
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div className="text-end mt-4">
+                                            <Link
+                                                href="/peta-sebaran"
+                                                className="btn btn-outline-success rounded-pill fw-bold px-4 d-inline-flex align-items-center gap-2"
+                                            >
+                                                Detail Peta Sebaran{" "}
+                                                <ArrowRight size={16} />
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : null}
                         </div>
                     </div>
                 </div>
