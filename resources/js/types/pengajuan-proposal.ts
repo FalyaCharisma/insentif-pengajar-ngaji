@@ -5,6 +5,7 @@ export type PengajuanProposal = {
     jumlah_guru: number;
     jumlah_siswa: number;
     bukti_dukung?: string | null;
+    status: string;
     created_at?: string;
     updated_at?: string;
     deleted_at?: string | null;

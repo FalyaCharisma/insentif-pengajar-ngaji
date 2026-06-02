@@ -79,6 +79,8 @@ class PengajuanProposalController extends Controller
             $validated['bukti_dukung'] = $filename;
         }
 
+        $validated['status'] = 'pending';
+
         PengajuanProposal::create($validated);
 
         return back()->with('success', 'Pengajuan proposal berhasil ditambahkan');
@@ -128,5 +130,29 @@ class PengajuanProposalController extends Controller
         $pengajuanProposal->delete();
 
         return back()->with('success', 'Pengajuan proposal berhasil dihapus');
+    }
+
+    public function verify(PengajuanProposal $pengajuanProposal)
+    {
+        $pengajuanProposal->update([
+            'status' => 'verified',
+        ]);
+
+        return back()->with(
+            'success',
+            'Proposal berhasil diverifikasi',
+        );
+    }
+
+    public function unverify(PengajuanProposal $pengajuanProposal)
+    {
+        $pengajuanProposal->update([
+            'status' => 'pending',
+        ]);
+
+        return back()->with(
+            'success',
+            'Verifikasi berhasil dibatalkan'
+        );
     }
 }

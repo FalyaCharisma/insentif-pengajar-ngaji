@@ -18,6 +18,7 @@ class PengajuanProposal extends Model
         'jumlah_guru',
         'jumlah_siswa',
         'bukti_dukung',
+        'status',
     ];
 
     public function lembaga()

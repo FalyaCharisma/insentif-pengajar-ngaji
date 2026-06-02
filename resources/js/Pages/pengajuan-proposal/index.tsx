@@ -28,12 +28,7 @@ type Props = {
     filters: any;
 };
 
-export default function Index({
-    pengajuanProposal,
-    lembaga,
-    filters,
-}: Props) {
-
+export default function Index({ pengajuanProposal, lembaga, filters }: Props) {
     const { hasRole } = useAuth();
 
     const { setParams } = useQueryParams(
@@ -43,21 +38,17 @@ export default function Index({
 
     const [open, setOpen] = useState(false);
 
-    const [
-        selectedProposal,
-        setSelectedProposal,
-    ] = useState<PengajuanProposal | null>(null);
+    const [selectedProposal, setSelectedProposal] =
+        useState<PengajuanProposal | null>(null);
 
     const pageProps: any = usePage().props;
 
     const flash = pageProps.flash || {};
 
     useEffect(() => {
-
         if (flash?.success) {
             successAlert(flash.success);
         }
-
     }, [flash]);
 
     return (
@@ -65,9 +56,7 @@ export default function Index({
             <Head title="Pengajuan Proposal" />
 
             <AdminLayout>
-
                 <div className="space-y-5 w-full overflow-hidden">
-
                     {/* HEADER */}
                     <PageHeader
                         title="Pengajuan Proposal"
@@ -76,23 +65,16 @@ export default function Index({
 
                     {/* TOOLBAR */}
                     <div className="w-full overflow-hidden">
-
                         <TableToolbar
                             filters={filters}
-
                             setParams={setParams}
-
                             searchPlaceholder="Cari proposal..."
-
                             addButtonLabel="Tambah Proposal"
-
                             onAdd={() => {
-
                                 setSelectedProposal(null);
 
                                 setOpen(true);
                             }}
-
                             sortOptions={[
                                 {
                                     label: "Terbaru",
@@ -124,25 +106,19 @@ export default function Index({
                             border border-slate-200
                         "
                     >
-
                         <DataTable
                             columns={columns(
-
                                 (row) => {
-
                                     setSelectedProposal(row);
 
                                     setOpen(true);
                                 },
 
                                 (row) => {
-
                                     deleteConfirm(
                                         `Proposal tahun ${row.tahun} akan dihapus`,
                                     ).then((result) => {
-
                                         if (result.isConfirmed) {
-
                                             router.delete(
                                                 route(
                                                     "pengajuan-proposal.destroy",
@@ -152,36 +128,29 @@ export default function Index({
                                         }
                                     });
                                 },
-                            )}
 
+                                hasRole,
+                            )}
                             data={pengajuanProposal.data}
                         />
                     </div>
 
                     {/* PAGINATION */}
                     <div className="overflow-x-auto">
-
-                        <Pagination
-                            links={pengajuanProposal.links}
-                        />
+                        <Pagination links={pengajuanProposal.links} />
                     </div>
 
                     {/* MODAL */}
                     <FormModal
                         open={open}
-
                         onClose={() => {
-
                             setOpen(false);
 
                             setSelectedProposal(null);
                         }}
-
                         proposal={selectedProposal}
-
                         lembaga={lembaga}
                     />
-
                 </div>
             </AdminLayout>
         </>

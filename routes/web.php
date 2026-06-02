@@ -50,6 +50,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('pengurus', PengurusController::class);
 
     Route::resource('pengajuan-proposal', PengajuanProposalController::class);
+
+    Route::patch('/pengajuan-proposal/{pengajuanProposal}/verify', [PengajuanProposalController::class, 'verify'])->name('pengajuan-proposal.verify');
+
+    Route::patch('/pengajuan-proposal/{pengajuanProposal}/unverify',[PengajuanProposalController::class, 'unverify'])->name('pengajuan-proposal.unverify');
+    
 });
 
 require __DIR__.'/auth.php';
