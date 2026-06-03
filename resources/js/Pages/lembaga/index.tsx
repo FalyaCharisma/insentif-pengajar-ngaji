@@ -3,7 +3,7 @@ import { router, usePage } from "@inertiajs/react";
 
 import AdminLayout from "@/layouts/app-layout";
 import DataTable from "@/Components/DataTable";
-import Pagination from "@/Components/pagination";
+import Pagination from "@/Components/Pagination";
 import TableToolbar from "@/Components/TableToolbar";
 import PageHeader from "@/Components/PageHeader";
 

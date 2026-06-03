@@ -1,4 +1,5 @@
 import { Pencil, Trash2 } from "lucide-react";
+import { router } from "@inertiajs/react";
 
 export const columns = (
     onEdit: (pengurus: any) => void,

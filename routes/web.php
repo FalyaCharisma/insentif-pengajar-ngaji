@@ -46,8 +46,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('kategori', KategoriController::class);
     Route::resource('forum', ForumController::class);
     Route::resource('lembaga', LembagaController::class);
+    Route::get('/data/lembaga', [LembagaController::class, 'data'])->name('lembaga.data');
 
-    Route::resource('pengurus', PengurusController::class);
+    Route::resource('pengurus', PengurusController::class)
+        ->parameters([
+            'pengurus' => 'pengurus',
+        ]);
 });
 
 require __DIR__.'/auth.php';

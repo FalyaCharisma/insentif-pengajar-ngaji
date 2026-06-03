@@ -1,4 +1,4 @@
-import Select from "react-select";
+import AsyncSelect from "react-select/async";
 
 import InputError from "../ui/InputError";
 import InputLabel from "../ui/InputLabel";
@@ -11,23 +11,26 @@ type Option = {
 type Props = {
     label: string;
     value: any;
-    options: Option[];
 
     error?: string;
     required?: boolean;
     placeholder?: string;
 
     onChange: (value: any) => void;
+
+    loadOptions: (
+        inputValue: string,
+    ) => Promise<Option[]>;
 };
 
 export default function FormSelect2({
     label,
     value,
-    options,
     error,
     required = false,
     placeholder = "Pilih data...",
     onChange,
+    loadOptions,
 }: Props) {
 
     return (
@@ -38,20 +41,17 @@ export default function FormSelect2({
                 required={required}
             />
 
-            <Select
-                options={options}
+            <AsyncSelect
+                cacheOptions
+                defaultOptions
+                loadOptions={loadOptions}
 
-                value={
-                    options.find(
-                        (opt) => opt.value == value,
-                    ) || null
-                }
+                value={value}
 
-                onChange={(opt: any) =>
-                    onChange(opt?.value || "")
-                }
+                onChange={(opt: any) => onChange(opt)}
 
                 placeholder={placeholder}
+
                 isClearable
 
                 classNames={{
@@ -88,8 +88,8 @@ export default function FormSelect2({
                                 isSelected
                                     ? "!bg-indigo-600 !text-white"
                                     : isFocused
-                                      ? "!bg-indigo-50"
-                                      : ""
+                                    ? "!bg-indigo-50"
+                                    : ""
                             }
                         `,
                 }}

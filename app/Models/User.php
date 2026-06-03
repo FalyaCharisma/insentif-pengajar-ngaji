@@ -22,6 +22,11 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+
+    protected $fillable = [
+        'nik',
+    ];
+
     protected function casts(): array
     {
         return [

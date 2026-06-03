@@ -9,6 +9,19 @@ use Illuminate\Support\Facades\Storage;
 
 class LembagaController extends Controller
 {
+    public function data(Request $request)
+    {
+        $query = Lembaga::query();
+
+        if ($request->q) {
+            $query->where('nama', 'like', '%' . $request->q . '%');
+        }
+
+        return response()->json([
+            'data' => $query->limit(20)->get(),
+        ]);
+    }
+
     public function index(Request $request)
     {
         $query = Lembaga::with('kategori');

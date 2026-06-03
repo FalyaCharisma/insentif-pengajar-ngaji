@@ -1,63 +1,96 @@
-import { useEffect, useState } from "react";
 import axios from "axios";
 
 export function useAlamat() {
-    const [provinsi, setProvinsi] = useState([]);
-    const [kabkota, setKabkota] = useState([]);
-    const [kecamatan, setKecamatan] = useState([]);
-    const [kelurahan, setKelurahan] = useState([]);
 
-    const [kodeProvinsi, setKodeProvinsi] = useState("");
-    const [kodeKabkota, setKodeKabkota] = useState("");
-    const [kodeKecamatan, setKodeKecamatan] = useState("");
+    // ================= PROVINSI =================
+    const searchProvinsi = async (
+        inputValue: string,
+    ) => {
 
-    // PROVINSI
-    useEffect(() => {
-        axios.get("http://103.78.106.192/api/provinsi")
-            .then(res => setProvinsi(res.data));
-    }, []);
+        const res = await axios.get(
+            `http://103.78.106.192/api/provinsi?q=${inputValue}`
+        );
 
-    // KABKOTA
-    useEffect(() => {
-        if (!kodeProvinsi) return;
+        return res.data.map((item: any) => ({
+            label: item.text,
+            value: item.id,
+        }));
+    };
 
-        axios.get(`http://103.78.106.192/api/kabko?kode_provinsi=${kodeProvinsi}`)
-            .then(res => setKabkota(res.data));
+    // ================= KABKOTA =================
+    const searchKabkota = async (
+        kodeProvinsi: string,
+        inputValue: string,
+    ) => {
 
-        setKabkota([]);
-        setKecamatan([]);
-        setKelurahan([]);
-    }, [kodeProvinsi]);
+        if (!kodeProvinsi) return [];
 
-    // KECAMATAN
-    useEffect(() => {
-        if (!kodeKabkota) return;
+        const res = await axios.get(
+            `http://103.78.106.192/api/kabko?kode_provinsi=${kodeProvinsi}&q=${inputValue}`
+        );
 
-        axios.get(`http://103.78.106.192/api/kecamatan?kode_kabkota=${kodeKabkota}`)
-            .then(res => setKecamatan(res.data));
+        return res.data.map((item: any) => ({
+            label: item.text,
+            value: item.id,
+        }));
+    };
 
-        setKecamatan([]);
-        setKelurahan([]);
-    }, [kodeKabkota]);
+    // ================= KECAMATAN =================
+    const searchKecamatan = async (
+        kodeKabkota: string,
+        inputValue: string,
+    ) => {
 
-    // KELURAHAN
-    useEffect(() => {
-        if (!kodeKecamatan) return;
+        if (!kodeKabkota) return [];
 
-        axios.get(`http://103.78.106.192/api/kelurahan?kode_kecamatan=${kodeKecamatan}`)
-            .then(res => setKelurahan(res.data));
+        const res = await axios.get(
+            `http://103.78.106.192/api/kecamatan?kode_kabkota=${kodeKabkota}&q=${inputValue}`
+        );
 
-        setKelurahan([]);
-    }, [kodeKecamatan]);
+        return res.data.map((item: any) => ({
+            label: item.text,
+            value: item.id,
+        }));
+    };
+
+    // ================= KELURAHAN =================
+    const searchKelurahan = async (
+        kodeKecamatan: string,
+        inputValue: string,
+    ) => {
+
+        if (!kodeKecamatan) return [];
+
+        const res = await axios.get(
+            `http://103.78.106.192/api/kelurahan?kode_kecamatan=${kodeKecamatan}&q=${inputValue}`
+        );
+
+        return res.data.map((item: any) => ({
+            label: item.text,
+            value: item.id,
+        }));
+    };
+
+    // ================= KELURAHAN =================
+    const searchAllKabkota = async (
+        inputValue: string,
+    ) => {
+
+        const res = await axios.get(
+            `http://103.78.106.192/api/kabko?q=${inputValue}`
+        );
+
+        return res.data.map((item: any) => ({
+            label: item.text,
+            value: item.id,
+        }));
+    }; 
 
     return {
-        provinsi,
-        kabkota,
-        kecamatan,
-        kelurahan,
-
-        setKodeProvinsi,
-        setKodeKabkota,
-        setKodeKecamatan,
+        searchProvinsi,
+        searchKabkota,
+        searchKecamatan,
+        searchKelurahan,
+        searchAllKabkota
     };
 }

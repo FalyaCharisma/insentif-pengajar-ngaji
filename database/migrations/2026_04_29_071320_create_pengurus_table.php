@@ -27,9 +27,14 @@ return new class extends Migration
             $table->year('tahun_lulus')->nullable();
             $table->string('agama')->nullable();
             $table->text('alamat')->nullable();
+            $table->string('id_kelurahan')->nullable();
             $table->string('kelurahan')->nullable();
+            $table->string('id_kecamatan')->nullable();
             $table->string('kecamatan')->nullable();
+            $table->string('id_kabkota')->nullable();
             $table->string('kabkota')->nullable();
+            $table->string('id_provinsi')->nullable();
+            $table->string('provinsi')->nullable();
             $table->string('no_hp')->nullable();
             $table->string('bank')->nullable();
             $table->string('no_rekening')->nullable();

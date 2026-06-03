@@ -6,6 +6,7 @@ use App\Models\Pengurus;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
@@ -65,11 +66,12 @@ class PengurusController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all(), $request->lembaga['value']);
         $validated = $request->validate([
-            'nik' => 'required|digits:16|numeric|unique:pengurus,nik',
+            'nik' => 'required|digits:16|numeric|unique:users,nik',
             'nama' => 'required|string|max:255',
-            'email' => 'required|email|unique:pengurus,email',
-            'tempat_lahir' => 'required|string|max:100',
+            'email' => 'required',
+            'tempat_lahir' => 'required|max:100',
             'tgl_lahir' => 'required|date',
             'jk' => 'required|in:L,P',
             'jabatan' => 'required|string|max:100',
@@ -87,30 +89,44 @@ class PengurusController extends Controller
             'bank' => 'required|string|max:100',
             'no_rekening' => 'required|string|max:50',
             'no_bpjs' => 'required|string|max:50',
-            'pas_foto' => 'required|image|mimes:jpg,jpeg,png|max:1048',
+            'pas_foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'status_insentif' => 'required|in:aktif,nonaktif',
         ]);
 
+        $foto = null;
+
         if ($request->hasFile('pas_foto')) {
-            $validated['pas_foto'] = $request->file('pas_foto')
-                ->store('pengurus/foto', 'public');
+            $extension = $request->file('pas_foto')
+                                ->getClientOriginalExtension();
+            
+            $filename = time() . '_pas_foto.' . $extension;
+
+            $request
+            ->file('pas_foto')
+            ->storeAs(
+                'pengurus',
+                $filename,
+                'public'
+            );
+
+            $foto = $filename;
         }
 
-        DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($request, $foto) {
 
             $user = User::create([
                 'nik' => $request->nik,
                 'name' => $request->nama,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'password' => Hash::make('12345678'),
                 'role' => 2, // staff
             ]);
 
             Pengurus::create([
-                'lembaga_id' => $request->lembaga_id,
+                'lembaga_id' => $request->lembaga['value'],
                 'nik' => $user->nik,
                 'nama' => $request->nama,
-                'tempat_lahir' => $request->tempat_lahir,
+                'tempat_lahir' => $request->tempat_lahir['label'],
                 'tgl_lahir' => $request->tgl_lahir,
                 'jk' => $request->jk,
                 'jabatan' => $request->jabatan,
@@ -120,14 +136,19 @@ class PengurusController extends Controller
                 'tahun_lulus' => $request->tahun_lulus,
                 'agama' => $request->agama,
                 'alamat' => $request->alamat,
-                'kelurahan' => $request->kelurahan,
-                'kecamatan' => $request->kecamatan,
-                'kabkota' => $request->kabkota,
+                'id_provinsi' => $request->provinsi['value'] ?? null,
+                'provinsi' => $request->provinsi['label'] ?? null,
+                'id_kabkota' => $request->kabkota['value'] ?? null,
+                'kabkota' => $request->kabkota['label'] ?? null,
+                'id_kecamatan' => $request->kecamatan['value'] ?? null,
+                'kecamatan' => $request->kecamatan['label'] ?? null,
+                'id_kelurahan' => $request->kelurahan['value'] ?? null,
+                'kelurahan' => $request->kelurahan['label'] ?? null,
                 'no_hp' => $request->no_hp,
                 'bank' => $request->bank,
                 'no_rekening' => $request->no_rekening,
                 'no_bpjs' => $request->no_bpjs,
-                'pas_foto' => $request->pas_foto,
+                'pas_foto' => $foto,
                 'status_insentif' => $request->status_insentif ?? 'aktif',
             ]);
         });
@@ -153,7 +174,10 @@ class PengurusController extends Controller
      */
     public function edit(Pengurus $pengurus)
     {
-        return inertia('Pengurus/Edit', [
+        $pengurus->load('user');
+        $pengurus->load('lembaga');
+
+        return inertia('pengurus/create', [
             'pengurus' => $pengurus,
         ]);
     }
@@ -163,28 +187,105 @@ class PengurusController extends Controller
      */
     public function update(Request $request, Pengurus $pengurus)
     {
-        $request->validate([
-            'nama' => 'required',
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email',
+            'tempat_lahir' => 'required',
+            'tgl_lahir' => 'required|date',
+            'jk' => 'required|in:L,P',
+            'jabatan' => 'required|string|max:100',
+            'pendidikan_terakhir' => 'required|string|max:100',
+            'jurusan' => 'required|string|max:100',
+            'sekolah_universitas' => 'required|string|max:255',
+            'tahun_lulus' => 'required|digits:4',
+            'agama' => 'required|string|max:50',
+            'provinsi' => 'required',
+            'kabkota' => 'required',
+            'kecamatan' => 'required',
+            'kelurahan' => 'required',
+            'alamat' => 'required|string',
+            'no_hp' => 'required|string|max:20',
+            'bank' => 'required|string|max:100',
+            'no_rekening' => 'required|string|max:50',
+            'no_bpjs' => 'required|string|max:50',
+            'pas_foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         DB::transaction(function () use ($request, $pengurus) {
 
-            // update pengurus
-            $pengurus->update([
-                'nama' => $request->nama,
-                'jabatan' => $request->jabatan,
-                'no_hp' => $request->no_hp,
-                'alamat' => $request->alamat,
+            $foto = $pengurus->pas_foto;
+
+            if ($request->hasFile('pas_foto')) {
+
+                // hapus foto lama
+                if ($foto) {
+                    Storage::disk('public')
+                        ->delete('pengurus/' . $foto);
+                }
+
+                $extension = $request->file('pas_foto')
+                    ->getClientOriginalExtension();
+
+                $filename = time() . '_pas_foto.' . $extension;
+
+                $request->file('pas_foto')->storeAs(
+                    'pengurus',
+                    $filename,
+                    'public'
+                );
+
+                $foto = $filename;
+            }
+
+            // update user
+            $pengurus->user()->update([
+                'name'  => $request->nama,
+                'email' => $request->email,
             ]);
 
-            // update user juga (sync nama)
-            if ($pengurus->user) {
-                $pengurus->user->update([
-                    'name' => $request->nama,
-                ]);
-            }
-        });
+            // update pengurus
+            $pengurus->update([
+                'lembaga_id' => $request->lembaga['value'] ?? null,
 
+                'nama' => $request->nama,
+
+                'tempat_lahir' => $request->tempat_lahir['value'] ?? null,
+
+                'tgl_lahir' => $request->tgl_lahir,
+                'jk' => $request->jk,
+
+                'jabatan' => $request->jabatan,
+
+                'pendidikan_terakhir' => $request->pendidikan_terakhir,
+                'jurusan' => $request->jurusan,
+                'sekolah_universitas' => $request->sekolah_universitas,
+                'tahun_lulus' => $request->tahun_lulus,
+
+                'agama' => $request->agama,
+
+                'alamat' => $request->alamat,
+
+                'id_provinsi' => $request->provinsi['value'] ?? null,
+                'provinsi' => $request->provinsi['label'] ?? null,
+
+                'id_kabkota' => $request->kabkota['value'] ?? null,
+                'kabkota' => $request->kabkota['label'] ?? null,
+
+                'id_kecamatan' => $request->kecamatan['value'] ?? null,
+                'kecamatan' => $request->kecamatan['label'] ?? null,
+
+                'id_kelurahan' => $request->kelurahan['value'] ?? null,
+                'kelurahan' => $request->kelurahan['label'] ?? null,
+
+                'no_hp' => $request->no_hp,
+                'bank' => $request->bank,
+                'no_rekening' => $request->no_rekening,
+                'no_bpjs' => $request->no_bpjs,
+
+                'pas_foto' => $foto,
+            ]);
+        });
+        
         return redirect()->route('pengurus.index')
             ->with('success', 'Data pengurus berhasil diperbarui');
     }

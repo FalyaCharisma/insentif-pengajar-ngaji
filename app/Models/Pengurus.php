@@ -12,30 +12,7 @@ class Pengurus extends Model
 
     protected $table = 'pengurus';
 
-    protected $fillable = [
-        'lembaga_id',
-        'nik',
-        'nama',
-        'tempat_lahir',
-        'tgl_lahir',
-        'jk',
-        'jabatan',
-        'pendidikan_terakhir',
-        'jurusan',
-        'sekolah_universitas',
-        'tahun_lulus',
-        'agama',
-        'alamat',
-        'kelurahan',
-        'kecamatan',
-        'kabkota',
-        'no_hp',
-        'bank',
-        'no_rekening',
-        'no_bpjs',
-        'pas_foto',
-        'status_insentif',
-    ];
+    protected $guarded = [];
 
     public function lembaga()
     {
