@@ -40,3 +40,16 @@ export const deleteConfirm = async (
         cancelButtonText: "Batal",
     });
 };
+
+export const verifyConfirm = (
+    text: string
+) => {
+    return Swal.fire({
+        title: "Konfirmasi",
+        text,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Ya",
+        cancelButtonText: "Batal",
+    });
+};

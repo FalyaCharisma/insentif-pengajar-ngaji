@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
-import { Landmark, Mail, MapPin, Phone } from 'lucide-react';
+import { Landmark, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 
 export default function Footer() {
     return (
@@ -19,7 +19,8 @@ export default function Footer() {
                         </div>
                         <p className="text-white-50 mb-0 portal-footer-text">
                             Portal penghimpunan data penerima insentif pengajar sekolah non formal Kota Kediri.
-                            Data pada tampilan ini masih dummy dan siap dihubungkan dengan backend Laravel.
+                            <br />
+                            program ini bertujuan untuk memudahkan proses pendataan, validasi, dan penyaluran insentif bagi para pengajar sekolah non formal di Kota Kediri.
                         </p>
                     </div>
 
@@ -39,15 +40,19 @@ export default function Footer() {
                         <div className="d-grid gap-3 text-white-50 small">
                             <div className="d-flex gap-2">
                                 <MapPin size={18} className="text-success flex-shrink-0" />
-                                <span>Jl. Mayor Bismo, Kota Kediri</span>
-                            </div>
-                            <div className="d-flex gap-2">
-                                <Mail size={18} className="text-success flex-shrink-0" />
-                                <span>disdik@kediri.go.id</span>
+                                <span>Jl. Mayor Bismo No. 10 -12 , Semampir, Kota Kediri</span>
                             </div>
                             <div className="d-flex gap-2">
                                 <Phone size={18} className="text-success flex-shrink-0" />
-                                <span>(0354) 000000</span>
+                                <span>(0354) 689923</span>
+                            </div>
+                            <div className="d-flex gap-2">
+                                <Mail size={18} className="text-success flex-shrink-0" />
+                                <span>dispendik@kedirikota.go.id</span>
+                            </div>
+                            <div className="d-flex gap-2">
+                                <MessageCircle size={18} className="text-success flex-shrink-0" />
+                                <span>WA <a href="https://wa.me/6281359969144" target="_blank" rel="noopener noreferrer" className="text-white ">6281359969144</a></span>
                             </div>
                         </div>
                     </div>
@@ -57,7 +62,7 @@ export default function Footer() {
 
                 <div className="d-flex flex-column flex-md-row justify-content-between gap-2 text-white-50 small">
                     <span>© 2026 Pemerintah Kota Kediri. All Rights Reserved.</span>
-                    <span>Prototype Portal Insentif Non Formal</span>
+                    <span>Developed by <a href="https://diskominfo.kedirikota.go.id/" target="_blank" rel="noopener noreferrer" className="text-white ">Diskominfo Kota Kediri</a></span>
                 </div>
             </div>
         </footer>

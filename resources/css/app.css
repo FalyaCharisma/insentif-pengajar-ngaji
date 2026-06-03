@@ -602,3 +602,32 @@ body {
         font-size: 16px !important;
     }
 }
+
+/* =========================
+   MAPS CUSTOM STYLE
+========================= */
+
+.portal-highcharts-map-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 8px;
+    min-height: 410px;
+}
+
+.portal-highcharts-map-wrapper .highcharts-container {
+    border-radius: 20px;
+}
+
+.portal-highcharts-map-wrapper .highcharts-background {
+    fill: transparent;
+}
+
+.portal-map-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+}
