@@ -989,19 +989,18 @@ function PetaSebaran() {
                                                                 <div className="text-center p-3 bg-light rounded-3">
                                                                     <div className="d-flex justify-content-center">
                                                                         <img
-                                                                            src={
-                                                                                pengurus.foto
-                                                                            }
-                                                                            alt={
-                                                                                pengurus.nama
-                                                                            }
+                                                                            src={`/storage/pengurus/${pengurus.pas_foto}`}
+                                                                            alt={pengurus.nama}
                                                                             className="rounded-circle mb-3"
                                                                             style={{
                                                                                 width: "90px",
                                                                                 height: "90px",
-                                                                                objectFit:
-                                                                                    "cover",
+                                                                                objectFit: "cover",
                                                                                 border: "3px solid #10b981",
+                                                                            }}
+                                                                            onError={(e) => {
+                                                                                (e.target as HTMLImageElement).src =
+                                                                                    "https://via.placeholder.com/90?text=No+Photo";
                                                                             }}
                                                                         />
                                                                     </div>
