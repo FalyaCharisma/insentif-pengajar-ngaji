@@ -2,6 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { Lembaga } from "@/types/lembaga";
+import { FileText, Paperclip } from "lucide-react";
 
 export const columns = (
     onEdit: (lembaga: Lembaga) => void,
@@ -24,11 +25,6 @@ export const columns = (
     },
 
     {
-        accessorKey: "kabkota",
-        header: "Kab/Kota",
-    },
-
-    {
         accessorKey: "kecamatan",
         header: "Kecamatan",
     },
@@ -41,6 +37,41 @@ export const columns = (
     {
         accessorKey: "jumlah_siswa",
         header: "Siswa",
+    },
+
+    {
+        id: "dokumen",
+        header: "Dokumen",
+        cell: ({ row }) => {
+            const lembaga = row.original;
+
+            return (
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                        <FileText className="h-4 w-4 text-slate-500" />
+                        <span>{lembaga.sk || "-"}</span>
+                    </div>
+
+                    {lembaga.file_pendukung && (
+                        <a
+                            href={`/storage/files/lembaga/${lembaga.file_pendukung}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="
+                                inline-flex items-center gap-2
+                                rounded-full border
+                                px-3 py-1
+                                text-xs
+                                hover:bg-slate-50
+                            "
+                        >
+                            <Paperclip className="h-3 w-3" />
+                            File Pendukung
+                        </a>
+                    )}
+                </div>
+            );
+        },
     },
 
     {

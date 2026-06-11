@@ -65,6 +65,9 @@ export function useAlamat() {
             `http://103.78.106.192/api/kelurahan?kode_kecamatan=${kodeKecamatan}&q=${inputValue}`
         );
 
+        console.log("kodeKecamatan:", kodeKecamatan);
+        console.log("response:", res.data);
+
         return res.data.map((item: any) => ({
             label: item.text,
             value: item.id,
@@ -86,11 +89,26 @@ export function useAlamat() {
         }));
     }; 
 
+    const searchKecamatanKotaKediri = async (
+        inputValue: string,
+    ) => {
+
+        const res = await axios.get(
+            `http://103.78.106.192/api/kecamatan?kode_kabkota=35.71&q=${inputValue}`
+        );
+
+        return res.data.map((item: any) => ({
+            label: item.text,
+            value: item.id,
+        }));
+    };
+
     return {
         searchProvinsi,
         searchKabkota,
         searchKecamatan,
         searchKelurahan,
-        searchAllKabkota
+        searchAllKabkota,
+        searchKecamatanKotaKediri
     };
 }

@@ -7,7 +7,7 @@ export default function Dashboard() {
             <Head title="Dashboard" />
             <AdminLayout>
                 <h1 className="text-xl font-bold">
-                    Dashboard
+                    Pengajuan Insentif
                 </h1>
             </AdminLayout>
         </>

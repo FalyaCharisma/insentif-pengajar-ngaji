@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
+import { useAuth } from "@/lib/auth";
 
 import {
     LayoutDashboard,
@@ -13,8 +14,8 @@ import {
     Menu,
     X,
     Building2,
+    UserStar
 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
 
 type Props = {
     collapsed: boolean;
@@ -220,6 +221,20 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                             </span>
                         )}
                     </Link>
+
+                    <Link
+                        href="/pengajuan-insentif"
+                        className={menuClass("/pengajuan-insentif")}
+                    >
+                        <UserStar size={20} />
+
+                        {!collapsed && (
+                            <span className="font-medium">
+                                Pengajuan Insentif
+                            </span>
+                        )}
+                    </Link>
+
                     {/* SETTINGS */}
                     <Link href="/settings" className={menuClass("/settings")}>
                         <Settings size={20} />

@@ -83,32 +83,44 @@ class LembagaController extends Controller
             'kategori_id' => 'required|exists:kategori,id',
             'nama' => 'required|string|max:255',
             'alamat' => 'nullable|string',
-            'kelurahan' => 'nullable|string|max:255',
-            'kecamatan' => 'nullable|string|max:255',
-            'kabkota' => 'nullable|string|max:255',
+            'kelurahan' => 'required',
+            'kecamatan' => 'required',
             'telp' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'jumlah_guru' => 'nullable|integer|min:0',
             'jumlah_siswa' => 'nullable|integer|min:0',
             'sk' => 'nullable|string|max:255',
-
             'file_pendukung' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048',
         ]);
 
-        // Upload file
         if ($request->hasFile('file_pendukung')) {
-            $file = $request->file('file_pendukung');
 
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $extension = $request->file('file_pendukung')
+                                ->getClientOriginalExtension();
+            
+            $filename = time() . '_file_lembaga.' . $extension;
 
-            $file->storeAs('files/lembaga', $filename, 'public');
+            $file->storeAs(
+                'files/lembaga',
+                $filename,
+                'public'
+            );
 
             $validated['file_pendukung'] = $filename;
         }
 
+        $validated['kecamatan_id'] = $request->kecamatan['value'];
+        $validated['kecamatan'] = $request->kecamatan['label'];
+
+        $validated['kelurahan_id'] = $request->kelurahan['value'];
+        $validated['kelurahan'] = $request->kelurahan['label'];
+
         Lembaga::create($validated);
 
-        return back()->with('success', 'Data lembaga berhasil ditambahkan');
+        return back()->with(
+            'success',
+            'Data lembaga berhasil ditambahkan'
+        );
     }
 
     public function update(Request $request, Lembaga $lembaga)
@@ -117,37 +129,55 @@ class LembagaController extends Controller
             'kategori_id' => 'required|exists:kategori,id',
             'nama' => 'required|string|max:255',
             'alamat' => 'nullable|string',
-            'kelurahan' => 'nullable|string|max:255',
-            'kecamatan' => 'nullable|string|max:255',
-            'kabkota' => 'nullable|string|max:255',
+            'kelurahan' => 'required',
+            'kecamatan' => 'required',
             'telp' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'jumlah_guru' => 'nullable|integer|min:0',
             'jumlah_siswa' => 'nullable|integer|min:0',
             'sk' => 'nullable|string|max:255',
-
             'file_pendukung' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048',
         ]);
 
-        // Upload file baru
         if ($request->hasFile('file_pendukung')) {
-            // Hapus file lama
-            if ($lembaga->file_pendukung && Storage::disk('public')->exists('images/lembaga/' . $lembaga->file_pendukung)) {
-                Storage::disk('public')->delete('images/lembaga/' . $lembaga->file_pendukung);
+
+            // hapus file lama
+            if (
+                $lembaga->file_pendukung &&
+                Storage::disk('public')->exists(
+                    'files/lembaga/' . $lembaga->file_pendukung
+                )
+            ) {
+                Storage::disk('public')->delete(
+                    'files/lembaga/' . $lembaga->file_pendukung
+                );
             }
 
             $file = $request->file('file_pendukung');
 
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $extension = $request->file('file_pendukung')
+                                ->getClientOriginalExtension();
+            
+            $filename = time() . '_file_lembaga.' . $extension;
 
-            $file->storeAs('images/lembaga', $filename, 'public');
+            $file->storeAs(
+                'files/lembaga',
+                $filename,
+                'public'
+            );
 
             $validated['file_pendukung'] = $filename;
+        } else {
+            // pertahankan file lama
+            $validated['file_pendukung'] = $lembaga->file_pendukung;
         }
 
         $lembaga->update($validated);
 
-        return back()->with('success', 'Data lembaga berhasil diperbarui');
+        return back()->with(
+            'success',
+            'Data lembaga berhasil diperbarui'
+        );
     }
 
     public function destroy(lembaga $lembaga)

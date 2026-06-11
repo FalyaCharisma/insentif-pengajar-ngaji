@@ -19,12 +19,12 @@ return new class extends Migration
 
             $table->string('nama');
             $table->text('alamat');
-            $table->unsignedBigInteger('kelurahan_id')->nullable();
+            $table->string('kelurahan_id')->nullable();
             $table->string('kelurahan');
-            $table->unsignedBigInteger('kecamatan_id')->nullable();
+            $table->string('kecamatan_id')->nullable();
             $table->string('kecamatan');
-            $table->unsignedBigInteger('kabkota_id')->nullable();
-            $table->string('kabkota');
+            $table->string('kabkota_id')->nullable();
+            $table->string('kabkota')->nullable();
 
             $table->string('telp')->nullable();
             $table->string('email')->nullable();

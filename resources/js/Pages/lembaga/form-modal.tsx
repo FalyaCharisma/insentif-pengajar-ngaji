@@ -7,6 +7,8 @@ import SecondaryButton from "@/Components/SecondaryButton";
 import FormTextarea from "@/Components/forms/FormTextArea";
 import FormSelect from "@/Components/forms/FormSelect";
 import FormFile from "@/Components/forms/FormFile";
+import FormAsyncSelect from "@/Components/forms/FormAsyncSelect";
+import { useAlamat } from "@/hooks/useAlamat";
 
 type Props = {
     open: boolean;
@@ -16,6 +18,12 @@ type Props = {
 };
 
 export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
+
+    const {
+        searchKecamatanKotaKediri,
+        searchKelurahan,
+    } = useAlamat();
+
     const isEdit = !!lembaga;
 
     const { data, setData, post, put, processing, errors, reset } = useForm({
@@ -23,9 +31,8 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
         kategori_id: "",
         nama: "",
         alamat: "",
-        kelurahan: "",
-        kecamatan: "",
-        kabkota: "",
+        kecamatan: null as any,
+        kelurahan: null as any,
         telp: "",
         email: "",
         jumlah_guru: 0,
@@ -40,9 +47,19 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
                 kategori_id: lembaga.kategori_id?.toString() || "",
                 nama: lembaga.nama || "",
                 alamat: lembaga.alamat || "",
-                kelurahan: lembaga.kelurahan || "",
-                kecamatan: lembaga.kecamatan || "",
-                kabkota: lembaga.kabkota || "",
+                kecamatan: lembaga.kecamatan
+                    ? {
+                        label: lembaga.kecamatan,
+                        value: lembaga.id_kecamatan,
+                    }
+                    : null,
+
+                kelurahan: lembaga.kelurahan
+                    ? {
+                        label: lembaga.kelurahan,
+                        value: lembaga.id_kelurahan,
+                    }
+                    : null,
                 telp: lembaga.telp || "",
                 email: lembaga.email || "",
                 jumlah_guru: lembaga.jumlah_guru || 0,
@@ -176,35 +193,32 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
                             </div>
 
                             {/* Wilayah */}
-                            <div className="xl:col-span-3 grid grid-cols-1 gap-4 md:grid-cols-3">
-                                <FormInput
-                                    label="Kelurahan"
-                                    value={data.kelurahan}
-                                    onChange={(e) =>
-                                        setData("kelurahan", e.target.value)
-                                    }
-                                    placeholder="Masukkan kelurahan"
-                                    error={errors.kelurahan}
-                                />
-
-                                <FormInput
+                            <div className="xl:col-span-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <FormAsyncSelect
                                     label="Kecamatan"
                                     value={data.kecamatan}
-                                    onChange={(e) =>
-                                        setData("kecamatan", e.target.value)
-                                    }
-                                    placeholder="Masukkan kecamatan"
+                                    onChange={(value: any) => {
+                                        setData("kecamatan", value);
+                                        setData("kelurahan", null);
+                                    }}
+                                    loadOptions={searchKecamatanKotaKediri}
                                     error={errors.kecamatan}
                                 />
 
-                                <FormInput
-                                    label="Kabupaten / Kota"
-                                    value={data.kabkota}
-                                    onChange={(e) =>
-                                        setData("kabkota", e.target.value)
+                                <FormAsyncSelect
+                                    key={data.kecamatan?.value}
+                                    label="Kelurahan"
+                                    value={data.kelurahan}
+                                    onChange={(value: any) =>
+                                        setData("kelurahan", value)
                                     }
-                                    placeholder="Masukkan kabupaten / kota"
-                                    error={errors.kabkota}
+                                    loadOptions={(inputValue) =>
+                                        searchKelurahan(
+                                            data.kecamatan?.value ?? "",
+                                            inputValue
+                                        )
+                                    }
+                                    error={errors.kelurahan}
                                 />
                             </div>
 
@@ -212,6 +226,7 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
                             <div className="xl:col-span-3 grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <FormInput
                                     label="No. Telepon"
+                                    type="number"
                                     value={data.telp}
                                     onChange={(e) =>
                                         setData("telp", e.target.value)
@@ -281,16 +296,27 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
                                         onChange={(e) =>
                                             setData(
                                                 "file_pendukung",
-                                                e.target.files?.[0] || null,
+                                                e.target.files?.[0] || null
                                             )
                                         }
                                         error={errors.file_pendukung}
                                     />
 
-                                    {errors.file_pendukung && (
-                                        <p className="mt-1 text-sm text-red-500">
-                                            {errors.file_pendukung}
-                                        </p>
+                                    {lembaga?.file_pendukung && (
+                                        <div className="mt-2 rounded-lg border bg-slate-50 p-3">
+                                            <p className="text-xs text-slate-500">
+                                                File yang tersimpan
+                                            </p>
+
+                                            <a
+                                                href={`/storage/files/lembaga/${lembaga.file_pendukung}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-sm text-indigo-600 hover:underline"
+                                            >
+                                                {lembaga.file_pendukung}
+                                            </a>
+                                        </div>
                                     )}
                                 </div>
                             </div>

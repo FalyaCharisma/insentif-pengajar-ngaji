@@ -8,6 +8,7 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\LembagaController;
 use App\Http\Controllers\PengurusController;
 use App\Http\Controllers\PengajuanProposalController;
+use App\Http\Controllers\PengajuanInsentifController;
 
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
@@ -58,6 +59,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/pengajuan-proposal/{pengajuanProposal}/verify', [PengajuanProposalController::class, 'verify'])->name('pengajuan-proposal.verify');
 
     Route::patch('/pengajuan-proposal/{pengajuanProposal}/unverify',[PengajuanProposalController::class, 'unverify'])->name('pengajuan-proposal.unverify');
+
+    Route::resource('pengajuan-insentif', PengajuanInsentifController::class);
     
 });
 

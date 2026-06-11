@@ -10,21 +10,7 @@ class Lembaga extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'lembaga';
-
-    protected $fillable = [
-        'kategori_id',
-        'nama',
-        'alamat',
-        'kelurahan',
-        'kecamatan', 
-        'kabkota',
-        'telp',
-        'email',
-        'jumlah_guru',
-        'jumlah_siswa',
-        'sk',
-        'file_pendukung'
-    ];
+    protected $guarded = [];
 
     public function kategori()
     {

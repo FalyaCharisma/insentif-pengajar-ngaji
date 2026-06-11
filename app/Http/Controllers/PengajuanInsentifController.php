@@ -3,15 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\PengajuanInsentif;
+use Inertia\Inertia;
 
 class PengajuanInsentifController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = PengajuanInsentif::with('pengurus');
+        
+        return Inertia::render('pengajuan-insentif/index');
     }
 
     /**
