@@ -14,7 +14,7 @@ class PortalController extends Controller
         $totalLembaga = Lembaga::count();
         $totalPendidik = Pengurus::count();
         $totalTervalidasi = Pengurus::where('status_insentif', 'aktif')->count();
-        $totalTidakTervalidasi = Pengurus::where('status_insentif', 'tidak_aktif')->count();
+        $totalTidakTervalidasi = Pengurus::where('status_insentif', 'nonaktif')->count();
 
         $statistik = [
             ['label' => 'Total Lembaga', 'value' => $totalLembaga, 'icon' => 'Building2', 'tone' => 'success'],

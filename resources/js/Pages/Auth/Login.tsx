@@ -55,7 +55,9 @@ export default function Login({
                     <div className="col-lg-6 auth-form-side">
                         <div className="auth-form-wrapper">
                             <div className="text-center mb-4">
-                                <h1 className="auth-title">INSENTIF</h1>
+                                <a href="/" className="d-inline-block mb-3">
+                                    <h3 className="auth-title">INSENTIF</h3>
+                                </a>
                                 <h2 className="auth-subtitle">LOGIN PAGE</h2>
                             </div>
 

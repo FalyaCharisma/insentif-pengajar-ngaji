@@ -41,7 +41,7 @@ class KecamatanController extends Controller
                     'lembaga'           => Lembaga::where('kecamatan', $name)->count(),
                     'pendidik'          => $pendidikQuery()->count(),
                     'tervalidasi'       => $pendidikQuery()->where('status_insentif', 'aktif')->count(),
-                    'tidak_tervalidasi' => $pendidikQuery()->where('status_insentif', 'tidak_aktif')->count(),
+                    'tidak_tervalidasi' => $pendidikQuery()->where('status_insentif', 'nonaktif')->count(),
                 ],
                 'lembaga' => Lembaga::with('kategori', 'pengurus')->where('kecamatan', $name)->get(),
             ]);
