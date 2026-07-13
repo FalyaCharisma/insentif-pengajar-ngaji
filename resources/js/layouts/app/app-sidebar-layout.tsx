@@ -1,20 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import { useAuth } from "@/lib/auth";
+import { sidebarMenus } from "@/data/sidebarMenus";
 
 import {
-    LayoutDashboard,
-    FolderKanban,
-    Users,
-    FileText,
-    Settings,
-    ChevronDown,
     ChevronLeft,
     ChevronRight,
     Menu,
     X,
-    Building2,
-    UserStar
 } from "lucide-react";
 
 type Props = {
@@ -26,20 +19,21 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
     const { hasRole } = useAuth();
     const { url } = usePage();
 
-    const isMasterActive =
-        url.startsWith("/kategori") ||
-        url.startsWith("/lembaga") ||
-        url.startsWith("/forum") ||
-        url.startsWith("/pengurus");
-
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [masterOpen, setMasterOpen] = useState(isMasterActive);
 
-    useEffect(() => {
-        if (isMasterActive) {
-            setMasterOpen(true);
-        }
-    }, [url]);
+    const [openMenus, setOpenMenus] = useState<string[]>([]);
+
+    const isParentActive = (menu: (typeof sidebarMenus)[number]) => {
+        return menu.children?.some((child) => url.startsWith(child.href ?? ""));
+    };
+
+    const toggleMenu = (title: string) => {
+        setOpenMenus((prev) =>
+            prev.includes(title)
+                ? prev.filter((item) => item !== title)
+                : [...prev, title]
+        );
+    };
 
     const isActive = (path: string) => {
         return url.startsWith(path);
@@ -56,6 +50,21 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                 : "text-slate-300 hover:bg-slate-800"
         }
     `;
+
+    useEffect(() => {
+        const activeParents = sidebarMenus
+            .filter(menu =>
+                menu.children?.some(child =>
+                    url.startsWith(child.href ?? "")
+                )
+            )
+            .map(menu => menu.title);
+
+        setOpenMenus(prev => {
+            const merged = [...new Set([...prev, ...activeParents])];
+            return merged;
+        });
+    }, [url]);
 
     return (
         <>
@@ -126,134 +135,75 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
 
                 {/* MENU */}
                 <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-2">
-                    {/* Dashboard */}
-                    <Link href="/dashboard" className={menuClass("/dashboard")}>
-                        <LayoutDashboard size={20} />
+                    {sidebarMenus
+                        .filter((menu) => menu.roles.some((role) => hasRole(role)))
+                        .map((menu) => {
+                            const Icon = menu.icon;
+                            const isOpen = openMenus.includes(menu.title);
 
-                        {!collapsed && (
-                            <span className="font-medium">Dashboard</span>
-                        )}
-                    </Link>
+                            // Parent Menu
+                            if (menu.children) {
+                                return (
+                                    <div key={menu.title}>
+                                        <button
+                                            onClick={() => toggleMenu(menu.title)}
+                                            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-800 ${
+                                                isParentActive(menu) ? "bg-slate-800" : ""
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                {Icon && <Icon size={20} />}
+                                                {!collapsed && <span>{menu.title}</span>}
+                                            </div>
 
-                    {hasRole("superadmin") && (
-                        <>
-                            {/* MASTER DATA */}
-                            <div>
-                                <button
-                                    onClick={() => setMasterOpen(!masterOpen)}
-                                    className={`
-                                        w-full flex items-center
-                                        ${collapsed ? "justify-center px-2" : "justify-between px-4"}
-                                        py-3 rounded-2xl text-slate-300 hover:bg-slate-800 transition
-                                    `}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <FolderKanban size={20} />
+                                            {!collapsed && (
+                                                <ChevronRight
+                                                    size={18}
+                                                    className={`transition ${
+                                                        isOpen ? "rotate-90" : ""
+                                                    }`}
+                                                />
+                                            )}
+                                        </button>
 
-                                        {!collapsed && (
-                                            <span className="font-medium">
-                                                Master Data
-                                            </span>
+                                        {!collapsed && isOpen && (
+                                            <div className="ml-5 mt-2 space-y-1 border-l border-slate-800 pl-3">
+                                                {menu.children
+                                                    .filter((child) =>
+                                                        child.roles.some((role) =>
+                                                            hasRole(role)
+                                                        )
+                                                    )
+                                                    .map((child) => (
+                                                        <Link
+                                                            key={child.title}
+                                                            href={child.href!}
+                                                            className={menuClass(child.href!)}
+                                                        >
+                                                            {child.icon && (
+                                                                <child.icon size={18} />
+                                                            )}
+                                                            <span>{child.title}</span>
+                                                        </Link>
+                                                    ))}
+                                            </div>
                                         )}
                                     </div>
+                                );
+                            }
 
-                                    {!collapsed && (
-                                        <ChevronDown
-                                            size={18}
-                                            className={`transition-transform ${
-                                                masterOpen ? "rotate-180" : ""
-                                            }`}
-                                        />
-                                    )}
-                                </button>
-
-                                {/* SUBMENU */}
-                                {!collapsed && masterOpen && (
-                                    <div className="ml-4 mt-2 space-y-2 border-l border-slate-800 pl-3">
-                                        <Link
-                                            href="/kategori"
-                                            className={menuClass("/kategori")}
-                                        >
-                                            <FolderKanban size={18} />
-
-                                            <span>Kategori</span>
-                                        </Link>
-
-                                        <Link
-                                            href="/lembaga"
-                                            className={menuClass("/lembaga")}
-                                        >
-                                            <Building2 size={18} />
-
-                                            <span>Lembaga</span>
-                                        </Link>
-
-                                        <Link
-                                            href="/forum"
-                                            className={menuClass("/forum")}
-                                        >
-                                            <FileText size={18} />
-
-                                            <span>Forum</span>
-                                        </Link>
-                                        <Link
-                                            href="/pengurus"
-                                            className={menuClass("/pengurus")}
-                                        >
-                                            <Users size={18} />
-                                            <span>Pengurus</span>
-                                        </Link>
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    )}
-                    <Link
-                        href="/periode"
-                        className={menuClass("/periode")}
-                    >
-                        <FileText size={20} />
-
-                        {!collapsed && (
-                            <span className="font-medium">
-                                Periode
-                            </span>
-                        )}
-                    </Link>
-                    <Link
-                        href="/pengajuan-proposal"
-                        className={menuClass("/pengajuan-proposal")}
-                    >
-                        <FileText size={20} />
-
-                        {!collapsed && (
-                            <span className="font-medium">
-                                Pengajuan Proposal
-                            </span>
-                        )}
-                    </Link>
-
-                    <Link
-                        href="/pengajuan-insentif"
-                        className={menuClass("/pengajuan-insentif")}
-                    >
-                        <UserStar size={20} />
-
-                        {!collapsed && (
-                            <span className="font-medium">
-                                Pengajuan Insentif
-                            </span>
-                        )}
-                    </Link>
-
-                    {/* SETTINGS */}
-                    <Link href="/settings" className={menuClass("/settings")}>
-                        <Settings size={20} />
-
-                        {!collapsed && (
-                            <span className="font-medium">Settings</span>
-                        )}
-                    </Link>
+                            // Menu Biasa
+                            return (
+                                <Link
+                                    key={menu.title}
+                                    href={menu.href!}
+                                    className={menuClass(menu.href!)}
+                                >
+                                    {Icon && <Icon size={20} />}
+                                    {!collapsed && <span>{menu.title}</span>}
+                                </Link>
+                            );
+                        })}
                 </nav>
             </aside>
         </>
