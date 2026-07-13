@@ -117,17 +117,17 @@ export const sidebarMenus: SidebarMenu[] = [
     {
         title: "Profil Lembaga",
         icon: Building2,
-        roles: ["lembaga"],
+        roles: ["superadmin","lembaga"],
         children: [
             {
                 title: "Profil",
                 href: "/profil-lembaga",
-                roles: ["lembaga"],
+                roles: ["superadmin","lembaga"],
             },
             {
                 title: "Dokumen Lembaga",
                 href: "/dokumen-lembaga",
-                roles: ["lembaga"],
+                roles: ["superadmin","lembaga"],
             },
         ],
     },
@@ -135,17 +135,17 @@ export const sidebarMenus: SidebarMenu[] = [
     {
         title: "Pengajar",
         icon: GraduationCap,
-        roles: ["dindik", "lembaga", "forum"],
+        roles: ["superadmin", "dindik", "lembaga", "forum"],
         children: [
             {
                 title: "Data Pengajar",
                 href: "/pengajar",
-                roles: ["dindik", "lembaga"],
+                roles: ["superadmin", "dindik", "lembaga"],
             },
             {
                 title: "Verifikasi Pengajar",
                 href: "/verifikasi-pengajar",
-                roles: ["forum"],
+                roles: ["superadmin", "forum"],
             },
         ],
     },
@@ -154,7 +154,7 @@ export const sidebarMenus: SidebarMenu[] = [
         title: "Data Siswa",
         icon: BookOpen,
         href: "/data-siswa",
-        roles: ["lembaga"],
+        roles: ["superadmin", "lembaga"],
     },
 
     {
@@ -165,27 +165,27 @@ export const sidebarMenus: SidebarMenu[] = [
             {
                 title: "Pengajuan Proposal",
                 href: "/pengajuan-proposal",
-                roles: ["lembaga"],
+                roles: ["superadmin", "lembaga"],
             },
             {
                 title: "Data Proposal",
                 href: "/proposal",
-                roles: ["dindik", "superadmin"],
+                roles: ["superadmin", "dindik", "superadmin"],
             },
             {
                 title: "Verifikasi Proposal",
                 href: "/verifikasi-proposal",
-                roles: ["forum"],
+                roles: ["superadmin", "forum"],
             },
             {
                 title: "Status Proposal",
                 href: "/status-proposal",
-                roles: ["lembaga", "dindik"],
+                roles: ["superadmin", "lembaga", "dindik"],
             },
             {
                 title: "Catatan Revisi",
                 href: "/catatan-revisi",
-                roles: ["lembaga"],
+                roles: ["superadmin", "lembaga"],
             },
         ],
     },
@@ -193,32 +193,32 @@ export const sidebarMenus: SidebarMenu[] = [
     {
         title: "Pengajuan Insentif",
         icon: UserStar,
-        roles: ["lembaga", "forum", "dindik"],
+        roles: ["superadmin", "lembaga", "forum", "dindik"],
         children: [
             {
                 title: "Pengajuan",
                 href: "/pengajuan-insentif",
-                roles: ["lembaga"],
+                roles: ["superadmin", "lembaga"],
             },
             {
                 title: "Usulan Penerima",
                 href: "/usulan-penerima",
-                roles: ["lembaga"],
+                roles: ["superadmin", "lembaga"],
             },
             {
                 title: "Verifikasi Penerima",
                 href: "/verifikasi-penerima",
-                roles: ["forum"],
+                roles: ["superadmin", "forum"],
             },
             {
                 title: "Finalisasi",
                 href: "/finalisasi",
-                roles: ["forum"],
+                roles: ["superadmin", "forum"],
             },
             {
                 title: "Kuota Estimasi",
                 href: "/kuota-estimasi",
-                roles: ["lembaga"],
+                roles: ["superadmin", "lembaga"],
             },
         ],
     },
@@ -231,27 +231,27 @@ export const sidebarMenus: SidebarMenu[] = [
             {
                 title: "Monitoring Verifikasi",
                 href: "/monitoring",
-                roles: ["dindik", "forum"],
+                roles: ["superadmin", "dindik", "forum"],
             },
             {
                 title: "Lembaga Belum Diverifikasi",
                 href: "/belum-verifikasi",
-                roles: ["dindik"],
+                roles: ["superadmin", "dindik"],
             },
             {
                 title: "Progress Lembaga",
                 href: "/progress-lembaga",
-                roles: ["forum"],
+                roles: ["superadmin", "forum"],
             },
             {
                 title: "Kuota Terpakai",
                 href: "/kuota-terpakai",
-                roles: ["forum"],
+                roles: ["superadmin", "forum"],
             },
             {
                 title: "Audit Log",
                 href: "/audit-log",
-                roles: ["superadmin"],
+                roles: ["superadmin", "superadmin"],
             },
         ],
     },
