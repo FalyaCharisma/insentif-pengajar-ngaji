@@ -1,127 +1,126 @@
-import { Head } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
+import { useEffect, useState } from "react";
+
 import AdminLayout from "@/layouts/app-layout";
-import { columns } from "./columns";
+
+import PageHeader from "@/Components/PageHeader";
+import TableToolbar from "@/Components/TableToolbar";
 import DataTable from "@/Components/DataTable";
 import Pagination from "@/Components/pagination";
-import { useQueryParams } from "@/hooks/use-query-params";
-import TableToolbar from "@/Components/TableToolbar";
-import PageHeader from "@/Components/PageHeader";
-import { useState, useEffect } from "react";
+
+import { columns } from "./columns";
 import FormModal from "./form-modal";
-import { router, usePage } from "@inertiajs/react";
+
+import { useQueryParams } from "@/hooks/use-query-params";
 import { deleteConfirm, successAlert } from "@/lib/alert";
 
 type Props = {
-    kategori: any;
+    periode: any;
     filters: any;
 };
 
-export default function Index({ kategori, filters }: Props) {
-
-    const { setParams } = useQueryParams(
-        route("kategori.index"),
-        filters,
-    );
+export default function Index({ periode, filters }: Props) {
+    const { setParams } = useQueryParams(route("periode.index"), filters);
 
     const [open, setOpen] = useState(false);
 
-    const [selectedKategori, setSelectedKategori] = useState(null);
+    const [selectedPeriode, setSelectedPeriode] = useState<any>(null);
 
     const pageProps: any = usePage().props;
     const flash = pageProps.flash || {};
 
     useEffect(() => {
-        if (flash?.success) {
+        if (flash.success) {
             successAlert(flash.success);
         }
     }, [flash]);
 
     return (
         <>
-            <Head title="Data Kategori" />
+            <Head title="Data Periode" />
+
             <AdminLayout>
                 <div className="space-y-5 w-full overflow-hidden">
-
-                    {/* Header */}
                     <PageHeader
-                        title="Kategori"
-                        subtitle="Kelola data kategori"
+                        title="Periode Upload Proposal"
+                        subtitle="Kelola periode upload proposal guru non formal"
                     />
 
-                    {/* Toolbar */}
                     <div className="w-full overflow-hidden">
                         <TableToolbar
                             filters={filters}
                             setParams={setParams}
-                            searchPlaceholder="Cari kategori..."
-                            addButtonLabel="Tambah Kategori"
-                            onAdd={() => setOpen(true)}
+                            searchPlaceholder="Cari tahun proposal..."
+                            addButtonLabel="Tambah Periode"
+                            onAdd={() => {
+                                setSelectedPeriode(null);
+                                setOpen(true);
+                            }}
                             sortOptions={[
                                 {
                                     label: "Terbaru",
                                     value: "id",
                                 },
-
                                 {
-                                    label: "Nama",
-                                    value: "nama",
+                                    label: "Tahun",
+                                    value: "tahun",
                                 },
-
                                 {
-                                    label: "Tanggal",
-                                    value: "created_at",
+                                    label: "Mulai Upload",
+                                    value: "mulai_upload",
+                                },
+                                {
+                                    label: "Selesai Upload",
+                                    value: "selesai_upload",
                                 },
                             ]}
                         />
                     </div>
 
-                    {/* Table */}
                     <div
                         className="
                             overflow-x-auto
                             rounded-2xl
-                            border border-slate-200
+                            border
+                            border-slate-200
                         "
                     >
                         <DataTable
                             columns={columns(
-                                (kategori) => {
-                                    setSelectedKategori(kategori);
+                                (periode) => {
+                                    setSelectedPeriode(periode);
+
                                     setOpen(true);
                                 },
 
-                                (kategori) => {
+                                (periode) => {
                                     deleteConfirm(
-                                        `Kategori "${kategori.nama}" akan dihapus`,
+                                        `Periode tahun ${periode.tahun} akan dihapus.`,
                                     ).then((result) => {
                                         if (result.isConfirmed) {
                                             router.delete(
                                                 route(
-                                                    "kategori.destroy",
-                                                    kategori.id,
+                                                    "periode.destroy",
+                                                    periode.id,
                                                 ),
                                             );
                                         }
                                     });
                                 },
                             )}
-                            data={kategori.data}
+                            data={periode.data}
                         />
                     </div>
 
-                    {/* Pagination */}
-                    <div className="overflow-x-auto">
-                        <Pagination links={kategori.links} />
-                    </div>
+                    <Pagination links={periode.links} />
 
-                    {/* Modal */}
                     <FormModal
                         open={open}
                         onClose={() => {
                             setOpen(false);
-                            setSelectedKategori(null);
+                            setSelectedPeriode(null);
                         }}
-                        kategori={selectedKategori}
+                        periode={selectedPeriode}
                     />
                 </div>
             </AdminLayout>

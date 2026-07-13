@@ -9,6 +9,7 @@ use App\Http\Controllers\LembagaController;
 use App\Http\Controllers\PengurusController;
 use App\Http\Controllers\PengajuanProposalController;
 use App\Http\Controllers\PengajuanInsentifController;
+use App\Http\Controllers\PeriodeController;
 
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
@@ -53,7 +54,7 @@ Route::middleware('auth')->group(function () {
         ->parameters([
             'pengurus' => 'pengurus',
         ]);
-
+    Route::resource('periode', PeriodeController::class);
     Route::resource('pengajuan-proposal', PengajuanProposalController::class);
 
     Route::patch('/pengajuan-proposal/{pengajuanProposal}/verify', [PengajuanProposalController::class, 'verify'])->name('pengajuan-proposal.verify');

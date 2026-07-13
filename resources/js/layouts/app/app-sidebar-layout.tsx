@@ -208,7 +208,18 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                             </div>
                         </>
                     )}
+                    <Link
+                        href="/periode"
+                        className={menuClass("/periode")}
+                    >
+                        <FileText size={20} />
 
+                        {!collapsed && (
+                            <span className="font-medium">
+                                Periode
+                            </span>
+                        )}
+                    </Link>
                     <Link
                         href="/pengajuan-proposal"
                         className={menuClass("/pengajuan-proposal")}
