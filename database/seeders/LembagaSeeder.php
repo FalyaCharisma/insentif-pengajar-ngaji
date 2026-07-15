@@ -2,15 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Lembaga;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class LembagaSeeder extends Seeder
 {
-        public function run(): void
+    public function run(): void
     {
         $data = [
             [
@@ -36,7 +35,7 @@ class LembagaSeeder extends Seeder
             [
                 'kode' => 'LMB00005',
                 'nama' => 'TPA Baiturrahman',
-                'kategori_id' => 4,
+                'kategori_id' => 1,
             ],
         ];
 
@@ -44,7 +43,7 @@ class LembagaSeeder extends Seeder
 
             $user = User::create([
                 'name' => $item['nama'],
-                'username' => $item['kode'],
+                'kode' => $item['kode'],
                 'email' => strtolower($item['kode']) . '@mail.com',
                 'password' => Hash::make($item['kode']),
                 'status' => 'aktif',
@@ -56,7 +55,7 @@ class LembagaSeeder extends Seeder
             Lembaga::create([
                 'user_id' => $user->id,
                 'kategori_id' => $item['kategori_id'],
-                'kode_lembaga' => $item['kode'],
+                'kode' => $item['kode'],
                 'nama' => $item['nama'],
             ]);
         }

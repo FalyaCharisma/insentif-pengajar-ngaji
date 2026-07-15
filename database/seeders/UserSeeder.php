@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -12,15 +11,14 @@ class UserSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-
     public function run(): void
     {
-        // Superadmin
+        // Super Administrator
         $superadmin = User::updateOrCreate(
             ['email' => 'superadmin@gmail.com'],
             [
                 'name' => 'Super Administrator',
-                'username' => 'superadmin',
+                'kode' => 'SUPERADMIN',
                 'password' => Hash::make('password'),
                 'status' => 'aktif',
                 'force_change_password' => false,
@@ -29,12 +27,12 @@ class UserSeeder extends Seeder
 
         $superadmin->assignRole('superadmin');
 
-        // Dindik
+        // Admin Dindik
         $dindik = User::updateOrCreate(
             ['email' => 'dindik@gmail.com'],
             [
                 'name' => 'Admin Dindik',
-                'username' => 'dindik',
+                'kode' => 'DINDIK',
                 'password' => Hash::make('password'),
                 'status' => 'aktif',
                 'force_change_password' => false,
@@ -43,12 +41,12 @@ class UserSeeder extends Seeder
 
         $dindik->assignRole('dindik');
 
-        // Forum
+        // Admin Forum
         $forum = User::updateOrCreate(
             ['email' => 'forum@gmail.com'],
             [
                 'name' => 'Admin Forum',
-                'username' => 'forum',
+                'kode' => 'FORUM',
                 'password' => Hash::make('password'),
                 'status' => 'aktif',
                 'force_change_password' => false,

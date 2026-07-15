@@ -23,7 +23,7 @@ class ProfilLembagaSeeder extends Seeder
                 'provinsi' => 'Jawa Timur',
                 'kabupaten' => 'Kota Kediri',
                 'kecamatan' => 'Kota',
-                'desa' => 'Balowerti',
+                'kelurahan' => 'Balowerti',
                 'kode_pos' => '64121',
 
                 'telepon' => '0354' . rand(100000, 999999),

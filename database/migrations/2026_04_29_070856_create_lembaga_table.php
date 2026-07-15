@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,21 +13,14 @@ return new class extends Migration
         Schema::create('lembaga', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')
-                ->constrained()
-                ->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
 
-            $table->foreignId('kategori_id')
-                ->constrained()
-                ->cascadeOnDelete();
+            $table->foreignId('kategori_id')->constrained('kategori')->cascadeOnUpdate()->cascadeOnDelete();
 
             $table->string('kode')->unique();
             $table->string('nama');
 
-            $table->enum('status', [
-                'aktif',
-                'nonaktif',
-            ])->default('aktif');
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
 
             $table->timestamps();
             $table->softDeletes();

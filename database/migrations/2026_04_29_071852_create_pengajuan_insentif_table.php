@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pengajuan_insentif', function (Blueprint $table) {
             $table->id();
             $table->foreignId('proposal_id')->constrained('pengajuan_proposal')->cascadeOnDelete();
-            $table->foreignId('pengurus_id')->constrained('pengurus')->cascadeOnDelete();
+            // $table->foreignId('pengurus_id')->constrained('pengurus')->cascadeOnDelete();
             $table->date('tanggal');
             $table->string('status');
             $table->timestamps();
