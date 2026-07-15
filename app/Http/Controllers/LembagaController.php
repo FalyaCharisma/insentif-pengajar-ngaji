@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 use App\Models\Lembaga;
 use App\Models\Kategori;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class LembagaController extends Controller
 {
@@ -24,55 +27,38 @@ class LembagaController extends Controller
 
     public function index(Request $request)
     {
-        $query = Lembaga::with('kategori');
-
-        // Search
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nama', 'like', '%' . $request->search . '%')
-                    ->orWhere('alamat', 'like', '%' . $request->search . '%')
-                    ->orWhere('kelurahan', 'like', '%' . $request->search . '%')
-                    ->orWhere('kecamatan', 'like', '%' . $request->search . '%')
-                    ->orWhere('kabkota', 'like', '%' . $request->search . '%')
-                    ->orWhere('email', 'like', '%' . $request->search . '%')
-                    ->orWhere('telp', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        // Filter kategori
-        if ($request->filled('kategori_id')) {
-            $query->where('kategori_id', $request->kategori_id);
-        }
-
-        // Sorting
-        $allowedSorts = ['id', 'nama', 'jumlah_guru', 'jumlah_siswa', 'created_at'];
-
-        $sort = in_array($request->sort, $allowedSorts) ? $request->sort : 'id';
-
-        $order = $request->order === 'asc' ? 'asc' : 'desc';
-
-        $query->orderBy($sort, $order);
-
-        // Per Page
-        $perPage = (int) $request->per_page;
-
-        if (!in_array($perPage, [10, 25, 50, 100])) {
-            $perPage = 10;
-        }
-
-        // Pagination
-        $lembaga = $query->paginate($perPage)->withQueryString();
+        $lembaga = $this->datatable(
+            query: Lembaga::with([
+                'kategori',
+                'user',
+                'profil',
+            ]),
+            request: $request,
+            searchable: [
+                'nama',
+                'kode_lembaga',
+            ],
+            sortable: [
+                'id',
+                'nama',
+            ],
+            filters: [
+                'kategori_id',
+                'status',
+            ]
+        );
 
         return Inertia::render('lembaga/index', [
             'lembaga' => $lembaga,
 
-            'filters' => [
-                'search' => $request->search ?? '',
-                'kategori_id' => $request->kategori_id ?? '',
-                'sort' => $sort,
-                'order' => $order,
-                'per_page' => $perPage,
-            ],
+            'filters' => $this->filters(
+                $request,
+                [
+                    'kategori_id',
+                    'status',
+                ]
+            ),
+
             'kategori' => Kategori::orderBy('nama')->get(),
         ]);
     }
@@ -82,40 +68,33 @@ class LembagaController extends Controller
         $validated = $request->validate([
             'kategori_id' => 'required|exists:kategori,id',
             'nama' => 'required|string|max:255',
-            'alamat' => 'nullable|string',
-            'kelurahan' => 'required',
-            'kecamatan' => 'required',
-            'telp' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'jumlah_guru' => 'nullable|integer|min:0',
-            'jumlah_siswa' => 'nullable|integer|min:0',
-            'sk' => 'nullable|string|max:255',
-            'file_pendukung' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048',
         ]);
 
-        if ($request->hasFile('file_pendukung')) {
+        DB::transaction(function () use ($validated) {
 
-            $extension = $request->file('file_pendukung')
-                                ->getClientOriginalExtension();
-            
-            $filename = time() . '_file_lembaga.' . $extension;
+            // Generate kode lembaga
+            $kode = Lembaga::generateKode();
 
-            $file->storeAs(
-                'files/lembaga',
-                $filename,
-                'public'
-            );
+            // Buat user
+            $user = User::create([
+                'name' => $validated['nama'],
+                'email' => strtolower($kode) . '@insentif.com',
+                'password' => Hash::make($kode . '@kdr'),
+                'force_change_password' => true,
+                'status' => 'aktif',
+            ]);
 
-            $validated['file_pendukung'] = $filename;
-        }
+            // Assign role
+            $user->assignRole('lembaga');
 
-        $validated['kecamatan_id'] = $request->kecamatan['value'];
-        $validated['kecamatan'] = $request->kecamatan['label'];
-
-        $validated['kelurahan_id'] = $request->kelurahan['value'];
-        $validated['kelurahan'] = $request->kelurahan['label'];
-
-        Lembaga::create($validated);
+            // Simpan lembaga
+            Lembaga::create([
+                'user_id' => $user->id,
+                'kategori_id' => $validated['kategori_id'],
+                'kode' => $kode,
+                'nama' => $validated['nama'],
+            ]);
+        });
 
         return back()->with(
             'success',
@@ -128,51 +107,23 @@ class LembagaController extends Controller
         $validated = $request->validate([
             'kategori_id' => 'required|exists:kategori,id',
             'nama' => 'required|string|max:255',
-            'alamat' => 'nullable|string',
-            'kelurahan' => 'required',
-            'kecamatan' => 'required',
-            'telp' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'jumlah_guru' => 'nullable|integer|min:0',
-            'jumlah_siswa' => 'nullable|integer|min:0',
-            'sk' => 'nullable|string|max:255',
-            'file_pendukung' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:2048',
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
-        if ($request->hasFile('file_pendukung')) {
+        DB::transaction(function () use ($validated, $lembaga) {
 
-            // hapus file lama
-            if (
-                $lembaga->file_pendukung &&
-                Storage::disk('public')->exists(
-                    'files/lembaga/' . $lembaga->file_pendukung
-                )
-            ) {
-                Storage::disk('public')->delete(
-                    'files/lembaga/' . $lembaga->file_pendukung
-                );
-            }
+            // Update data lembaga
+            $lembaga->update([
+                'kategori_id' => $validated['kategori_id'],
+                'nama' => $validated['nama'],
+            ]);
 
-            $file = $request->file('file_pendukung');
-
-            $extension = $request->file('file_pendukung')
-                                ->getClientOriginalExtension();
-            
-            $filename = time() . '_file_lembaga.' . $extension;
-
-            $file->storeAs(
-                'files/lembaga',
-                $filename,
-                'public'
-            );
-
-            $validated['file_pendukung'] = $filename;
-        } else {
-            // pertahankan file lama
-            $validated['file_pendukung'] = $lembaga->file_pendukung;
-        }
-
-        $lembaga->update($validated);
+            // Update nama user
+            $lembaga->user()->update([
+                'name' => $validated['nama'],
+                'status' => $validated['status'],
+            ]);
+        });
 
         return back()->with(
             'success',
@@ -180,16 +131,34 @@ class LembagaController extends Controller
         );
     }
 
-    public function destroy(lembaga $lembaga)
+    public function destroy(Lembaga $lembaga)
     {
-        // Hapus file pendukung
-        if ($lembaga->file_pendukung && Storage::disk('public')->exists('images/lembaga/' . $lembaga->file_pendukung)) {
-            Storage::disk('public')->delete('images/lembaga/' . $lembaga->file_pendukung);
+        if ($lembaga->user) {
+            $lembaga->user->update([
+                'status' => 'nonaktif',
+            ]);
         }
 
-        // Hapus data
         $lembaga->delete();
 
-        return back()->with('success', 'Data lembaga berhasil dihapus');
+        return back()->with(
+            'success',
+            'Data lembaga berhasil dihapus dan akun dinonaktifkan.'
+        );
+    }
+
+    public function resetPassword(Lembaga $lembaga)
+    {
+        $lembaga->load('user');
+
+        $lembaga->user->update([
+            'password' => Hash::make($lembaga->kode . '@kdr'),
+            'force_change_password' => true,
+        ]);
+
+        return back()->with(
+            'success',
+            'Password berhasil direset.'
+        );
     }
 }

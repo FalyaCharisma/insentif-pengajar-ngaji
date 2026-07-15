@@ -12,6 +12,16 @@ class Lembaga extends Model
     protected $table = 'lembaga';
     protected $guarded = [];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function profil()
+    {
+        return $this->belongsTo(ProfilLembaga::class);
+    }
+
     public function kategori()
     {
         return $this->belongsTo(Kategori::class);
@@ -25,5 +35,20 @@ class Lembaga extends Model
     public function pengajuanProposal()
     {
         return $this->hasMany(PengajuanProposal::class);
+    }
+
+    public static function generateKode(): string
+    {
+        $last = self::withTrashed()
+            ->orderByDesc('id')
+            ->first();
+
+        $number = 1;
+
+        if ($last) {
+            $number = (int) substr($last->kode_lembaga, 3) + 1;
+        }
+
+        return 'LMB' . str_pad($number, 5, '0', STR_PAD_LEFT);
     }
 }

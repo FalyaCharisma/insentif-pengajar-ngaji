@@ -1,17 +1,24 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Pencil, Trash2 } from "lucide-react";
-
+import { Pencil, Trash2, User2, Building2 } from "lucide-react";
 import { Lembaga } from "@/types/lembaga";
-import { FileText, Paperclip } from "lucide-react";
+import { User } from "@/types/user";
+import { ProfilLembaga } from "@/types/profil-lembaga";
 
 export const columns = (
     onEdit: (lembaga: Lembaga) => void,
-    onDelete: (lembaga: Lembaga) => void
+    onDelete: (lembaga: Lembaga) => void,
+    onDetailAkun: (lembaga: Lembaga) => void,
+    onDetailProfil: (profil: ProfilLembaga) => void,
 ): ColumnDef<Lembaga>[] => [
     {
         id: "no",
         header: "No",
         cell: ({ row }) => row.index + 1,
+    },
+
+    {
+        accessorKey: "kode",
+        header: "Kode Lembaga",
     },
 
     {
@@ -25,50 +32,36 @@ export const columns = (
     },
 
     {
-        accessorKey: "kecamatan",
-        header: "Kecamatan",
+        id: "alamat",
+        header: "Alamat",
+        cell: ({ row }) => (
+            <span className="line-clamp-2 max-w-xs">
+                {row.original.profil?.alamat ?? "-"}
+            </span>
+        ),
     },
 
     {
-        accessorKey: "jumlah_guru",
-        header: "Guru",
-    },
-
-    {
-        accessorKey: "jumlah_siswa",
-        header: "Siswa",
-    },
-
-    {
-        id: "dokumen",
-        header: "Dokumen",
+        accessorKey: "status",
+        header: () => (
+            <div className="text-center">
+                Status
+            </div>
+        ),
         cell: ({ row }) => {
-            const lembaga = row.original;
+            const status = row.original.user?.status;
 
             return (
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                        <FileText className="h-4 w-4 text-slate-500" />
-                        <span>{lembaga.sk || "-"}</span>
-                    </div>
-
-                    {lembaga.file_pendukung && (
-                        <a
-                            href={`/storage/files/lembaga/${lembaga.file_pendukung}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="
-                                inline-flex items-center gap-2
-                                rounded-full border
-                                px-3 py-1
-                                text-xs
-                                hover:bg-slate-50
-                            "
-                        >
-                            <Paperclip className="h-3 w-3" />
-                            File Pendukung
-                        </a>
-                    )}
+                <div className="flex justify-center">
+                    <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                            status === "aktif"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                        }`}
+                    >
+                        {status === "aktif" ? "Aktif" : "Nonaktif"}
+                    </span>
                 </div>
             );
         },
@@ -76,16 +69,39 @@ export const columns = (
 
     {
         id: "aksi",
-        header: "Aksi",
+        header: () => (
+            <div className="text-center">
+                Aksi
+            </div>
+        ),
 
         cell: ({ row }) => {
             const lembaga = row.original;
+            const user = lembaga.user;
+            const profil = lembaga.profil;
 
             return (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap justify-center items-center gap-2">
+
+                    <button
+                        onClick={() => onDetailAkun(lembaga)}
+                        className="flex items-center gap-1 rounded-lg bg-sky-500 px-3 py-1.5 text-xs text-white hover:bg-sky-600"
+                    >
+                        <User2 className="h-3.5 w-3.5" />
+                        Akun
+                    </button>
+
+                    <button
+                        onClick={() => profil && onDetailProfil(profil)}
+                        className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs text-white hover:bg-emerald-600"
+                    >
+                        <Building2 className="h-3.5 w-3.5" />
+                        Profil
+                    </button>
+
                     <button
                         onClick={() => onEdit(lembaga)}
-                        className="flex items-center gap-1 rounded-lg bg-amber-500 px-3 py-1.5 text-xs text-white"
+                        className="flex items-center gap-1 rounded-lg bg-amber-500 px-3 py-1.5 text-xs text-white hover:bg-amber-600"
                     >
                         <Pencil className="h-3.5 w-3.5" />
                         Edit
@@ -93,11 +109,12 @@ export const columns = (
 
                     <button
                         onClick={() => onDelete(lembaga)}
-                        className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white"
+                        className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white hover:bg-red-600"
                     >
                         <Trash2 className="h-3.5 w-3.5" />
                         Hapus
                     </button>
+
                 </div>
             );
         },

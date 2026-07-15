@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
             KategoriSeeder::class,
             LembagaSeeder::class,
             ForumSeeder::class,
-            PengurusSeeder::class
+            PengurusSeeder::class,
+            MasterJenisDokumenSeeder::class,
         ]);
     }
 }

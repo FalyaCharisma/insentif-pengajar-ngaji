@@ -1,4 +1,4 @@
-import { LucideIcon } from "lucide-react";
+import { Circle, LucideIcon } from "lucide-react";
 
 export interface SidebarMenu {
     title: string;
@@ -62,25 +62,26 @@ export const sidebarMenus: SidebarMenu[] = [
             {
                 title: "Kategori Lembaga",
                 href: "/kategori",
-                icon: FolderKanban,
                 roles: ["superadmin"],
             },
             {
                 title: "Lembaga",
                 href: "/lembaga",
-                icon: Building2,
                 roles: ["superadmin", "dindik"],
             },
             {
                 title: "Forum",
                 href: "/forum",
-                icon: Users,
                 roles: ["superadmin"],
             },
+            // {
+            //     title: "Pengurus",
+            //     href: "/pengurus",
+            //     roles: ["superadmin"],
+            // },
             {
-                title: "Pengurus",
-                href: "/pengurus",
-                icon: Users,
+                title: "Jenis Dokumen",
+                href: "/jenis-dokumen",
                 roles: ["superadmin"],
             },
         ],
@@ -117,17 +118,17 @@ export const sidebarMenus: SidebarMenu[] = [
     {
         title: "Profil Lembaga",
         icon: Building2,
-        roles: ["superadmin","lembaga"],
+        roles: ["lembaga"],
         children: [
             {
                 title: "Profil",
                 href: "/profil-lembaga",
-                roles: ["superadmin","lembaga"],
+                roles: ["lembaga"],
             },
             {
                 title: "Dokumen Lembaga",
                 href: "/dokumen-lembaga",
-                roles: ["superadmin","lembaga"],
+                roles: ["lembaga"],
             },
         ],
     },

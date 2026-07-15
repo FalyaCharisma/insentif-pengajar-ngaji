@@ -13,6 +13,7 @@ import { useQueryParams } from "@/hooks/use-query-params";
 import { deleteConfirm, successAlert } from "@/lib/alert";
 import { Lembaga } from "@/types/lembaga";
 import FormModal from "./form-modal";
+import DetailAkunModal from "./detail-akun-modal";
 
 type Props = {
     lembaga: any;
@@ -29,6 +30,8 @@ export default function Index({ lembaga, filters, kategori }: Props) {
 
     const [open, setOpen] = useState(false);
     const [selectedLembaga, setSelectedLembaga] = useState<Lembaga | null>(null);
+
+    const [openDetailAkun, setOpenDetailAkun] = useState(false);
 
     const pageProps: any = usePage().props;
     const flash = pageProps.flash || {};
@@ -69,21 +72,6 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                                     label: "Nama",
                                     value: "nama",
                                 },
-
-                                {
-                                    label: "Jumlah Guru",
-                                    value: "jumlah_guru",
-                                },
-
-                                {
-                                    label: "Jumlah Siswa",
-                                    value: "jumlah_siswa",
-                                },
-
-                                {
-                                    label: "Tanggal",
-                                    value: "created_at",
-                                },
                             ]}
                         />
                     </div>
@@ -96,27 +84,39 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                             border border-slate-200
                         "
                     >
-                        <DataTable
+                    <DataTable
                             columns={columns(
+
+                                // Edit
                                 (lembaga) => {
                                     setSelectedLembaga(lembaga);
                                     setOpen(true);
                                 },
 
+                                // Delete
                                 (lembaga) => {
                                     deleteConfirm(
                                         `Lembaga "${lembaga.nama}" akan dihapus`,
                                     ).then((result) => {
                                         if (result.isConfirmed) {
                                             router.delete(
-                                                route(
-                                                    "lembaga.destroy",
-                                                    lembaga.id,
-                                                ),
+                                                route("lembaga.destroy", lembaga.id)
                                             );
                                         }
                                     });
                                 },
+
+                                // Detail Akun
+                                (lembaga) => {
+                                    setSelectedLembaga(lembaga);
+                                    setOpenDetailAkun(true);
+                                },
+
+                                // Detail Profil
+                                (profil) => {
+                                    console.log(profil);
+                                }
+
                             )}
                             data={lembaga.data}
                         />
@@ -138,6 +138,15 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                         kategori={kategori}
                     />
                 </div>
+
+                <DetailAkunModal
+                    open={openDetailAkun}
+                    onClose={() => {
+                        setOpenDetailAkun(false);
+                        setSelectedLembaga(null);
+                    }}
+                    lembaga={selectedLembaga}
+                />
             </AdminLayout>
         </>
     );

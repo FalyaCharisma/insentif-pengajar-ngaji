@@ -15,9 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('nik')->unique();
+            $table->string('kode')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('force_change_password')->default(true);
+            $table->enum('status', [
+                'aktif',
+                'nonaktif',
+            ])->default('aktif');
             $table->rememberToken();
             $table->timestamps();
         });

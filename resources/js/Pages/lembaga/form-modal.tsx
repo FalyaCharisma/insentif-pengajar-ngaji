@@ -1,14 +1,11 @@
 import { useEffect } from "react";
 import { router, useForm } from "@inertiajs/react";
-import { X } from "lucide-react";
 import FormInput from "@/Components/forms/FormInput";
 import PrimaryButton from "@/Components/PrimaryButton";
 import SecondaryButton from "@/Components/SecondaryButton";
-import FormTextarea from "@/Components/forms/FormTextArea";
-import FormSelect from "@/Components/forms/FormSelect";
-import FormFile from "@/Components/forms/FormFile";
-import FormAsyncSelect from "@/Components/forms/FormAsyncSelect";
-import { useAlamat } from "@/hooks/useAlamat";
+import Modal from "@/Components/Modal";
+import FormSelect2 from "@/Components/forms/FormSelect2";
+
 
 type Props = {
     open: boolean;
@@ -19,26 +16,13 @@ type Props = {
 
 export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
 
-    const {
-        searchKecamatanKotaKediri,
-        searchKelurahan,
-    } = useAlamat();
-
     const isEdit = !!lembaga;
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         _method: "",
         kategori_id: "",
         nama: "",
-        alamat: "",
-        kecamatan: null as any,
-        kelurahan: null as any,
-        telp: "",
-        email: "",
-        jumlah_guru: 0,
-        jumlah_siswa: 0,
-        sk: "",
-        file_pendukung: null as File | null,
+        status: "aktif",
     });
 
     useEffect(() => {
@@ -46,26 +30,7 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
             setData({
                 kategori_id: lembaga.kategori_id?.toString() || "",
                 nama: lembaga.nama || "",
-                alamat: lembaga.alamat || "",
-                kecamatan: lembaga.kecamatan
-                    ? {
-                        label: lembaga.kecamatan,
-                        value: lembaga.id_kecamatan,
-                    }
-                    : null,
-
-                kelurahan: lembaga.kelurahan
-                    ? {
-                        label: lembaga.kelurahan,
-                        value: lembaga.id_kelurahan,
-                    }
-                    : null,
-                telp: lembaga.telp || "",
-                email: lembaga.email || "",
-                jumlah_guru: lembaga.jumlah_guru || 0,
-                jumlah_siswa: lembaga.jumlah_siswa || 0,
-                sk: lembaga.sk || "",
-                file_pendukung: null,
+                status: lembaga.user?.status || "aktif",
             });
         } else {
             reset();
@@ -97,248 +62,103 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
             },
         });
     };
-
-    const handleDelete = (id: number) => {
-        if (!confirm("Yakin ingin menghapus data ini?")) {
-            return;
-        }
-
-        router.delete(route("lembaga.destroy", id), {
-            onSuccess: () => {
-                console.log("Berhasil dihapus");
-            },
-        });
-    };
-
+    
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 p-6">
-            <div className="flex min-h-full items-center justify-center">
-                <div className="w-full max-w-5xl rounded-2xl bg-white p-6">
-                    {/* Header */}
-                    <div className="mb-6 flex items-start justify-between gap-4">
-                        <div>
-                            <h2 className="text-xl font-semibold text-slate-800">
-                                {isEdit ? "Edit Lembaga" : "Tambah Lembaga"}
-                            </h2>
+        <Modal
+            show={open}
+            onClose={onClose}
+            maxWidth="lg"
+        >
+            <div className="p-6">
+                {/* HEADER */}
+                <div className="mb-6">
 
-                            <p className="mt-1 text-sm text-slate-500">
-                                Isi form data lembaga di bawah ini
-                            </p>
-                        </div>
+                    <h2 className="text-xl font-semibold text-slate-800">
+                        {isEdit
+                            ? "Edit Lembaga"
+                            : "Tambah Lembaga"}
+                    </h2>
 
-                        <SecondaryButton onClick={onClose}>
-                            <X className="h-4 w-4" />
-                        </SecondaryButton>
-                    </div>
-
-                    {/* Form */}
-                    <form onSubmit={submit} className="space-y-5">
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                            {/* Kategori & Nama */}
-                            <div className="xl:col-span-3 grid grid-cols-1 gap-4 md:grid-cols-4">
-                                {/* Kategori */}
-                                <div className="md:col-span-1">
-                                    <FormSelect
-                                        label="Kategori"
-                                        value={data.kategori_id}
-                                        onChange={(e) =>
-                                            setData(
-                                                "kategori_id",
-                                                e.target.value,
-                                            )
-                                        }
-                                        error={errors.kategori_id}
-                                    >
-                                        <option value="">Pilih kategori</option>
-
-                                        {kategori.map((item) => (
-                                            <option
-                                                key={item.id}
-                                                value={item.id}
-                                            >
-                                                {item.nama}
-                                            </option>
-                                        ))}
-                                    </FormSelect>
-                                </div>
-
-                                {/* Nama */}
-                                <div className="md:col-span-3">
-                                    <FormInput
-                                        label="Nama Lembaga"
-                                        value={data.nama}
-                                        onChange={(e) =>
-                                            setData("nama", e.target.value)
-                                        }
-                                        placeholder="Masukkan nama lembaga"
-                                        error={errors.nama}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Alamat */}
-                            <div className="md:col-span-2 xl:col-span-3">
-                                <FormTextarea
-                                    label="Alamat"
-                                    value={data.alamat}
-                                    onChange={(e) =>
-                                        setData("alamat", e.target.value)
-                                    }
-                                    rows={3}
-                                    placeholder="Masukkan alamat"
-                                    error={errors.alamat}
-                                />
-                            </div>
-
-                            {/* Wilayah */}
-                            <div className="xl:col-span-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <FormAsyncSelect
-                                    label="Kecamatan"
-                                    value={data.kecamatan}
-                                    onChange={(value: any) => {
-                                        setData("kecamatan", value);
-                                        setData("kelurahan", null);
-                                    }}
-                                    loadOptions={searchKecamatanKotaKediri}
-                                    error={errors.kecamatan}
-                                />
-
-                                <FormAsyncSelect
-                                    key={data.kecamatan?.value}
-                                    label="Kelurahan"
-                                    value={data.kelurahan}
-                                    onChange={(value: any) =>
-                                        setData("kelurahan", value)
-                                    }
-                                    loadOptions={(inputValue) =>
-                                        searchKelurahan(
-                                            data.kecamatan?.value ?? "",
-                                            inputValue
-                                        )
-                                    }
-                                    error={errors.kelurahan}
-                                />
-                            </div>
-
-                            {/* Kontak */}
-                            <div className="xl:col-span-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <FormInput
-                                    label="No. Telepon"
-                                    type="number"
-                                    value={data.telp}
-                                    onChange={(e) =>
-                                        setData("telp", e.target.value)
-                                    }
-                                    placeholder="Masukkan nomor telepon"
-                                    error={errors.telp}
-                                />
-
-                                <FormInput
-                                    label="Email"
-                                    type="email"
-                                    value={data.email}
-                                    onChange={(e) =>
-                                        setData("email", e.target.value)
-                                    }
-                                    placeholder="Masukkan email"
-                                    error={errors.email}
-                                />
-                            </div>
-
-                            {/* Statistik */}
-                            <div className="xl:col-span-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <FormInput
-                                    label="Jumlah Guru"
-                                    type="number"
-                                    value={data.jumlah_guru}
-                                    onChange={(e) =>
-                                        setData(
-                                            "jumlah_guru",
-                                            Number(e.target.value),
-                                        )
-                                    }
-                                    placeholder="0"
-                                    error={errors.jumlah_guru}
-                                />
-
-                                <FormInput
-                                    label="Jumlah Siswa"
-                                    type="number"
-                                    value={data.jumlah_siswa}
-                                    onChange={(e) =>
-                                        setData(
-                                            "jumlah_siswa",
-                                            Number(e.target.value),
-                                        )
-                                    }
-                                    placeholder="0"
-                                    error={errors.jumlah_siswa}
-                                />
-                            </div>
-
-                            {/* SK & File */}
-                            <div className="xl:col-span-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <FormInput
-                                    label="SK"
-                                    value={data.sk}
-                                    onChange={(e) =>
-                                        setData("sk", e.target.value)
-                                    }
-                                    placeholder="Masukkan nomor SK"
-                                    error={errors.sk}
-                                />
-
-                                <div>
-                                    <FormFile
-                                        label="File Pendukung"
-                                        onChange={(e) =>
-                                            setData(
-                                                "file_pendukung",
-                                                e.target.files?.[0] || null
-                                            )
-                                        }
-                                        error={errors.file_pendukung}
-                                    />
-
-                                    {lembaga?.file_pendukung && (
-                                        <div className="mt-2 rounded-lg border bg-slate-50 p-3">
-                                            <p className="text-xs text-slate-500">
-                                                File yang tersimpan
-                                            </p>
-
-                                            <a
-                                                href={`/storage/files/lembaga/${lembaga.file_pendukung}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-sm text-indigo-600 hover:underline"
-                                            >
-                                                {lembaga.file_pendukung}
-                                            </a>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="flex items-center justify-end gap-3 pt-4">
-                            <SecondaryButton
-                                type="button"
-                                onClick={onClose}
-                                disabled={processing}
-                            >
-                                Batal
-                            </SecondaryButton>
-
-                            <PrimaryButton type="submit" disabled={processing}>
-                                {isEdit ? "Update" : "Simpan"}
-                            </PrimaryButton>
-                        </div>
-                    </form>
+                    <p className="mt-1 text-sm text-slate-500">
+                        Isi form di bawah ini
+                    </p>
                 </div>
+                {/* FORM */}
+                <form
+                    onSubmit={submit}
+                    className="space-y-5"
+                >
+                    {/* Kategori */}
+                    <FormSelect2
+                        label="Kategori"
+                        value={data.kategori_id}
+                        options={kategori.map((item) => ({
+                            value: item.id,
+                            label: item.nama,
+                        }))}
+                        onChange={(value) =>
+                            setData("kategori_id", value)
+                        }
+                        error={errors.kategori_id}
+                    />
+
+                     {/* Nama */}
+                     <FormInput
+                        label="Nama Lembaga"
+                        value={data.nama}
+                        onChange={(e) =>
+                            setData("nama", e.target.value)
+                        }
+                        placeholder="Masukkan nama lembaga"
+                        error={errors.nama}
+                    />
+
+                    {isEdit && (
+                        <FormSelect2
+                            label="Status"
+                            value={data.status}
+                            options={[
+                                {
+                                    value: "aktif",
+                                    label: "Aktif",
+                                },
+                                {
+                                    value: "nonaktif",
+                                    label: "Nonaktif",
+                                },
+                            ]}
+                            onChange={(value) => setData("status", value)}
+                            error={errors.status}
+                        />
+                    )}
+
+                    {/* FOOTER */}
+                    <div className="flex items-center justify-end gap-3 pt-4">
+
+                        <SecondaryButton
+                            type="button"
+                            onClick={onClose}
+                            disabled={processing}
+                        >
+                            Batal
+                        </SecondaryButton>
+
+                        <PrimaryButton
+                            type="submit"
+                            disabled={processing}
+                        >
+                            {processing
+                                ? "Menyimpan..."
+                                : isEdit
+                                    ? "Update"
+                                    : "Simpan"}
+                        </PrimaryButton>
+
+                    </div>
+                </form>
             </div>
-        </div>
+        </Modal>
     );
 }

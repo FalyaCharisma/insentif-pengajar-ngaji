@@ -1,38 +1,19 @@
-export interface Kategori {
-    id: number;
-    nama: string;
-}
+import { User } from "./user";
+import { ProfilLembaga } from "./profil-lembaga";
+import { Kategori } from "./kategori";
 
 export interface Lembaga {
     id: number;
+
+    user_id: number;
     kategori_id: number;
 
+    kode: string;
     nama: string;
-    alamat: string;
-
-    kelurahan_id?: number | null;
-    kelurahan: string;
-
-    kecamatan_id?: number | null;
-    kecamatan: string;
-
-    kabkota_id?: number | null;
-    kabkota: string;
-
-    telp?: string | null;
-    email?: string | null;
-
-    jumlah_guru: number;
-    jumlah_siswa: number;
-
-    sk?: string | null;
-    file_pendukung?: string | null;
-
-    created_at: string;
-    updated_at: string;
-    deleted_at?: string | null;
 
     kategori?: Kategori;
+    user?: User;
+    profil: ProfilLembaga | null;
 }
 
 export interface PaginatedLembaga {

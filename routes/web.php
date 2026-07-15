@@ -48,7 +48,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('kategori', KategoriController::class);
     Route::resource('forum', ForumController::class);
     Route::resource('lembaga', LembagaController::class);
-    Route::get('/data/lembaga', [LembagaController::class, 'data'])->name('lembaga.data');
+    Route::prefix('lembaga')->name('lembaga.')->controller(LembagaController::class)->group(function () {
+        Route::get('data', 'data')->name('data');
+        Route::put('{lembaga}/reset-password', 'resetPassword')->name('reset-password');
+
+    });
 
     Route::resource('pengurus', PengurusController::class)
         ->parameters([

@@ -120,7 +120,7 @@ export default function AppHeaderLayout() {
                                 {user?.name ?? "Guest"}
                             </h4>
                             <p className="text-xs text-slate-500">
-                                {user?.role?.name ?? "No Role"}
+                                {user?.role ?? "No Role"}
                             </p>
                         </div>
 
