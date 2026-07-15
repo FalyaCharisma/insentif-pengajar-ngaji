@@ -20,9 +20,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             KategoriSeeder::class,
             LembagaSeeder::class,
+            ProfilLembagaSeeder::class,
             ForumSeeder::class,
-            PengurusSeeder::class,
-            MasterJenisDokumenSeeder::class,
         ]);
     }
 }
