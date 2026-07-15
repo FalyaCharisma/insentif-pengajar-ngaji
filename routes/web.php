@@ -10,6 +10,8 @@ use App\Http\Controllers\PengurusController;
 use App\Http\Controllers\PengajuanProposalController;
 use App\Http\Controllers\PengajuanInsentifController;
 use App\Http\Controllers\PeriodeController;
+use App\Http\Controllers\SiswaController;
+use App\Http\Controllers\KuotaController;
 
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
@@ -37,10 +39,11 @@ Route::get('/kontak', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth'])->name('dashboard');
+})
+    ->middleware(['auth'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -49,17 +52,23 @@ Route::middleware('auth')->group(function () {
     Route::resource('forum', ForumController::class);
     Route::resource('lembaga', LembagaController::class);
     Route::get('/data/lembaga', [LembagaController::class, 'data'])->name('lembaga.data');
+    Route::resource('data-siswa', SiswaController::class);
 
-    Route::resource('pengurus', PengurusController::class)
-        ->parameters([
-            'pengurus' => 'pengurus',
-        ]);
+    Route::resource('pengurus', PengurusController::class)->parameters([
+        'pengurus' => 'pengurus',
+    ]);
+    Route::resource('kuota', KuotaController::class)->parameters([
+        'kuota' => 'kuota',
+    ]);
+
+    Route::post('kuota/generate', [KuotaController::class, 'generate'])->name('kuota.generate');
+
+    Route::delete('kuota/periode/{periode}', [KuotaController::class, 'destroyPeriode'])->name('kuota.destroyPeriode');
     Route::resource('periode', PeriodeController::class);
     Route::resource('pengajuan-proposal', PengajuanProposalController::class);
     Route::patch('/pengajuan-proposal/{pengajuanProposal}/verify', [PengajuanProposalController::class, 'verify'])->name('pengajuan-proposal.verify');
-    Route::patch('/pengajuan-proposal/{pengajuanProposal}/unverify',[PengajuanProposalController::class, 'unverify'])->name('pengajuan-proposal.unverify');
+    Route::patch('/pengajuan-proposal/{pengajuanProposal}/unverify', [PengajuanProposalController::class, 'unverify'])->name('pengajuan-proposal.unverify');
     Route::resource('pengajuan-insentif', PengajuanInsentifController::class);
-
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

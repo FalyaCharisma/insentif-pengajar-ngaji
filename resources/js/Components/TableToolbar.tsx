@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 type Props = {
     filters: any;
 
@@ -13,31 +15,36 @@ type Props = {
     }[];
 
     onAdd?: () => void;
+
+    // tambahan (opsional)
+    children?: ReactNode;
+
+    // tambahan (opsional)
+    hideAddButton?: boolean;
 };
 
 export default function TableToolbar({
     filters,
     setParams,
     searchPlaceholder = "Cari data...",
-
     addButtonLabel = "Tambah Data",
-
     sortOptions = [],
-
     onAdd,
+    children,
+    hideAddButton = false,
 }: Props) {
     return (
         <div
             className="
                 flex flex-col gap-3
-                xl:flex-row xl:items-center xl:justify-between
+                xl:flex-row xl:items-end xl:justify-between
             "
         >
             {/* LEFT */}
             <div
                 className="
                     flex flex-col gap-3
-                    md:flex-row md:flex-wrap md:items-center
+                    md:flex-row md:flex-wrap md:items-end
                 "
             >
                 {/* Search */}
@@ -98,60 +105,67 @@ export default function TableToolbar({
                 </select>
 
                 {/* Sort */}
-                <select
-                    defaultValue={filters.sort}
+                {sortOptions.length > 0 && (
+                    <select
+                        defaultValue={filters.sort}
+                        className="
+                            w-full
+                            md:w-auto
+                            h-11
+                            px-4
+                            rounded-2xl
+                            border border-slate-200
+                            bg-white
+                            text-sm
+                            outline-none
+                            transition
+                            focus:ring-2 focus:ring-indigo-500
+                            focus:border-indigo-500
+                        "
+                        onChange={(e) =>
+                            setParams({
+                                sort: e.target.value,
+                                page: 1,
+                            })
+                        }
+                    >
+                        {sortOptions.map((option) => (
+                            <option
+                                key={option.value}
+                                value={option.value}
+                            >
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                )}
+
+                {/* Extra Filter */}
+                {children}
+            </div>
+
+            {/* RIGHT */}
+            {!hideAddButton && (
+                <button
+                    onClick={onAdd}
                     className="
                         w-full
                         md:w-auto
                         h-11
-                        px-4
+                        px-5
                         rounded-2xl
-                        border border-slate-200
-                        bg-white
+                        bg-indigo-600
+                        hover:bg-indigo-700
+                        text-white
                         text-sm
-                        outline-none
+                        font-medium
                         transition
-                        focus:ring-2 focus:ring-indigo-500
-                        focus:border-indigo-500
+                        shadow-sm
                     "
-                    onChange={(e) =>
-                        setParams({
-                            sort: e.target.value,
-                            page: 1,
-                        })
-                    }
                 >
-                    {sortOptions.map((option) => (
-                        <option
-                            key={option.value}
-                            value={option.value}
-                        >
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {/* RIGHT */}
-            <button
-                onClick={onAdd}
-                className="
-                    w-full
-                    md:w-auto
-                    h-11
-                    px-5
-                    rounded-2xl
-                    bg-indigo-600
-                    hover:bg-indigo-700
-                    text-white
-                    text-sm
-                    font-medium
-                    transition
-                    shadow-sm
-                "
-            >
-                + {addButtonLabel}
-            </button>
+                    + {addButtonLabel}
+                </button>
+            )}
         </div>
     );
 }
