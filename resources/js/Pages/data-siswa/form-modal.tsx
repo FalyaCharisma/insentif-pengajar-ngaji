@@ -14,7 +14,9 @@ type Props = {
 };
 
 export default function FormModal({ open, onClose, dataSiswa }: Props) {
+    
     const isEdit = !!dataSiswa;
+    const { auth }: any = usePage().props;
 
     const page: any = usePage().props;
 
@@ -122,7 +124,8 @@ export default function FormModal({ open, onClose, dataSiswa }: Props) {
                     {/* LEMBAGA */}
 
                     <div>
-                        <FormSelect2
+                        {!auth.user.role.includes("lembaga") && (
+                            <FormSelect2
                             label="Lembaga"
                             value={data.lembaga_id}
                             options={lembagaOptions}
@@ -130,6 +133,8 @@ export default function FormModal({ open, onClose, dataSiswa }: Props) {
                             placeholder="Pilih Lembaga"
                             error={errors.lembaga_id}
                         />
+                        )}
+                        
                     </div>
 
                     {/* JUMLAH SISWA */}

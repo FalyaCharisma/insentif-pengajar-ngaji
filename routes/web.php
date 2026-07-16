@@ -14,6 +14,7 @@ use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\KuotaController;
 use App\Http\Controllers\MappingForumController;
 use App\Http\Controllers\MappingKategoriController;
+use App\Http\Controllers\PengajarController;
 
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
@@ -72,6 +73,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('pengurus', PengurusController::class)->parameters([
         'pengurus' => 'pengurus',
     ]);
+
+    Route::resource('pengajar', PengajarController::class)->parameters([
+        'pengajar' => 'pengajar',
+    ]);
+
     Route::resource('kuota', KuotaController::class)->parameters([
         'kuota' => 'kuota',
     ]);
