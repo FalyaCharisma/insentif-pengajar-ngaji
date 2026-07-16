@@ -16,22 +16,32 @@ type Props = {
 
     onAdd?: () => void;
 
-    // tambahan (opsional)
-    children?: ReactNode;
-
-    // tambahan (opsional)
     hideAddButton?: boolean;
+    hideSearch?: boolean;
+    hideSort?: boolean;
+    hidePerPage?: boolean;
+
+    children?: React.ReactNode;
 };
 
 export default function TableToolbar({
     filters,
     setParams,
+
     searchPlaceholder = "Cari data...",
+
     addButtonLabel = "Tambah Data",
+
     sortOptions = [],
+
     onAdd,
-    children,
+
     hideAddButton = false,
+    hideSearch = false,
+    hideSort = false,
+    hidePerPage = false,
+
+    children,
 }: Props) {
     return (
         <div
@@ -43,85 +53,73 @@ export default function TableToolbar({
             {/* LEFT */}
             <div
                 className="
-                    flex flex-col gap-3
-                    md:flex-row md:flex-wrap md:items-end
-                "
+        flex flex-col gap-3
+        md:flex-row md:flex-wrap md:items-center
+    "
             >
-                {/* Search */}
-                <input
-                    type="text"
-                    defaultValue={filters.search}
-                    placeholder={searchPlaceholder}
-                    className="
-                        w-full
-                        md:w-72
-                        h-11
-                        px-4
-                        rounded-2xl
-                        border border-slate-200
-                        bg-white
-                        text-sm
-                        outline-none
-                        transition
-                        focus:ring-2 focus:ring-indigo-500
-                        focus:border-indigo-500
-                    "
-                    onChange={(e) =>
-                        setParams({
-                            search: e.target.value,
-                            page: 1,
-                        })
-                    }
-                />
+                {!hideSearch && (
+                    <input
+                        type="text"
+                        defaultValue={filters.search}
+                        placeholder={searchPlaceholder}
+                        className="
+                w-full
+                md:w-72
+                h-11
+                px-4
+                rounded-2xl
+                border border-slate-200
+                bg-white
+                text-sm
+                outline-none
+                transition
+                focus:ring-2
+                focus:ring-indigo-500
+                focus:border-indigo-500
+            "
+                        onChange={(e) =>
+                            setParams({
+                                search: e.target.value,
+                                page: 1,
+                            })
+                        }
+                    />
+                )}
 
-                {/* Per Page */}
-                <select
-                    defaultValue={filters.per_page}
-                    className="
-                        w-full
-                        md:w-auto
-                        h-11
-                        px-4
-                        rounded-2xl
-                        border border-slate-200
-                        bg-white
-                        text-sm
-                        outline-none
-                        transition
-                        focus:ring-2 focus:ring-indigo-500
-                        focus:border-indigo-500
-                    "
-                    onChange={(e) =>
-                        setParams({
-                            per_page: Number(e.target.value),
-                            page: 1,
-                        })
-                    }
-                >
-                    <option value="10">10 Data</option>
-                    <option value="25">25 Data</option>
-                    <option value="50">50 Data</option>
-                    <option value="100">100 Data</option>
-                </select>
+                {!hidePerPage && (
+                    <select
+                        defaultValue={filters.per_page}
+                        className="
+                h-11
+                rounded-2xl
+                border border-slate-200
+                px-4
+                text-sm
+            "
+                        onChange={(e) =>
+                            setParams({
+                                per_page: Number(e.target.value),
+                                page: 1,
+                            })
+                        }
+                    >
+                        <option value="10">10 Data</option>
+                        <option value="25">25 Data</option>
+                        <option value="50">50 Data</option>
+                        <option value="100">100 Data</option>
+                    </select>
+                )}
 
-                {/* Sort */}
-                {sortOptions.length > 0 && (
+                {!hideSort && sortOptions.length > 0 && (
                     <select
                         defaultValue={filters.sort}
                         className="
-                            w-full
-                            md:w-auto
-                            h-11
-                            px-4
-                            rounded-2xl
-                            border border-slate-200
-                            bg-white
-                            text-sm
-                            outline-none
-                            transition
-                            focus:ring-2 focus:ring-indigo-500
-                            focus:border-indigo-500
-                        "
+                h-11
+                rounded-2xl
+                border border-slate-200
+                px-4
+                text-sm
+            "
                         onChange={(e) =>
                             setParams({
                                 sort: e.target.value,
@@ -130,17 +128,13 @@ export default function TableToolbar({
                         }
                     >
                         {sortOptions.map((option) => (
-                            <option
-                                key={option.value}
-                                value={option.value}
-                            >
+                            <option key={option.value} value={option.value}>
                                 {option.label}
                             </option>
                         ))}
                     </select>
                 )}
 
-                {/* Extra Filter */}
                 {children}
             </div>
 
@@ -149,19 +143,19 @@ export default function TableToolbar({
                 <button
                     onClick={onAdd}
                     className="
-                        w-full
-                        md:w-auto
-                        h-11
-                        px-5
-                        rounded-2xl
-                        bg-indigo-600
-                        hover:bg-indigo-700
-                        text-white
-                        text-sm
-                        font-medium
-                        transition
-                        shadow-sm
-                    "
+            w-full
+            md:w-auto
+            h-11
+            px-5
+            rounded-2xl
+            bg-indigo-600
+            hover:bg-indigo-700
+            text-white
+            text-sm
+            font-medium
+            transition
+            shadow-sm
+        "
                 >
                     + {addButtonLabel}
                 </button>

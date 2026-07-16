@@ -37,8 +37,8 @@ export const deleteConfirm = async (message: string) => {
 export const verifyConfirm = (
     title: string,
     text: string,
-    confirmButtonText: string = "Ya",
-    icon: "question" | "info" | "warning" = "question",
+    confirmButtonText = "Ya",
+    icon: "question" | "warning" | "info" = "question",
 ) => {
     return Swal.fire({
         title,
@@ -48,10 +48,6 @@ export const verifyConfirm = (
         icon,
 
         showCancelButton: true,
-
-        confirmButtonColor: "#4f46e5",
-
-        cancelButtonColor: "#64748b",
 
         confirmButtonText,
 

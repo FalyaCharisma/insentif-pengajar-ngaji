@@ -51,4 +51,9 @@ class Lembaga extends Model
 
         return 'LMB' . str_pad($number, 5, '0', STR_PAD_LEFT);
     }
+
+    public function forum()
+    {
+        return $this->belongsTo(Forum::class);
+    }
 }

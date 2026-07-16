@@ -12,6 +12,7 @@ use App\Http\Controllers\PengajuanInsentifController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\KuotaController;
+use App\Http\Controllers\MappingForumController;
 
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
@@ -51,11 +52,16 @@ Route::middleware('auth')->group(function () {
     Route::resource('kategori', KategoriController::class);
     Route::resource('forum', ForumController::class);
     Route::resource('lembaga', LembagaController::class);
-    Route::prefix('lembaga')->name('lembaga.')->controller(LembagaController::class)->group(function () {
-        Route::get('data', 'data')->name('data');
-        Route::put('{lembaga}/reset-password', 'resetPassword')->name('reset-password');
+    Route::prefix('lembaga')
+        ->name('lembaga.')
+        ->controller(LembagaController::class)
+        ->group(function () {
+            Route::get('data', 'data')->name('data');
+            Route::put('{lembaga}/reset-password', 'resetPassword')->name('reset-password');
+        });
 
-    });
+    Route::get('mapping-forum', [MappingForumController::class, 'index'])->name('mapping-forum.index');
+    Route::put('mapping-forum', [MappingForumController::class, 'update'])->name('mapping-forum.update');
 
     Route::resource('data-siswa', SiswaController::class);
 

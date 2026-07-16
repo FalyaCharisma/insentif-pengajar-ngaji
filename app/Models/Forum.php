@@ -22,4 +22,9 @@ class Forum extends Model
     {
         return $this->belongsTo(Kategori::class);
     }
+
+    public function lembaga()
+    {
+        return $this->hasMany(Lembaga::class);
+    }
 }

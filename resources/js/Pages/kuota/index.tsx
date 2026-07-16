@@ -60,37 +60,58 @@ export default function Index({ kuota, filters, periodes }: Props) {
                         title="Kuota Pengusulan"
                         subtitle="Kelola kuota penerima insentif"
                     />
-                    <div className="bg-amber-50 p-3 rounded-2xl border border-amber-200">
-                        <h3 className="text-sm font-semibold text-amber-800">
-                            Mekanisme Generate Kuota
-                        </h3>
+                    <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5">
+                                <svg
+                                    className="h-5 w-5 text-sky-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
+                                    />
+                                </svg>
+                            </div>
 
-                        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-amber-700">
-                            <li>
-                                Generate kuota hanya dapat dilakukan satu kali
-                                pada setiap periode.
-                            </li>
+                            <div>
+                                <h3 className="text-sm font-semibold text-sky-800">
+                                    Mekanisme Generate Kuota
+                                </h3>
 
-                            <li>
-                                Sistem akan mengambil seluruh data jumlah siswa
-                                yang telah diinput oleh setiap lembaga.
-                            </li>
+                                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-sky-700">
+                                    <li>
+                                        Generate kuota hanya dapat dilakukan
+                                        satu kali pada setiap periode.
+                                    </li>
 
-                            <li>
-                                Estimasi kuota dihitung secara otomatis
-                                berdasarkan jumlah siswa.
-                            </li>
+                                    <li>
+                                        Sistem akan mengambil seluruh data
+                                        jumlah siswa yang telah diinput oleh
+                                        setiap lembaga.
+                                    </li>
 
-                            <li>
-                                Kuota Final akan diisi sama dengan Estimasi
-                                Kuota sebagai nilai awal.
-                            </li>
+                                    <li>
+                                        Estimasi kuota dihitung secara otomatis
+                                        berdasarkan jumlah siswa.
+                                    </li>
 
-                            <li>
-                                Admin Dinas Pendidikan dapat mengubah Kuota
-                                Final sesuai hasil kebijakan.
-                            </li>
-                        </ul>
+                                    <li>
+                                        Kuota Final akan diisi sama dengan
+                                        Estimasi Kuota sebagai nilai awal.
+                                    </li>
+
+                                    <li>
+                                        Admin Dinas Pendidikan dapat mengubah
+                                        Kuota Final sesuai hasil kebijakan.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-between gap-3">
