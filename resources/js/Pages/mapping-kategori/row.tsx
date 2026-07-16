@@ -3,22 +3,23 @@ import { verifyConfirm } from "@/lib/alert";
 
 type Props = {
     item: any;
-    forumId: number;
+    kategoriId: number;
     selected: number[];
     setSelected: React.Dispatch<React.SetStateAction<number[]>>;
 };
 
 export default function MappingRow({
     item,
-    forumId,
+    kategoriId,
     selected,
     setSelected,
 }: Props) {
     const checked = selected.includes(item.id);
 
-    const isCurrent = item.forum_id === forumId;
+    const isCurrent = Number(item.kategori_id) === Number(kategoriId);
 
-    const isOther = item.forum && item.forum_id !== forumId;
+    const isOther =
+        item.kategori && Number(item.kategori_id) !== Number(kategoriId);
 
     const toggle = () => {
         if (checked) {
@@ -30,8 +31,10 @@ export default function MappingRow({
 
     const move = () => {
         verifyConfirm(
-            "Pindahkan Lembaga",
-            `${item.nama} akan dipindahkan dari ${item.forum.nama} ke forum yang dipilih.`,
+            "Pindahkan Kategori",
+
+            `${item.nama} akan dipindahkan dari kategori ${item.kategori.nama} ke kategori yang dipilih.`,
+
             "Ya, Pindahkan",
         ).then((r) => {
             if (!r.isConfirmed) return;
@@ -43,20 +46,16 @@ export default function MappingRow({
     return (
         <tr
             className={`
-        border-b border-slate-100
-        transition-colors
-        ${checked ? "bg-indigo-50 hover:bg-indigo-100" : "hover:bg-slate-50/70"}
-    `}
+                border-b border-slate-100
+                transition-colors
+                ${
+                    checked
+                        ? "bg-indigo-50 hover:bg-indigo-100"
+                        : "hover:bg-slate-50/70"
+                }
+            `}
         >
-            <td
-                className="
-                    px-4
-                    py-3
-                    text-sm
-                    text-center
-                    text-slate-700
-                "
-            >
+            <td className="px-4 py-3 text-center">
                 <input
                     type="checkbox"
                     checked={checked}
@@ -74,37 +73,26 @@ export default function MappingRow({
                 />
             </td>
 
-            <td
-                className="
-                    px-4
-                    py-3
-                    text-sm
-                    text-slate-700
-                    whitespace-nowrap
-                "
-            >
+            <td className="px-4 py-3 text-sm text-slate-700 whitespace-nowrap">
                 {item.kode}
             </td>
 
             <td
-                className="
+                className={`
                     px-4
                     py-3
                     text-sm
-                    text-left
-                    text-slate-700
-                "
+                    ${
+                        checked
+                            ? "font-semibold text-indigo-700"
+                            : "text-slate-700"
+                    }
+                `}
             >
-                {item.nama ?? "-"}
+                {item.nama}
             </td>
 
-            <td
-                className="
-                    px-4
-                    py-3
-                    text-center
-                "
-            >
+            <td className="px-4 py-3 text-center">
                 <span
                     className="
                         inline-flex
@@ -117,30 +105,12 @@ export default function MappingRow({
                         text-sky-700
                     "
                 >
-                    {item.kategori.nama}
+                    {item.kategori?.nama ?? "-"}
                 </span>
             </td>
 
-            <td
-                className={`
-        px-4
-        py-3
-        text-sm
-        text-left
-        ${checked ? "font-semibold text-indigo-700" : "text-slate-700"}
-    `}
-            >
-                {item.forum?.nama ?? "-"}
-            </td>
-
-            <td
-                className="
-                    px-4
-                    py-3
-                    text-center
-                "
-            >
-                {!item.forum && (
+            <td className="px-4 py-3 text-center">
+                {!item.kategori && (
                     <span
                         className="
                             inline-flex
@@ -170,7 +140,7 @@ export default function MappingRow({
                             text-indigo-700
                         "
                     >
-                        Forum Ini
+                        Kategori Ini
                     </span>
                 )}
 
@@ -187,7 +157,7 @@ export default function MappingRow({
                             text-amber-700
                         "
                     >
-                        Forum Lain
+                        Kategori Lain
                     </span>
                 )}
             </td>

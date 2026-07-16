@@ -13,6 +13,7 @@ use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\KuotaController;
 use App\Http\Controllers\MappingForumController;
+use App\Http\Controllers\MappingKategoriController;
 
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
@@ -62,6 +63,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('mapping-forum', [MappingForumController::class, 'index'])->name('mapping-forum.index');
     Route::put('mapping-forum', [MappingForumController::class, 'update'])->name('mapping-forum.update');
+
+    Route::get('mapping-kategori', [MappingKategoriController::class, 'index'])->name('mapping-kategori.index');
+    Route::put('mapping-kategori', [MappingKategoriController::class, 'update'])->name('mapping-kategori.update');
 
     Route::resource('data-siswa', SiswaController::class);
 
