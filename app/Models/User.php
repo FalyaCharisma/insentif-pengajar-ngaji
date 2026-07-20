@@ -50,4 +50,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Pengurus::class, 'nik', 'nik');
     }
+
+    public function forum()
+    {
+        return $this->hasOne(Forum::class);
+    }
 }

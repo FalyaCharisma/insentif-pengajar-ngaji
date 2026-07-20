@@ -54,3 +54,25 @@ export const verifyConfirm = (
         cancelButtonText: "Batal",
     });
 };
+export const inputConfirm = (
+    title: string,
+    label: string,
+) => {
+    return Swal.fire({
+        title,
+        input: "textarea",
+        inputLabel: label,
+        inputPlaceholder: "Masukkan catatan revisi...",
+        inputAttributes: {
+            maxlength: "500",
+        },
+        showCancelButton: true,
+        confirmButtonText: "Kirim",
+        cancelButtonText: "Batal",
+        inputValidator: (value) => {
+            if (!value) {
+                return "Catatan revisi wajib diisi.";
+            }
+        },
+    });
+};

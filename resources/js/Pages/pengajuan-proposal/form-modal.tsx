@@ -4,7 +4,6 @@ import { useForm } from "@inertiajs/react";
 import { X } from "lucide-react";
 
 import FormInput from "@/Components/forms/FormInput";
-import FormSelect from "@/Components/forms/FormSelect";
 import FormFile from "@/Components/forms/FormFile";
 
 import PrimaryButton from "@/Components/PrimaryButton";
@@ -17,47 +16,65 @@ type Props = {
 
     proposal?: any;
 
-    lembaga: any[];
+    lembaga: any;
+
+    periode: any;
+
+    jumlahSiswa: number;
+
+    estimasiKuota: number;
 };
 
-export default function FormModal({ open, onClose, proposal, lembaga }: Props) {
+export default function FormModal({
+    open,
+    onClose,
+    proposal,
+    lembaga,
+    periode,
+    jumlahSiswa,
+    estimasiKuota,
+}: Props) {
     const isEdit = !!proposal;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         _method: "",
 
-        lembaga_id: lembaga?.[0]?.id?.toString() || "",
+        periode_id: periode?.id?.toString() || "",
 
-        tahun: new Date().getFullYear(),
-
-        jumlah_guru: "",
-
-        jumlah_siswa: "",
+        jumlah_guru: proposal?.jumlah_guru?.toString() || "",
 
         bukti_dukung: null as File | null,
     });
 
     useEffect(() => {
+        if (!open) return;
+
         if (proposal) {
             setData({
                 _method: "",
 
-                lembaga_id: proposal.lembaga_id?.toString() || "",
-
-                tahun: proposal.tahun || new Date().getFullYear(),
+                periode_id: proposal.periode_id?.toString() || "",
 
                 jumlah_guru: proposal.jumlah_guru?.toString() || "",
-
-                jumlah_siswa: proposal.jumlah_siswa?.toString() || "",
 
                 bukti_dukung: null,
             });
         } else {
             reset();
-        }
-    }, [proposal, open]);
 
-    const submit = (e: any) => {
+            setData({
+                _method: "",
+
+                periode_id: periode?.id?.toString() || "",
+
+                jumlah_guru: "",
+
+                bukti_dukung: null,
+            });
+        }
+    }, [proposal, open, periode]);
+
+    const submit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (isEdit) {
@@ -84,50 +101,21 @@ export default function FormModal({ open, onClose, proposal, lembaga }: Props) {
     };
 
     if (!open) return null;
-
     return (
-        <div
-            className="
-                fixed inset-0 z-50
-                overflow-y-auto bg-black/40 p-6
-            "
-        >
-            <div
-                className="
-                    flex min-h-full
-                    items-center justify-center
-                "
-            >
-                <div
-                    className="
-                        w-full max-w-3xl
-                        rounded-2xl bg-white p-6
-                    "
-                >
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 p-6">
+            <div className="flex min-h-full items-center justify-center">
+                <div className="w-full max-w-3xl rounded-2xl bg-white p-6">
                     {/* Header */}
-                    <div
-                        className="
-                            mb-6 flex items-start
-                            justify-between gap-4
-                        "
-                    >
+                    <div className="mb-6 flex items-start justify-between gap-4">
                         <div>
-                            <h2
-                                className="
-                                    text-xl font-semibold
-                                    text-slate-800
-                                "
-                            >
-                                {isEdit ? "Edit Proposal" : "Tambah Proposal"}
+                            <h2 className="text-xl font-semibold text-slate-800">
+                                {isEdit
+                                    ? "Edit Pengajuan Proposal"
+                                    : "Tambah Pengajuan Proposal"}
                             </h2>
 
-                            <p
-                                className="
-                                    mt-1 text-sm
-                                    text-slate-500
-                                "
-                            >
-                                Isi form pengajuan proposal
+                            <p className="mt-1 text-sm text-slate-500">
+                                Lengkapi data pengajuan proposal.
                             </p>
                         </div>
 
@@ -136,66 +124,60 @@ export default function FormModal({ open, onClose, proposal, lembaga }: Props) {
                         </SecondaryButton>
                     </div>
 
-                    {/* Form */}
                     <form onSubmit={submit} className="space-y-5">
-                        <div
-                            className="
-                                grid grid-cols-1
-                                gap-4 md:grid-cols-2
-                            "
-                        >
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             {/* Lembaga */}
-                            <div className="md:col-span-2">
-                                <FormInput
-                                    label="Lembaga"
-                                    value={lembaga?.[0]?.nama || ""}
-                                    disabled
-                                />
-                            </div>
-
-                            {/* Jumlah Guru */}
                             <FormInput
-                                label="Jumlah Guru"
+                                label="Lembaga"
+                                value={lembaga?.nama ?? "-"}
+                                disabled
+                            />
+
+                            {/* Periode */}
+                            <FormInput
+                                label="Periode"
+                                value={periode?.tahun?.toString() ?? "-"}
+                                disabled
+                            />
+                            {errors.periode_id && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.periode_id}
+                                </p>
+                            )}
+
+                            {/* Jumlah Siswa */}
+                            <FormInput
+                                label="Jumlah Siswa"
+                                value={jumlahSiswa.toString()}
+                                disabled
+                            />
+
+                            {/* Estimasi Kuota */}
+                            <FormInput
+                                label="Estimasi Kuota Penerima Insentif"
+                                value={estimasiKuota.toString()}
+                                disabled
+                            />
+
+                            {/* Guru Diajukan */}
+                            <FormInput
+                                label="Jumlah Guru Diajukan"
                                 type="number"
                                 value={data.jumlah_guru}
                                 onChange={(e) =>
                                     setData("jumlah_guru", e.target.value)
                                 }
-                                placeholder="0"
+                                placeholder="Masukkan jumlah guru"
                                 error={errors.jumlah_guru}
                             />
 
-                            {/* Jumlah Siswa */}
-                            <FormInput
-                                label="Jumlah Siswa"
-                                type="number"
-                                value={data.jumlah_siswa}
-                                onChange={(e) =>
-                                    setData("jumlah_siswa", e.target.value)
-                                }
-                                placeholder="0"
-                                error={errors.jumlah_siswa}
-                            />
-
-                            {/* Tahun */}
-                            <FormInput
-                                label="Tahun"
-                                type="number"
-                                value={data.tahun}
-                                onChange={(e) =>
-                                    setData("tahun", Number(e.target.value))
-                                }
-                                placeholder="Masukkan tahun"
-                                error={errors.tahun}
-                            />
-
-                            {/* File */}
+                            {/* Bukti Dukung */}
                             <FormFile
                                 label="Bukti Dukung"
                                 onChange={(e) =>
                                     setData(
                                         "bukti_dukung",
-                                        e.target.files?.[0] || null,
+                                        e.target.files?.[0] ?? null,
                                     )
                                 }
                                 fileName={
@@ -206,16 +188,17 @@ export default function FormModal({ open, onClose, proposal, lembaga }: Props) {
                                 currentFile={proposal?.bukti_dukung}
                                 error={errors.bukti_dukung}
                             />
-                           
                         </div>
 
-                        {/* Footer */}
-                        <div
-                            className="
-                                flex items-center
-                                justify-end gap-3 pt-4
-                            "
-                        >
+                        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                            <p className="text-sm text-amber-700">
+                                <strong>Catatan:</strong> Jumlah guru yang
+                                diajukan tidak boleh melebihi estimasi kuota
+                                yang telah dihitung oleh sistem.
+                            </p>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 pt-2">
                             <SecondaryButton
                                 type="button"
                                 onClick={onClose}

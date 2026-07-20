@@ -8,19 +8,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Forum extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
     protected $table = 'forum';
 
     protected $fillable = [
-        'nama',
+        'user_id',
         'kategori_id',
-        'nik',
+        'nama',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function kategori()
     {
-        return $this->belongsTo(Kategori::class);
+        return $this->belongsTo(KategoriLembaga::class, 'kategori_id');
     }
 
     public function lembaga()

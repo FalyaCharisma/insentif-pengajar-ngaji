@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 abstract class Controller
 {
+    use AuthorizesRequests;
+
     /**
      * DataTable Helper
      */
@@ -48,7 +51,7 @@ abstract class Controller
         // Pagination
         $perPage = (int) $request->input('per_page', $defaultPerPage);
 
-        if (! in_array($perPage, [10, 25, 50, 100])) {
+        if (!in_array($perPage, [10, 25, 50, 100])) {
             $perPage = $defaultPerPage;
         }
 
@@ -69,7 +72,7 @@ abstract class Controller
             'sort' => $request->sort ?? '',
             'order' => $request->order ?? '',
             'per_page' => $request->input('per_page', 10),
-        ], collect($additional)->mapWithKeys(fn ($field) => [
+        ], collect($additional)->mapWithKeys(fn($field) => [
             $field => $request->$field ?? '',
         ])->toArray());
     }

@@ -1,7 +1,8 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2 } from "lucide-react";
 import { router } from "@inertiajs/react";
-import { verifyConfirm } from "@/lib/alert";
+
+import { deleteConfirm, inputConfirm, verifyConfirm } from "@/lib/alert";
 
 import { PengajuanProposal } from "@/types/pengajuan-proposal";
 
@@ -15,47 +16,54 @@ export const columns = (
         header: "No",
         cell: ({ row }) => row.index + 1,
     },
+
     {
-        accessorKey: "lembaga.nama",
         header: "Lembaga",
+        cell: ({ row }) => row.original.lembaga?.nama ?? "-",
     },
+
     {
-        accessorKey: "tahun",
-        header: "Tahun",
+        header: "Periode",
+        cell: ({ row }) => row.original.periode?.tahun ?? "-",
     },
-    {
-        accessorKey: "jumlah_guru",
-        header: "Guru",
-    },
+
     {
         accessorKey: "jumlah_siswa",
-        header: "Siswa",
+        header: "Jumlah Siswa",
     },
+
+    {
+        accessorKey: "estimasi_kuota",
+        header: "Estimasi Kuota",
+    },
+
+    {
+        accessorKey: "jumlah_guru",
+        header: "Guru Diajukan",
+    },
+
     {
         accessorKey: "bukti_dukung",
         header: "Bukti Dukung",
+
         cell: ({ row }) => {
             const file = row.original.bukti_dukung;
 
-            if (!file) {
-                return "-";
-            }
+            if (!file) return "-";
 
             return (
                 <a
                     href={`/storage/files/proposal/${file}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="
-                        text-sm text-indigo-600
-                        hover:underline
-                    "
+                    className="text-indigo-600 hover:underline"
                 >
                     Lihat File
                 </a>
             );
         },
     },
+
     {
         accessorKey: "status",
 
@@ -64,24 +72,38 @@ export const columns = (
         cell: ({ row }) => {
             const status = row.original.status;
 
+            let className = "bg-amber-100 text-amber-700";
+
+            let label = "Pending";
+
+            if (status === "verified") {
+                className = "bg-green-100 text-green-700";
+                label = "Terverifikasi";
+            }
+
+            if (status === "revision") {
+                className = "bg-red-100 text-red-700";
+                label = "Revisi";
+            }
+
             return (
                 <span
-                    className={`
-                    rounded-full px-3 py-1
-                    text-xs font-medium
-
-                    ${
-                        status === "verified"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-amber-100 text-amber-700"
-                    }
-                `}
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${className}`}
                 >
-                    {status === "verified" ? "Terverifikasi" : "Pending"}
+                    {label}
                 </span>
             );
         },
     },
+
+    {
+        accessorKey: "catatan",
+
+        header: "Catatan",
+
+        cell: ({ row }) => row.original.catatan || "-",
+    },
+
     {
         id: "aksi",
 
@@ -90,11 +112,9 @@ export const columns = (
         cell: ({ row }) => {
             const proposal = row.original;
 
-            const verified = proposal.status === "verified";
-
             return (
-                <div className="flex items-center gap-2">
-                    {hasRole("pimpinan_lembaga") && !verified && (
+                <div className="flex flex-wrap items-center gap-2">
+                    {hasRole("lembaga") && proposal.status !== "verified" && (
                         <>
                             <button
                                 onClick={() => onEdit(proposal)}
@@ -113,52 +133,54 @@ export const columns = (
                             </button>
                         </>
                     )}
-                    {hasRole("superadmin") && !verified && (
-                        <button
-                            onClick={() =>
-                                verifyConfirm(
-                                    "Proposal ini akan diverifikasi",
-                                ).then((result) => {
-                                    if (result.isConfirmed) {
-                                        router.patch(
-                                            route(
-                                                "pengajuan-proposal.verify",
-                                                proposal.id,
-                                            ),
-                                        );
-                                    }
-                                })
-                            }
-                            className="
-            flex items-center gap-1
-            rounded-lg bg-green-600
-            px-3 py-1.5 text-xs text-white
-        "
-                        >
-                            Verifikasi
-                        </button>
-                    )}
 
-                    {hasRole("superadmin") && verified && (
-                        <button
-                            onClick={() => {
-                                verifyConfirm(
-                                    "Batalkan verifikasi proposal?",
-                                ).then((result) => {
+                    {hasRole("forum") && proposal.status === "pending" && (
+                        <>
+                            <button
+                                onClick={() =>
+                                    verifyConfirm(
+                                        "Verifikasi Proposal",
+                                        "Apakah proposal ini sudah sesuai dan akan diverifikasi?",
+                                    ).then((result) => {
+                                        if (result.isConfirmed) {
+                                            router.patch(
+                                                route(
+                                                    "pengajuan-proposal.verify",
+                                                    proposal.id,
+                                                ),
+                                            );
+                                        }
+                                    })
+                                }
+                                className="rounded-lg bg-green-600 px-3 py-1.5 text-xs text-white"
+                            >
+                                Verifikasi
+                            </button>
+
+                            <button
+                                onClick={async () => {
+                                    const result = await inputConfirm(
+                                        "Catatan Revisi",
+                                        "Masukkan catatan revisi",
+                                    );
+
                                     if (result.isConfirmed) {
                                         router.patch(
                                             route(
                                                 "pengajuan-proposal.unverify",
                                                 proposal.id,
                                             ),
+                                            {
+                                                catatan: result.value,
+                                            },
                                         );
                                     }
-                                });
-                            }}
-                            className="flex items-center gap-1 rounded-lg bg-amber-500 px-3 py-1.5 text-xs text-white"
-                        >
-                            Batalkan Verifikasi
-                        </button>
+                                }}
+                                className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-white"
+                            >
+                                Revisi
+                            </button>
+                        </>
                     )}
                 </div>
             );
