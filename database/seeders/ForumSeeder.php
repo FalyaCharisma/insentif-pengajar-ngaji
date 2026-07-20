@@ -10,7 +10,7 @@ class ForumSeeder extends Seeder
 {
     public function run(): void
     {
-        $kategoriIds = DB::table('kategori')->pluck('id')->toArray();
+        $kategoriIds = DB::table('kategori_lembaga')->pluck('id')->toArray();
 
         Forum::insert([
             [

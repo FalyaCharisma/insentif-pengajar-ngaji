@@ -112,11 +112,6 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                                     setOpenDetailAkun(true);
                                 },
 
-                                // Detail Profil
-                                (profil) => {
-                                    console.log(profil);
-                                }
-
                             )}
                             data={lembaga.data}
                         />

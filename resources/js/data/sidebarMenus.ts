@@ -1,13 +1,5 @@
-import { Circle, LucideIcon } from "lucide-react";
 
-export interface SidebarMenu {
-    title: string;
-    href?: string;
-    icon?: LucideIcon;
-    roles: string[];
-    children?: SidebarMenu[];
-}
-
+import type { SidebarMenu } from "@/types/sidebar"; 
 import {
     LayoutDashboard,
     FolderKanban,
@@ -28,7 +20,8 @@ import {
     X,
 } from "lucide-react";
 
-export const sidebarMenus: SidebarMenu[] = [
+
+export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
     {
         title: "Dashboard",
         icon: LayoutDashboard,
@@ -62,17 +55,21 @@ export const sidebarMenus: SidebarMenu[] = [
             {
                 title: "Kategori Lembaga",
                 href: "/kategori",
-                roles: ["superadmin"],
+                roles: ["superadmin", "dindik"],
             },
             {
                 title: "Lembaga",
                 href: "/lembaga",
+                activeMatch: [
+                    "/lembaga",
+                    "/dokumen/lembaga",
+                ],
                 roles: ["superadmin", "dindik"],
             },
             {
                 title: "Forum",
                 href: "/forum",
-                roles: ["superadmin"],
+                roles: ["superadmin", "dindik"],
             },
             // {
             //     title: "Pengurus",
@@ -82,11 +79,10 @@ export const sidebarMenus: SidebarMenu[] = [
             {
                 title: "Jenis Dokumen",
                 href: "/jenis-dokumen",
-                roles: ["superadmin"],
+                roles: ["superadmin", "dindik"],
             },
         ],
     },
-
     {
         title: "Program Insentif",
         icon: Wallet,
@@ -122,12 +118,16 @@ export const sidebarMenus: SidebarMenu[] = [
         children: [
             {
                 title: "Profil",
-                href: "/profil-lembaga",
+                href: lembagaId
+                    ? `/lembaga/${lembagaId}/profil`
+                    : "#",
                 roles: ["lembaga"],
             },
             {
                 title: "Dokumen Lembaga",
-                href: "/dokumen-lembaga",
+                href: lembagaId
+                    ? `/dokumen/lembaga/${lembagaId}`
+                    : "#",
                 roles: ["lembaga"],
             },
         ],

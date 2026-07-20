@@ -137,14 +137,6 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
                     {/* FOOTER */}
                     <div className="flex items-center justify-end gap-3 pt-4">
 
-                        <SecondaryButton
-                            type="button"
-                            onClick={onClose}
-                            disabled={processing}
-                        >
-                            Batal
-                        </SecondaryButton>
-
                         <PrimaryButton
                             type="submit"
                             disabled={processing}
@@ -156,6 +148,14 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
                                     : "Simpan"}
                         </PrimaryButton>
 
+                        <SecondaryButton
+                            type="button"
+                            onClick={onClose}
+                            disabled={processing}
+                        >
+                            Batal
+                        </SecondaryButton>
+                        
                     </div>
                 </form>
             </div>

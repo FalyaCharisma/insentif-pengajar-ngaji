@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { usePage, Link } from "@inertiajs/react";
-import { Bell, ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { Bell, ChevronDown, LogOut, Key, User } from "lucide-react";
 
 export default function AppHeaderLayout() {
     const [notifOpen, setNotifOpen] = useState(false);
@@ -130,11 +130,10 @@ export default function AppHeaderLayout() {
                                 rounded-2xl
                                 bg-gradient-to-br from-indigo-500 to-cyan-500
                                 flex items-center justify-center
-                                text-white font-bold
                                 shadow-lg shadow-indigo-500/20
                             "
                         >
-                            A
+                            <User className="h-5 w-5 text-white" />
                         </div>
 
                         <ChevronDown
@@ -157,10 +156,10 @@ export default function AppHeaderLayout() {
                         >
                             <div className="px-5 py-4 border-b border-slate-100">
                                 <h3 className="font-semibold text-slate-800">
-                                    Admin
+                                    {user?.name ?? "Guest"}
                                 </h3>
                                 <p className="text-sm text-slate-500">
-                                    admin@email.com
+                                    {user?.email ?? "Email"}
                                 </p>
                             </div>
 
@@ -169,17 +168,17 @@ export default function AppHeaderLayout() {
                                     href="/profile"
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 text-slate-700"
                                 >
-                                    <User size={18} />
-                                    <span className="text-sm">Profil Saya</span>
+                                    <Key size={18} />
+                                    <span className="text-sm">Ubah Password</span>
                                 </Link>
 
-                                <Link
+                                {/* <Link
                                     href="/settings"
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 text-slate-700"
                                 >
                                     <Settings size={18} />
                                     <span className="text-sm">Pengaturan</span>
-                                </Link>
+                                </Link> */}
 
                                 <div className="border-t border-slate-100 my-2"></div>
 

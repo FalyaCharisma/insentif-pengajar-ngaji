@@ -19,7 +19,7 @@ class Lembaga extends Model
 
     public function profil()
     {
-        return $this->belongsTo(ProfilLembaga::class);
+        return $this->hasOne(ProfilLembaga::class);
     }
 
     public function kategori()
@@ -46,9 +46,14 @@ class Lembaga extends Model
         $number = 1;
 
         if ($last) {
-            $number = (int) substr($last->kode_lembaga, 3) + 1;
+            $number = (int) substr($last->kode, 3) + 1;
         }
 
         return 'LMB' . str_pad($number, 5, '0', STR_PAD_LEFT);
+    }
+
+    public function dokumen()
+    {
+        return $this->hasMany(DokumenLembaga::class);
     }
 }

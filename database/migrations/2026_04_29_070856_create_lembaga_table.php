@@ -15,7 +15,7 @@ return new class extends Migration {
 
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
 
-            $table->foreignId('kategori_id')->constrained('kategori')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('kategori_id')->constrained('kategori_lembaga')->cascadeOnUpdate()->cascadeOnDelete();
 
             $table->string('kode')->unique();
             $table->string('nama');

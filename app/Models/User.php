@@ -45,4 +45,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Pengurus::class, 'nik', 'nik');
     }
+
+    public function lembaga()
+    {
+        return $this->hasOne(Lembaga::class);
+    }
 }

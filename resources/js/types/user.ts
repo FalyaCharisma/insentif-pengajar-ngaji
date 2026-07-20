@@ -6,4 +6,5 @@ export interface User {
     role: string[];
     force_change_password: boolean;
     status: "aktif" | "nonaktif";
+    lembaga_id?: number;
 }

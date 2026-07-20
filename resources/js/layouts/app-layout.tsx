@@ -5,6 +5,9 @@ import AppSidebarLayout from "./app/app-sidebar-layout";
 import AppContentLayout from "./app/app-content-layout";
 import AppFooterLayout from "./app/app-footer-layout";
 
+import { usePage, router } from "@inertiajs/react";
+import ForceChangePasswordModal from "@/Components/ForceChangePasswordModal";
+
 type Props = {
     children: ReactNode;
 };
@@ -12,6 +15,9 @@ type Props = {
 export default function AdminLayout({ children }: Props) {
 
     const [collapsed, setCollapsed] = useState(false);
+
+    const auth = usePage<any>().props.auth;
+    const currentUrl = usePage().url;
 
     return (
         <div className="min-h-screen bg-slate-100">
@@ -40,6 +46,11 @@ export default function AdminLayout({ children }: Props) {
                 {/* Footer */}
                 <AppFooterLayout />
             </div>
+            
+            {auth?.user?.force_change_password &&
+                !currentUrl.startsWith("/profile") && (
+                    <ForceChangePasswordModal />
+            )}
         </div>
     );
 }

@@ -26,6 +26,7 @@ export default function FormModal({
         data,
         setData,
         post,
+        put,
         processing,
         errors,
         reset,
@@ -35,6 +36,11 @@ export default function FormModal({
     });
 
     useEffect(() => {
+
+        if (!open) {
+            reset();
+            return;
+        }
 
         if (kategori) {
 
@@ -56,12 +62,11 @@ export default function FormModal({
 
         if (isEdit) {
 
-            setData("_method", "put");
-
-            post(
+            put(
                 route("kategori.update", kategori.id),
                 {
                     onSuccess: () => {
+                        reset();
                         onClose();
                     },
                 },
@@ -73,6 +78,7 @@ export default function FormModal({
         post(route("kategori.store"), {
 
             onSuccess: () => {
+                reset();
                 onClose();
             },
         });

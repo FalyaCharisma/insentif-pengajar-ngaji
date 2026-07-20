@@ -17,6 +17,8 @@ type Props = {
     required?: boolean;
     placeholder?: string;
 
+    disabled?: boolean;
+
     onChange: (value: any) => void;
 };
 
@@ -27,6 +29,7 @@ export default function FormSelect2({
     error,
     required = false,
     placeholder = "Pilih data...",
+    disabled = false,
     onChange,
 }: Props) {
 
@@ -40,7 +43,23 @@ export default function FormSelect2({
 
             <Select
                 options={options}
-
+                
+                isDisabled={disabled}
+                
+                styles={{
+                    control: (base, state) => ({
+                        ...base,
+                        minHeight: 44,
+                        borderRadius: 8,
+                        backgroundColor: state.isDisabled
+                            ? "#f8fafc"
+                            : "#ffffff",
+                        cursor: state.isDisabled
+                            ? "not-allowed"
+                            : "pointer",
+                    }),
+                }}
+                
                 value={
                     options.find(
                         (opt) => opt.value == value,

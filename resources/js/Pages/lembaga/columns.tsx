@@ -1,14 +1,12 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2, User2, Building2 } from "lucide-react";
 import { Lembaga } from "@/types/lembaga";
-import { User } from "@/types/user";
-import { ProfilLembaga } from "@/types/profil-lembaga";
+import { router } from "@inertiajs/react";
 
 export const columns = (
     onEdit: (lembaga: Lembaga) => void,
     onDelete: (lembaga: Lembaga) => void,
     onDetailAkun: (lembaga: Lembaga) => void,
-    onDetailProfil: (profil: ProfilLembaga) => void,
 ): ColumnDef<Lembaga>[] => [
     {
         id: "no",
@@ -91,13 +89,20 @@ export const columns = (
                         Akun
                     </button>
 
-                    <button
-                        onClick={() => profil && onDetailProfil(profil)}
-                        className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs text-white hover:bg-emerald-600"
-                    >
-                        <Building2 className="h-3.5 w-3.5" />
-                        Profil
-                    </button>
+                        <button
+                            onClick={() =>
+                                router.visit(
+                                    route(
+                                        "lembaga.profil.index",
+                                        lembaga.id
+                                    )
+                                )
+                            }
+                            className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs text-white hover:bg-emerald-600"
+                        >
+                            <Building2 className="h-3.5 w-3.5" />
+                            Profil
+                        </button>
 
                     <button
                         onClick={() => onEdit(lembaga)}

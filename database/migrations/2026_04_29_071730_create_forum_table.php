@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('forum', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->foreignId('kategori_id')->constrained('kategori')->cascadeOnDelete();
+            $table->foreignId('kategori_id')->constrained('kategori_lembaga')->cascadeOnDelete();
             $table->string('nik');
             $table->timestamps();
             $table->softDeletes();
