@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kategori;
+use App\Models\KategoriLembaga;
 use App\Models\Lembaga;
 use App\Models\ProfilLembaga;
 use Illuminate\Http\Request;
@@ -37,7 +37,7 @@ class ProfilLembagaController extends Controller
 
         return Inertia::render('lembaga/profil/index', [
             'lembaga' => $lembaga,
-            'kategori' => Kategori::orderBy('nama')->get(),
+            'kategori' => KategoriLembaga::orderBy('nama')->get(),
 
             'statistik' => [
                 'total' => $totalDokumen,

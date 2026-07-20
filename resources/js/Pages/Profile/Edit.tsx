@@ -77,7 +77,7 @@ export default function Edit({
                         subtitle="Kelola informasi akun dan keamanan"
                     />
 
-                    {user.force_change_password && (
+                    {!!user.force_change_password && (
 
                         <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-5">
 

@@ -12,6 +12,9 @@ use App\Http\Controllers\PengajuanInsentifController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\KuotaController;
+use App\Http\Controllers\MappingForumController;
+use App\Http\Controllers\MappingKategoriController;
+use App\Http\Controllers\PengajarController;
 use App\Http\Controllers\JenisDokumenController;
 use App\Http\Controllers\ProfilLembagaController;
 use App\Http\Controllers\DokumenLembagaController;
@@ -59,6 +62,19 @@ Route::middleware('auth')->group(function () {
 
     // Lembaga
     Route::resource('lembaga', LembagaController::class);
+    Route::prefix('lembaga')
+        ->name('lembaga.')
+        ->controller(LembagaController::class)
+        ->group(function () {
+            Route::get('data', 'data')->name('data');
+            Route::put('{lembaga}/reset-password', 'resetPassword')->name('reset-password');
+        });
+
+    Route::get('mapping-forum', [MappingForumController::class, 'index'])->name('mapping-forum.index');
+    Route::put('mapping-forum', [MappingForumController::class, 'update'])->name('mapping-forum.update');
+
+    Route::get('mapping-kategori', [MappingKategoriController::class, 'index'])->name('mapping-kategori.index');
+    Route::put('mapping-kategori', [MappingKategoriController::class, 'update'])->name('mapping-kategori.update');
 
     // Route tambahan lembaga
     Route::prefix('lembaga')->name('lembaga.')->controller(LembagaController::class)->group(function () {
@@ -92,6 +108,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('pengurus', PengurusController::class)->parameters([
         'pengurus' => 'pengurus',
     ]);
+
+    Route::resource('pengajar', PengajarController::class)->parameters([
+        'pengajar' => 'pengajar',
+    ]);
+
     Route::resource('kuota', KuotaController::class)->parameters([
         'kuota' => 'kuota',
     ]);

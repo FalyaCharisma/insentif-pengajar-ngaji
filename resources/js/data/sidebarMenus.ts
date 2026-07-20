@@ -168,26 +168,26 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
                 href: "/pengajuan-proposal",
                 roles: ["superadmin", "lembaga"],
             },
-            {
-                title: "Data Proposal",
-                href: "/proposal",
-                roles: ["superadmin", "dindik", "superadmin"],
-            },
-            {
-                title: "Verifikasi Proposal",
-                href: "/verifikasi-proposal",
-                roles: ["superadmin", "forum"],
-            },
-            {
-                title: "Status Proposal",
-                href: "/status-proposal",
-                roles: ["superadmin", "lembaga", "dindik"],
-            },
-            {
-                title: "Catatan Revisi",
-                href: "/catatan-revisi",
-                roles: ["superadmin", "lembaga"],
-            },
+            // {
+            //     title: "Data Proposal",
+            //     href: "/proposal",
+            //     roles: ["superadmin", "dindik", "superadmin"],
+            // },
+            // {
+            //     title: "Verifikasi Proposal",
+            //     href: "/verifikasi-proposal",
+            //     roles: ["superadmin", "forum"],
+            // },
+            // {
+            //     title: "Status Proposal",
+            //     href: "/status-proposal",
+            //     roles: ["superadmin", "lembaga", "dindik"],
+            // },
+            // {
+            //     title: "Catatan Revisi",
+            //     href: "/catatan-revisi",
+            //     roles: ["superadmin", "lembaga"],
+            // },
         ],
     },
 

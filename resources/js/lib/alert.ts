@@ -37,8 +37,8 @@ export const deleteConfirm = async (message: string) => {
 export const verifyConfirm = (
     title: string,
     text: string,
-    confirmButtonText: string = "Ya",
-    icon: "question" | "info" | "warning" = "question",
+    confirmButtonText = "Ya",
+    icon: "question" | "warning" | "info" = "question",
 ) => {
     return Swal.fire({
         title,
@@ -48,10 +48,6 @@ export const verifyConfirm = (
         icon,
 
         showCancelButton: true,
-
-        confirmButtonColor: "#4f46e5",
-
-        cancelButtonColor: "#64748b",
 
         confirmButtonText,
 
@@ -65,5 +61,27 @@ export const warningAlert = (message: string) => {
         title: "Peringatan",
         text: message,
         confirmButtonText: "OK",
+    });
+};
+export const inputConfirm = (
+    title: string,
+    label: string,
+) => {
+    return Swal.fire({
+        title,
+        input: "textarea",
+        inputLabel: label,
+        inputPlaceholder: "Masukkan catatan revisi...",
+        inputAttributes: {
+            maxlength: "500",
+        },
+        showCancelButton: true,
+        confirmButtonText: "Kirim",
+        cancelButtonText: "Batal",
+        inputValidator: (value) => {
+            if (!value) {
+                return "Catatan revisi wajib diisi.";
+            }
+        },
     });
 };

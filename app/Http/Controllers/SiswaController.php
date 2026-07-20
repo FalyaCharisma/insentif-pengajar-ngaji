@@ -14,6 +14,13 @@ class SiswaController extends Controller
     {
         $query = Siswa::with(['periode', 'lembaga']);
 
+        $user = auth()->user();
+
+        // Jika login sebagai lembaga
+        if ($user->hasRole('lembaga') && $user->lembaga) {
+            $query->where('lembaga_id', $user->lembaga->id);
+        }
+
         if ($request->filled('search')) {
             $query->whereHas('lembaga', function ($q) use ($request) {
                 $q->where('nama', 'like', '%' . $request->search . '%');
@@ -21,6 +28,7 @@ class SiswaController extends Controller
         }
 
         $sort = $request->get('sort', 'id');
+
         $direction = $request->get('direction', 'desc');
 
         $allowed = ['id', 'jumlah_siswa', 'created_at'];
@@ -36,13 +44,15 @@ class SiswaController extends Controller
 
             'filters' => [
                 'search' => $request->search,
+
                 'sort' => $sort,
+
                 'direction' => $direction,
             ],
 
             'periodes' => Periode::where('status', true)->orderByDesc('tahun')->get(),
 
-            'lembagas' => Lembaga::orderBy('nama')->get(),
+            'lembagas' => $user->hasRole(['superadmin', 'dindik']) ? Lembaga::orderBy('nama')->get() : [],
         ]);
     }
 
@@ -51,10 +61,23 @@ class SiswaController extends Controller
         $validated = $request->validate([
             'periode_id' => ['required', 'exists:periode,id'],
 
-            'lembaga_id' => ['required', 'exists:lembaga,id'],
-
             'jumlah_siswa' => ['required', 'integer', 'min:1'],
         ]);
+
+        $user = auth()->user();
+
+        if ($user->hasRole('lembaga')) {
+            $validated['lembaga_id'] = $user->lembaga->id;
+        } else {
+            $validated['lembaga_id'] = $request->lembaga_id;
+        }
+        $exists = Siswa::where('periode_id', $validated['periode_id'])->where('lembaga_id', $validated['lembaga_id'])->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'periode_id' => 'Data jumlah siswa untuk periode ini sudah pernah diinput.',
+            ]);
+        }
 
         Siswa::create($validated);
 
@@ -63,13 +86,21 @@ class SiswaController extends Controller
 
     public function update(Request $request, Siswa $data_siswa)
     {
+        if (auth()->user()->hasRole('lembaga') && $data_siswa->lembaga_id !== auth()->user()->lembaga->id) {
+            abort(403);
+        }
         $validated = $request->validate([
             'periode_id' => ['required', 'exists:periode,id'],
-
-            'lembaga_id' => ['required', 'exists:lembaga,id'],
-
             'jumlah_siswa' => ['required', 'integer', 'min:1'],
         ]);
+
+        $user = auth()->user();
+
+        if ($user->hasRole('lembaga')) {
+            $validated['lembaga_id'] = $user->lembaga->id;
+        } else {
+            $validated['lembaga_id'] = $request->lembaga_id;
+        }
 
         $data_siswa->update($validated);
 
@@ -78,6 +109,9 @@ class SiswaController extends Controller
 
     public function destroy(Siswa $data_siswa)
     {
+        if (auth()->user()->hasRole('lembaga') && $data_siswa->lembaga_id !== auth()->user()->lembaga->id) {
+            abort(403);
+        }
         $data_siswa->delete();
 
         return back()->with('success', 'Data siswa berhasil dihapus.');

@@ -41,13 +41,18 @@ class User extends Authenticatable
         return $this->getRoleNames()->first();
     }
 
+    public function lembaga()
+    {
+        return $this->hasOne(Lembaga::class);
+    }
+
     public function pengurus()
     {
         return $this->hasOne(Pengurus::class, 'nik', 'nik');
     }
 
-    public function lembaga()
+    public function forum()
     {
-        return $this->hasOne(Lembaga::class);
+        return $this->hasOne(Forum::class);
     }
 }

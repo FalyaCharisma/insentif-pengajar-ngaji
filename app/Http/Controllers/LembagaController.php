@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Lembaga;
-use App\Models\Kategori;
+use App\Models\KategoriLembaga;
 use App\Models\ProfilLembaga;
 use App\Models\JenisDokumen;
 use App\Models\DokumenLembaga;
@@ -63,7 +63,7 @@ class LembagaController extends Controller
                 ]
             ),
 
-            'kategori' => Kategori::orderBy('nama')->get(),
+            'kategori' => KategoriLembaga::orderBy('nama')->get(),
         ]);
     }
 

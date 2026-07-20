@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Forum;
-use App\Models\Kategori;
+use App\Models\KategoriLembaga;
 use Inertia\Inertia;
 
 class ForumController extends Controller
@@ -42,7 +42,7 @@ class ForumController extends Controller
 
         return Inertia::render('forum/index', [
             'forum' => $forum,
-            'kategori' => Kategori::all(),
+            'kategori' => KategoriLembaga::all(),
 
             'filters' => [
                 'search' => $request->search ?? '',

@@ -23,12 +23,25 @@ type Props = {
         links: any[];
     };
 
-    lembaga: any[];
+    periode: any;
+
+    jumlahSiswa: number;
+
+    estimasiKuota: number;
+
+    lembaga: any;
 
     filters: any;
 };
 
-export default function Index({ pengajuanProposal, lembaga, filters }: Props) {
+export default function Index({
+    pengajuanProposal,
+    lembaga,
+    periode,
+    jumlahSiswa,
+    estimasiKuota,
+    filters,
+}: Props) {
     const { hasRole } = useAuth();
 
     const { setParams } = useQueryParams(
@@ -69,31 +82,27 @@ export default function Index({ pengajuanProposal, lembaga, filters }: Props) {
                             filters={filters}
                             setParams={setParams}
                             searchPlaceholder="Cari proposal..."
-                            addButtonLabel="Tambah Proposal"
-                            onAdd={() => {
-                                setSelectedProposal(null);
-
-                                setOpen(true);
-                            }}
+                            addButtonLabel={
+                                hasRole("lembaga")
+                                    ? "Tambah Proposal"
+                                    : undefined
+                            }
+                            onAdd={
+                                hasRole("lembaga")
+                                    ? () => {
+                                          setSelectedProposal(null);
+                                          setOpen(true);
+                                      }
+                                    : undefined
+                            }
                             sortOptions={[
                                 {
                                     label: "Terbaru",
                                     value: "id",
                                 },
-
                                 {
-                                    label: "Tahun",
-                                    value: "tahun",
-                                },
-
-                                {
-                                    label: "Jumlah Guru",
-                                    value: "jumlah_guru",
-                                },
-
-                                {
-                                    label: "Jumlah Siswa",
-                                    value: "jumlah_siswa",
+                                    label: "Status",
+                                    value: "status",
                                 },
                             ]}
                         />
@@ -116,7 +125,7 @@ export default function Index({ pengajuanProposal, lembaga, filters }: Props) {
 
                                 (row) => {
                                     deleteConfirm(
-                                        `Proposal tahun ${row.tahun} akan dihapus`,
+                                        `Proposal periode ${row.periode?.tahun} akan dihapus`,
                                     ).then((result) => {
                                         if (result.isConfirmed) {
                                             router.delete(
@@ -145,11 +154,13 @@ export default function Index({ pengajuanProposal, lembaga, filters }: Props) {
                         open={open}
                         onClose={() => {
                             setOpen(false);
-
                             setSelectedProposal(null);
                         }}
                         proposal={selectedProposal}
                         lembaga={lembaga}
+                        periode={periode}
+                        jumlahSiswa={jumlahSiswa}
+                        estimasiKuota={estimasiKuota}
                     />
                 </div>
             </AdminLayout>

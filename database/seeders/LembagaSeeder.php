@@ -44,7 +44,7 @@ class LembagaSeeder extends Seeder
             $user = User::create([
                 'name' => $item['nama'],
                 'email' => strtolower($item['kode']) . '@mail.com',
-                'password' => Hash::make($item['kode']),
+                'password' => Hash::make($item['kode']) . '@kdr',
                 'status' => 'aktif',
                 'force_change_password' => true,
             ]);

@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Kategori;
+use App\Models\KategoriLembaga;
 use Inertia\Inertia;
 
 class KategoriController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Kategori::query();
+        $query = KategoriLembaga::query();
 
         // Search
         if ($request->filled('search')) {
@@ -54,7 +54,7 @@ class KategoriController extends Controller
             'nama' => 'required|string|max:255',
         ]);
 
-        Kategori::create($validated);
+        KategoriLembaga::create($validated);
 
         return back()->with('success', 'Kategori berhasil ditambahkan');
     }
