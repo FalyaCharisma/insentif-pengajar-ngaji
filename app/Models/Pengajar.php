@@ -18,4 +18,9 @@ class Pengajar extends Model
     {
         return $this->belongsTo(Lembaga::class);
     }
+
+    public function pengajuanInsentif()
+    {
+        return $this->hasMany(PengajuanInsentif::class);
+    }
 }

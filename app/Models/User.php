@@ -32,9 +32,7 @@ class User extends Authenticatable
         ];
     }
 
-    protected $appends = [
-        'role',
-    ];
+    protected $appends = ['role'];
 
     public function getRoleAttribute()
     {
@@ -54,5 +52,10 @@ class User extends Authenticatable
     public function forum()
     {
         return $this->hasOne(Forum::class);
+    }
+
+    public function verifikasiPengajuanInsentif()
+    {
+        return $this->hasMany(PengajuanInsentif::class, 'verified_by');
     }
 }

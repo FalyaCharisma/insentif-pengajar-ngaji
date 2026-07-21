@@ -26,6 +26,7 @@ class PengajuanProposal extends Model
     protected $appends = [
         'jumlah_siswa',
         'estimasi_kuota',
+        'guru_dipilih',
     ];
 
     public function lembaga()
@@ -55,6 +56,11 @@ class PengajuanProposal extends Model
         return Kuota::where('lembaga_id', $this->lembaga_id)
             ->where('periode_id', $this->periode_id)
             ->value('estimasi_kuota') ?? 0;
+    }
+
+    public function getGuruDipilihAttribute()
+    {
+        return $this->pengajuanInsentif()->count();
     }
 
 }

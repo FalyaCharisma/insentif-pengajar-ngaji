@@ -89,7 +89,18 @@ Route::middleware('auth')->group(function () {
     Route::resource('pengajuan-proposal', PengajuanProposalController::class);
     Route::patch('/pengajuan-proposal/{pengajuanProposal}/verify', [PengajuanProposalController::class, 'verify'])->name('pengajuan-proposal.verify');
     Route::patch('/pengajuan-proposal/{pengajuanProposal}/unverify', [PengajuanProposalController::class, 'unverify'])->name('pengajuan-proposal.unverify');
-    Route::resource('pengajuan-insentif', PengajuanInsentifController::class);
+    Route::prefix('pengajuan-insentif')
+        ->name('pengajuan-insentif.')
+        ->controller(PengajuanInsentifController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{proposal}', 'show')->name('show');
+            Route::patch('/{proposal}/verify', 'verify')->name('verify');
+            Route::patch('/{proposal}/reject', 'reject')->name('reject');
+        });
+
+    Route::get('pengajuan-insentif/{proposal}/usulan', [PengajuanInsentifController::class, 'usulan'])->name('pengajuan-insentif.usulan');
 });
 
 require __DIR__ . '/auth.php';
