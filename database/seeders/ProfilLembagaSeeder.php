@@ -27,7 +27,7 @@ class ProfilLembagaSeeder extends Seeder
                 'kode_pos' => '64121',
 
                 'telepon' => '0354' . rand(100000, 999999),
-                'email' => strtolower($lembaga->kode_lembaga) . '@mail.com',
+                'email' => strtolower($lembaga->kode) . '@mail.com',
                 'website' => null,
 
                 'nama_pimpinan' => 'Ahmad Fauzi',

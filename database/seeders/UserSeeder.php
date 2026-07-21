@@ -18,7 +18,6 @@ class UserSeeder extends Seeder
             ['email' => 'superadmin@gmail.com'],
             [
                 'name' => 'Super Administrator',
-                'kode' => 'SUPERADMIN',
                 'password' => Hash::make('password'),
                 'status' => 'aktif',
                 'force_change_password' => false,
@@ -32,7 +31,6 @@ class UserSeeder extends Seeder
             ['email' => 'dindik@gmail.com'],
             [
                 'name' => 'Admin Dindik',
-                'kode' => 'DINDIK',
                 'password' => Hash::make('password'),
                 'status' => 'aktif',
                 'force_change_password' => false,
@@ -46,7 +44,6 @@ class UserSeeder extends Seeder
             ['email' => 'forum@gmail.com'],
             [
                 'name' => 'Admin Forum',
-                'kode' => 'FORUM',
                 'password' => Hash::make('password'),
                 'status' => 'aktif',
                 'force_change_password' => false,

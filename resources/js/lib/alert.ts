@@ -54,6 +54,15 @@ export const verifyConfirm = (
         cancelButtonText: "Batal",
     });
 };
+
+export const warningAlert = (message: string) => {
+    return Swal.fire({
+        icon: "warning",
+        title: "Peringatan",
+        text: message,
+        confirmButtonText: "OK",
+    });
+};
 export const inputConfirm = (
     title: string,
     label: string,

@@ -1,43 +1,176 @@
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
-import { PageProps } from '@/types';
-import { Head } from '@inertiajs/react';
-import DeleteUserForm from './Partials/DeleteUserForm';
-import UpdatePasswordForm from './Partials/UpdatePasswordForm';
-import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
+import { Head, useForm } from "@inertiajs/react";
+import { useEffect } from "react";
+
+import AdminLayout from "@/layouts/app-layout";
+
+import PageHeader from "@/Components/PageHeader";
+
+import { successAlert } from "@/lib/alert";
+import PasswordCard from "./PasswordCard";
+
+import { User, ShieldAlert } from "lucide-react";
+
+type Props = {
+    user: {
+        id: number;
+        name: string;
+        username: string;
+        email: string;
+        role: string;
+        force_change_password: boolean;
+    };
+
+    flash: {
+        success?: string;
+    };
+};
 
 export default function Edit({
-    mustVerifyEmail,
-    status,
-}: PageProps<{ mustVerifyEmail: boolean; status?: string }>) {
+    user,
+    flash,
+}: Props) {
+
+    useEffect(() => {
+
+        if (flash?.success) {
+
+            successAlert(flash.success);
+
+        }
+
+    }, [flash]);
+
+    const passwordForm = useForm({
+
+        current_password: "",
+
+        password: "",
+
+        password_confirmation: "",
+
+    });
+
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        passwordForm.patch(route("profile.password"), {
+            preserveScroll: true,
+            onSuccess: () => {
+                passwordForm.reset();
+            },
+        });
+    };
+
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Profile
-                </h2>
-            }
-        >
-            <Head title="Profile" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-6">
-                        <UpdateProfileInformationForm
-                            mustVerifyEmail={mustVerifyEmail}
-                            status={status}
-                            className="max-w-xl"
-                        />
+        <>
+
+            <Head title="Pengaturan Akun" />
+
+            <AdminLayout>
+
+                <div className="space-y-6">
+
+                    <PageHeader
+                        title="Pengaturan Akun"
+                        subtitle="Kelola informasi akun dan keamanan"
+                    />
+
+                    {!!user.force_change_password && (
+
+                        <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-5">
+
+                            <div className="flex items-start gap-3">
+
+                                <ShieldAlert
+                                    className="mt-0.5 h-6 w-6 text-yellow-600"
+                                />
+
+                                <div>
+
+                                    <h3 className="font-semibold text-yellow-800">
+
+                                        Anda wajib mengganti password
+
+                                    </h3>
+
+                                    <p className="mt-1 text-sm text-yellow-700">
+
+                                        Demi keamanan akun,
+                                        silakan ubah password
+                                        sebelum menggunakan aplikasi.
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    )}
+
+                    <div className="rounded-2xl border border-slate-200 bg-white p-6">
+
+                        <div className="flex items-center gap-5">
+
+                            <div
+                                className="
+                                    flex h-16 w-16 items-center justify-center
+                                    rounded-full
+                                    bg-gradient-to-br
+                                    from-indigo-500
+                                    to-cyan-500
+                                "
+                            >
+
+                                <User
+                                    className="h-8 w-8 text-white"
+                                />
+
+                            </div>
+
+                            <div>
+
+                                <h2 className="text-xl font-semibold text-slate-800">
+
+                                    {user.name}
+
+                                </h2>
+
+                                <p className="text-sm text-slate-500">
+
+                                    {user.email}
+
+                                </p>
+
+                                <span
+                                    className="
+                                        mt-2
+                                        inline-flex
+                                        rounded-full
+                                        bg-blue-100
+                                        px-3
+                                        py-1
+                                        text-xs
+                                        font-medium
+                                        text-blue-700
+                                    "
+                                >
+
+                                    {user.role}
+
+                                </span>
+
+                            </div>
+
+                        </div>
                     </div>
 
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-6">
-                        <UpdatePasswordForm className="max-w-xl" />
-                    </div>
-
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-6">
-                        <DeleteUserForm className="max-w-xl" />
-                    </div>
+                    <PasswordCard />
                 </div>
-            </div>
-        </AuthenticatedLayout>
+            </AdminLayout>
+        </>
     );
 }

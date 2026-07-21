@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import FormModal from "./form-modal";
 import { router, usePage } from "@inertiajs/react";
 import { deleteConfirm, successAlert } from "@/lib/alert";
+import DetailAkunModal from "./detail-akun-modal";
 
 type Props = {
     forum: any;
@@ -26,6 +27,8 @@ export default function Index({ forum, kategori, filters }: Props) {
 
     const [open, setOpen] = useState(false);
     const [selectedForum, setSelectedForum] = useState<any>(null);
+
+    const [openDetailAkun, setOpenDetailAkun] = useState(false);
 
     const pageProps: any = usePage().props;
     const flash = pageProps.flash || {};
@@ -87,6 +90,12 @@ export default function Index({ forum, kategori, filters }: Props) {
                                         }
                                     });
                                 },
+
+                                // Detail Akun
+                                (row) => {
+                                    setSelectedForum(row);
+                                    setOpenDetailAkun(true);
+                                },
                             )}
                             data={forum.data}
                         />
@@ -105,9 +114,16 @@ export default function Index({ forum, kategori, filters }: Props) {
                             setSelectedForum(null);
                         }}
                         forum={selectedForum}
-                        kategori={kategori}
                     />
 
+                    <DetailAkunModal
+                        open={openDetailAkun}
+                        onClose={() => {
+                            setOpenDetailAkun(false);
+                            setSelectedForum(null);
+                        }}
+                        forum={selectedForum}
+                    />
                 </div>
             </AdminLayout>
         </>

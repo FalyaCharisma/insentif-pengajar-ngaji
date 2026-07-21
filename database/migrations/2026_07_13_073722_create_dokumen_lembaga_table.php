@@ -19,20 +19,20 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('jenis_dokumen_id')
-                ->constrained('master_jenis_dokumen')
+                ->constrained('jenis_dokumen')
                 ->cascadeOnDelete();
 
             $table->string('nama_file');
 
             $table->string('path');
 
-            $table->enum('status', [
+            $table->enum('status_verifikasi', [
                 'pending',
                 'disetujui',
                 'ditolak'
             ])->default('pending');
 
-            $table->text('catatan')->nullable();
+            $table->text('catatan_verifikasi')->nullable();
 
             $table->foreignId('verified_by')
                 ->nullable()
@@ -42,6 +42,7 @@ return new class extends Migration
             $table->timestamp('verified_at')->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

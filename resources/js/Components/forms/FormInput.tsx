@@ -8,6 +8,7 @@ type Props = {
     label: string;
     error?: string;
     required?: boolean;
+    helperText?: string;
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
 export default function FormInput({

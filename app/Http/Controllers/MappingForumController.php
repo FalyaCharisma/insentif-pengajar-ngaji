@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Forum;
 use App\Models\Lembaga;
-use App\Models\Kategori;
+use App\Models\KategoriLembaga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -39,7 +39,7 @@ class MappingForumController extends Controller
 
         return Inertia::render('mapping-forum/index', [
             'forums' => $forums,
-            'kategori' => Kategori::orderBy('nama')->get(),
+            'kategori' => KategoriLembaga::orderBy('nama')->get(),
             'selectedForum' => $selectedForum,
 
             'lembagas' => $query

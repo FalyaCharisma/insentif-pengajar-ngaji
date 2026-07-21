@@ -16,6 +16,8 @@ type Props = {
     required?: boolean;
     placeholder?: string;
 
+    disabled?: boolean;
+
     onChange: (value: any) => void;
 
     loadOptions: (
@@ -29,6 +31,7 @@ export default function FormSelect2({
     error,
     required = false,
     placeholder = "Pilih data...",
+    disabled = false,
     onChange,
     loadOptions,
 }: Props) {
@@ -53,6 +56,8 @@ export default function FormSelect2({
                 placeholder={placeholder}
 
                 isClearable
+
+                isDisabled={disabled}
 
                 classNames={{
                     control: ({ isFocused }) =>

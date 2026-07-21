@@ -13,9 +13,17 @@ return new class extends Migration
     {
         Schema::create('forum', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->string('kode')->unique();
             $table->string('nama');
-            $table->foreignId('kategori_id')->constrained('kategori')->cascadeOnDelete();
-            $table->string('nik');
+            $table->string('telepon', 20)->nullable();
+
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
+
             $table->timestamps();
             $table->softDeletes();
         });

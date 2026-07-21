@@ -9,9 +9,13 @@ export interface ProfilLembaga {
     // Alamat
     alamat: string | null;
     provinsi: string | null;
+    kode_provinsi: string | null;
     kabupaten: string | null;
+    kode_kabupaten: string | null;
     kecamatan: string | null;
-    desa: string | null;
+    kode_kecamatan: string | null;
+    kelurahan: string | null;
+    kode_kelurahan: string | null;
     kode_pos: string | null;
 
     // Kontak

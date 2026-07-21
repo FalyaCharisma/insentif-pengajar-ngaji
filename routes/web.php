@@ -15,6 +15,12 @@ use App\Http\Controllers\KuotaController;
 use App\Http\Controllers\MappingForumController;
 use App\Http\Controllers\MappingKategoriController;
 use App\Http\Controllers\PengajarController;
+use App\Http\Controllers\JenisDokumenController;
+use App\Http\Controllers\ProfilLembagaController;
+use App\Http\Controllers\DokumenLembagaController;
+use App\Http\Controllers\PasswordController;
+
+
 
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
@@ -49,10 +55,13 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::patch('/profile/password', [PasswordController::class, 'update'])->name('profile.password');
 
     Route::resource('kategori', KategoriController::class);
     Route::resource('forum', ForumController::class);
+    Route::put('/forum/{forum}/reset-password', [ForumController::class, 'resetPassword'])->name('forum.reset-password');
+
+    // Lembaga
     Route::resource('lembaga', LembagaController::class);
     Route::prefix('lembaga')
         ->name('lembaga.')
@@ -67,6 +76,33 @@ Route::middleware('auth')->group(function () {
 
     Route::get('mapping-kategori', [MappingKategoriController::class, 'index'])->name('mapping-kategori.index');
     Route::put('mapping-kategori', [MappingKategoriController::class, 'update'])->name('mapping-kategori.update');
+
+    // Route tambahan lembaga
+    Route::prefix('lembaga')->name('lembaga.')->controller(LembagaController::class)->group(function () {
+            Route::get('data', 'data')->name('data');
+            Route::put('{lembaga}/reset-password', 'resetPassword')->name('reset-password');
+        });
+
+    // Profil Lembaga
+    Route::prefix('lembaga')->name('lembaga.')->controller(ProfilLembagaController::class)->group(function () {
+            Route::get('{lembaga}/profil', 'index')->name('profil.index');
+            Route::put('{lembaga}/profil', 'update')->name('profil.update');
+            Route::put('profil/{profil}/verifikasi', 'verifikasi')->name('profil.verifikasi');
+        });
+
+    // Jenis Dokumen
+    Route::resource('jenis-dokumen', JenisDokumenController::class);
+
+    // Dokumen Lembaga
+    Route::controller(DokumenLembagaController::class)->prefix('dokumen')->name('dokumen.')->group(function () {
+            Route::get('/lembaga/{lembaga}', 'index')->name('index');
+            Route::post('/lembaga/{lembaga}', 'store')->name('store');
+            Route::get('/{dokumenLembaga}', 'show')->name('show');
+            Route::put('/{dokumenLembaga}', 'update')->name('update');
+            Route::delete('/{dokumenLembaga}', 'destroy')->name('destroy');
+            Route::put('/{dokumenLembaga}/verifikasi', 'verifikasi')->name('verifikasi');
+
+    });
 
     Route::resource('data-siswa', SiswaController::class);
 

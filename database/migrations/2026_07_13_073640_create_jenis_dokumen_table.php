@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('master_jenis_dokumen', function (Blueprint $table) {
+        Schema::create('jenis_dokumen', function (Blueprint $table) {
             $table->id();
 
             $table->string('nama');
@@ -20,6 +20,7 @@ return new class extends Migration
                 ->default(true);
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('master_jenis_dokumen');
+        Schema::dropIfExists('jenis_dokumen');
     }
 };

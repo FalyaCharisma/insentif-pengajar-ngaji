@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import { useAuth } from "@/lib/auth";
 import { sidebarMenus } from "@/data/sidebarMenus";
+import type { SidebarMenu } from "@/types/sidebar";
 
 import {
     ChevronLeft,
@@ -17,14 +18,18 @@ type Props = {
 
 export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
     const { hasRole } = useAuth();
-    const { url } = usePage();
+    const { url, props } = usePage<any>();
+
+    const lembagaId = props.auth?.user?.lembaga_id;
+
+    const menus = sidebarMenus(lembagaId);
 
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const [openMenus, setOpenMenus] = useState<string[]>([]);
 
-    const isParentActive = (menu: (typeof sidebarMenus)[number]) => {
-        return menu.children?.some((child) => url.startsWith(child.href ?? ""));
+    const isParentActive = (menu: SidebarMenu) => {
+        return menu.children?.some(child => isActive(child));
     };
 
     const toggleMenu = (title: string) => {
@@ -35,28 +40,30 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
         );
     };
 
-    const isActive = (path: string) => {
-        return url.startsWith(path);
+    const isActive = (menu: SidebarMenu) => {
+        if (!menu.href) return false;
+
+        const matches = menu.activeMatch ?? [menu.href];
+
+        return matches.some(match => url.startsWith(match));
     };
 
-    const menuClass = (path: string) =>
+    const menuClass = (menu: SidebarMenu) =>
         `
         flex items-center
         ${collapsed ? "justify-center px-2" : "gap-3 px-4"}
         py-3 rounded-2xl transition-all duration-200
         ${
-            isActive(path)
+            isActive(menu)
                 ? "bg-indigo-600 text-white shadow-lg"
                 : "text-slate-300 hover:bg-slate-800"
         }
     `;
 
     useEffect(() => {
-        const activeParents = sidebarMenus
+        const activeParents = menus
             .filter(menu =>
-                menu.children?.some(child =>
-                    url.startsWith(child.href ?? "")
-                )
+                menu.children?.some(child => isActive(child))
             )
             .map(menu => menu.title);
 
@@ -135,7 +142,7 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
 
                 {/* MENU */}
                 <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-2">
-                    {sidebarMenus
+                    {menus
                         .filter((menu) => menu.roles.some((role) => hasRole(role)))
                         .map((menu) => {
                             const Icon = menu.icon;
@@ -178,7 +185,7 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                                                         <Link
                                                             key={child.title}
                                                             href={child.href!}
-                                                            className={menuClass(child.href!)}
+                                                            className={menuClass(child)}
                                                         >
                                                             {child.icon && (
                                                                 <child.icon size={18} />
@@ -197,7 +204,7 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                                 <Link
                                     key={menu.title}
                                     href={menu.href!}
-                                    className={menuClass(menu.href!)}
+                                    className={menuClass(menu)}
                                 >
                                     {Icon && <Icon size={20} />}
                                     {!collapsed && <span>{menu.title}</span>}

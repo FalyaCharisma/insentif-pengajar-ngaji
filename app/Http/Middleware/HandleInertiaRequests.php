@@ -40,6 +40,8 @@ class HandleInertiaRequests extends Middleware
                         'name' => auth()->user()->name,
                         'email' => auth()->user()->email,
                         'role' => $request->user()->getRoleNames()->first(),
+                        'lembaga_id' => optional($request->user()->lembaga)->id,
+                        'force_change_password' => auth()->user()->force_change_password,
                     ]
                     : null,
             ],

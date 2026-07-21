@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kategori;
+use App\Models\KategoriLembaga;
 use App\Models\Lembaga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +12,7 @@ class MappingKategoriController extends Controller
 {
     public function index(Request $request)
     {
-        $kategori = Kategori::orderBy('nama')->get();
+        $kategori = KategoriLembaga::orderBy('nama')->get();
 
         $selectedKategori = $request->filled('kategori_id') ? (int) $request->kategori_id : null;
 

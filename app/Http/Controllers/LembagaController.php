@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 use App\Models\Lembaga;
-use App\Models\Kategori;
+use App\Models\KategoriLembaga;
+use App\Models\ProfilLembaga;
+use App\Models\JenisDokumen;
+use App\Models\DokumenLembaga;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class LembagaController extends Controller
 {
@@ -36,7 +40,7 @@ class LembagaController extends Controller
             request: $request,
             searchable: [
                 'nama',
-                'kode_lembaga',
+                'kode',
             ],
             sortable: [
                 'id',
@@ -59,7 +63,7 @@ class LembagaController extends Controller
                 ]
             ),
 
-            'kategori' => Kategori::orderBy('nama')->get(),
+            'kategori' => KategoriLembaga::orderBy('nama')->get(),
         ]);
     }
 
@@ -78,7 +82,7 @@ class LembagaController extends Controller
             // Buat user
             $user = User::create([
                 'name' => $validated['nama'],
-                'email' => strtolower($kode) . '@insentif.com',
+                'email' => strtolower($kode) . '@mail.com',
                 'password' => Hash::make($kode . '@kdr'),
                 'force_change_password' => true,
                 'status' => 'aktif',
@@ -105,7 +109,7 @@ class LembagaController extends Controller
     public function update(Request $request, Lembaga $lembaga)
     {
         $validated = $request->validate([
-            'kategori_id' => 'required|exists:kategori,id',
+            'kategori_id' => 'required|exists:kategori_lembaga,id',
             'nama' => 'required|string|max:255',
             'status' => 'required|in:aktif,nonaktif',
         ]);

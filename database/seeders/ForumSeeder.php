@@ -3,35 +3,50 @@
 namespace Database\Seeders;
 
 use App\Models\Forum;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class ForumSeeder extends Seeder
 {
     public function run(): void
     {
-        $kategoriIds = DB::table('kategori')->pluck('id')->toArray();
-
-        Forum::insert([
+        $data = [
             [
                 'nama' => 'Forum Guru Ngaji Al-Hikmah',
-                'user_id' => 3,
-                'kategori_id' => $kategoriIds[0] ?? 1,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'telepon' => '081234567890',
             ],
-            // [
-            //     'nama' => 'Forum Pendidikan Islam Kota',
-            //     'kategori_id' => $kategoriIds[1] ?? 1,
-            //     'created_at' => now(),
-            //     'updated_at' => now(),
-            // ],
-            // [
-            //     'nama' => 'Forum TPQ Nasional',
-            //     'kategori_id' => $kategoriIds[2] ?? 1,
-            //     'created_at' => now(),
-            //     'updated_at' => now(),
-            // ],
-        ]);
+            [
+                'nama' => 'Forum Pendidikan Islam Kota',
+                'telepon' => '081234567891',
+            ],
+            [
+                'nama' => 'Forum TPQ Nasional',
+                'telepon' => '081234567892',
+            ],
+        ];
+
+        foreach ($data as $item) {
+
+            $kode = Forum::generateKode();
+
+            $user = User::create([
+                'name' => $item['nama'],
+                'email' => strtolower($kode) . '@mail.com',
+                'password' => Hash::make($kode . '@kdr'),
+                'force_change_password' => true,
+                'status' => 'aktif',
+            ]);
+
+            $user->assignRole('forum');
+
+            Forum::create([
+                'user_id' => $user->id,
+                'kode' => $kode,
+                'nama' => $item['nama'],
+                'telepon' => $item['telepon'],
+                'status' => 'aktif',
+            ]);
+        }
     }
 }
