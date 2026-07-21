@@ -6,21 +6,37 @@ use Illuminate\Http\Request;
 use App\Models\Forum;
 use App\Models\KategoriLembaga;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use App\Models\User;
 
 class ForumController extends Controller
 {
+
     public function index(Request $request)
     {
-        $query = Forum::with('kategori');
+        $query = Forum::with('user');
 
         // SEARCH
         if ($request->filled('search')) {
-            $query->where('nama', 'like', '%' . $request->search . '%')
-                  ->orWhere('nik', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('kode', 'like', '%' . $request->search . '%')
+                ->orWhere('nama', 'like', '%' . $request->search . '%')
+                ->orWhere('telepon', 'like', '%' . $request->search . '%');
+            });
         }
 
         // SORTING
-        $allowedSorts = ['id', 'nama', 'nik', 'created_at'];
+        $allowedSorts = [
+            'id',
+            'kode',
+            'nama',
+            'telepon',
+            'status',
+            'created_at'
+        ];
 
         $sort = in_array($request->sort, $allowedSorts)
             ? $request->sort
@@ -42,7 +58,6 @@ class ForumController extends Controller
 
         return Inertia::render('forum/index', [
             'forum' => $forum,
-            'kategori' => KategoriLembaga::all(),
 
             'filters' => [
                 'search' => $request->search ?? '',
@@ -57,26 +72,71 @@ class ForumController extends Controller
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'kategori_id' => 'required|exists:kategori,id',
-            'nik' => 'required|string|max:20',
+            'telepon' => 'nullable|string|max:20',
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
-        Forum::create($validated);
+        DB::transaction(function () use ($validated) {
 
-        return back()->with('success', 'Forum berhasil ditambahkan');
+            // Generate kode forum
+            $kode = Forum::generateKode();
+
+            // Buat user
+            $user = User::create([
+                'name' => $validated['nama'],
+                'email' => strtolower($kode) . '@mail.com',
+                'password' => Hash::make($kode . '@kdr'),
+                'force_change_password' => true,
+                'status' => 'aktif',
+            ]);
+
+            // Assign role
+            $user->assignRole('forum');
+
+            // Simpan forum
+            Forum::create([
+                'user_id' => $user->id,
+                'kode' => $kode,
+                'nama' => $validated['nama'],
+                'telepon' => $validated['telepon'],
+                'status' => 'aktif',
+            ]);
+        });
+
+        return back()->with(
+            'success',
+            'Data forum berhasil ditambahkan'
+        );
     }
 
     public function update(Request $request, Forum $forum)
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'kategori_id' => 'required|exists:kategori,id',
-            'nik' => 'required|string|max:20',
+            'telepon' => 'nullable|string|max:20',
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
-        $forum->update($validated);
+        DB::transaction(function () use ($forum, $validated) {
 
-        return back()->with('success', 'Forum berhasil diperbarui');
+            // Update user
+            $forum->user->update([
+                'name' => $validated['nama'],
+                'status' => $validated['status'],
+            ]);
+
+            // Update forum
+            $forum->update([
+                'nama' => $validated['nama'],
+                'telepon' => $validated['telepon'],
+                'status' => $validated['status'],
+            ]);
+        });
+
+        return back()->with(
+            'success',
+            'Data forum berhasil diperbarui'
+        );
     }
 
     public function destroy(Forum $forum)
@@ -84,5 +144,20 @@ class ForumController extends Controller
         $forum->delete();
 
         return back()->with('success', 'Forum berhasil dihapus');
+    }
+
+    public function resetPassword(Forum $forum)
+    {
+        $forum->load('user');
+
+        $forum->user->update([
+            'password' => Hash::make($forum->kode . '@kdr'),
+            'force_change_password' => true,
+        ]);
+
+        return back()->with(
+            'success',
+            'Password berhasil direset.'
+        );
     }
 }

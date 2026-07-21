@@ -122,7 +122,7 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                         <Pagination links={lembaga.links} />
                     </div>
 
-                    {/* Modal */}
+                {/* Modal */}
                 <FormModal
                         open={open}
                         onClose={() => {

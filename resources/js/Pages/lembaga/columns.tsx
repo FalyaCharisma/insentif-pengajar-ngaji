@@ -89,20 +89,20 @@ export const columns = (
                         Akun
                     </button>
 
-                        <button
-                            onClick={() =>
-                                router.visit(
-                                    route(
-                                        "lembaga.profil.index",
-                                        lembaga.id
-                                    )
+                    <button
+                        onClick={() =>
+                            router.visit(
+                                route(
+                                    "lembaga.profil.index",
+                                    lembaga.id
                                 )
-                            }
-                            className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs text-white hover:bg-emerald-600"
-                        >
-                            <Building2 className="h-3.5 w-3.5" />
-                            Profil
-                        </button>
+                            )
+                        }
+                        className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs text-white hover:bg-emerald-600"
+                    >
+                        <Building2 className="h-3.5 w-3.5" />
+                        Profil
+                    </button>
 
                     <button
                         onClick={() => onEdit(lembaga)}

@@ -20,9 +20,9 @@ return new class extends Migration
 
             $table->string('kode')->unique();
             $table->string('nama');
-            $table->string('no_hp', 20)->nullable();
+            $table->string('telepon', 20)->nullable();
 
-            $table->boolean('status')->default(true);
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
 
             $table->timestamps();
             $table->softDeletes();

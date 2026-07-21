@@ -13,14 +13,12 @@ type Props = {
     open: boolean;
     onClose: () => void;
     forum?: any;
-    kategori?: any[];
 };
 
 export default function FormModal({
     open,
     onClose,
     forum,
-    kategori = [],
 }: Props) {
 
     const isEdit = !!forum;
@@ -36,8 +34,8 @@ export default function FormModal({
         _method: "",
 
         nama: "",
-        kategori_id: "",
-        nik: "",
+        telepon: "",
+        status: "aktif",
     });
 
     useEffect(() => {
@@ -48,8 +46,8 @@ export default function FormModal({
                 _method: "",
 
                 nama: forum.nama ?? "",
-                kategori_id: forum.kategori_id ?? "",
-                nik: forum.nik ?? "",
+                telepon: forum.telepon ?? "",
+                status: forum.status ?? "aktif",
             });
 
         } else {
@@ -59,7 +57,7 @@ export default function FormModal({
 
     }, [forum, open]);
 
-    const submit = (e: any) => {
+    const submit = (e: React.FormEvent) => {
 
         e.preventDefault();
 
@@ -67,23 +65,15 @@ export default function FormModal({
 
             setData("_method", "put");
 
-            post(
-                route("forum.update", forum.id),
-                {
-                    onSuccess: () => {
-                        onClose();
-                    },
-                },
-            );
+            post(route("forum.update", forum.id), {
+                onSuccess: () => onClose(),
+            });
 
             return;
         }
 
         post(route("forum.store"), {
-
-            onSuccess: () => {
-                onClose();
-            },
+            onSuccess: () => onClose(),
         });
     };
 
@@ -97,13 +87,10 @@ export default function FormModal({
 
             <div className="p-6">
 
-                {/* HEADER */}
                 <div className="mb-6">
 
                     <h2 className="text-xl font-semibold text-slate-800">
-                        {isEdit
-                            ? "Edit Forum"
-                            : "Tambah Forum"}
+                        {isEdit ? "Edit Forum" : "Tambah Forum"}
                     </h2>
 
                     <p className="mt-1 text-sm text-slate-500">
@@ -112,55 +99,45 @@ export default function FormModal({
 
                 </div>
 
-                {/* FORM */}
                 <form
                     onSubmit={submit}
                     className="space-y-5"
                 >
-
-                    {/* NAMA */}
                     <FormInput
                         label="Nama Forum"
                         value={data.nama}
-                        onChange={(e) =>
-                            setData(
-                                "nama",
-                                e.target.value,
-                            )
-                        }
+                        onChange={(e) => setData("nama", e.target.value)}
                         placeholder="Masukkan nama forum"
                         error={errors.nama}
                     />
 
-                    {/* KATEGORI */}
-                    <FormSelect2
-                        label="Kategori"
-                        value={data.kategori_id}
-                        options={(kategori || []).map((k: any) => ({
-                            label: k.nama,
-                            value: k.id,
-                        }))}
-                        onChange={(value) =>
-                            setData("kategori_id", value)
-                        }
-                        error={errors.kategori_id}
-                    />
-
-                    {/* NIK */}
                     <FormInput
-                        label="NIK"
-                        value={data.nik}
-                        onChange={(e) =>
-                            setData(
-                                "nik",
-                                e.target.value,
-                            )
-                        }
-                        placeholder="Masukkan NIK"
-                        error={errors.nik}
+                        label="Telepon"
+                        value={data.telepon}
+                        onChange={(e) => setData("telepon", e.target.value)}
+                        placeholder="08xxxxxxxxxx"
+                        error={errors.telepon}
                     />
 
-                    {/* FOOTER */}
+                    {isEdit && (
+                        <FormSelect2
+                            label="Status"
+                            value={data.status}
+                            options={[
+                                {
+                                    value: "aktif",
+                                    label: "Aktif",
+                                },
+                                {
+                                    value: "nonaktif",
+                                    label: "Nonaktif",
+                                },
+                            ]}
+                            onChange={(value) => setData("status", value)}
+                            error={errors.status}
+                        />
+                    )}
+
                     <div className="flex items-center justify-end gap-3 pt-4">
 
                         <SecondaryButton

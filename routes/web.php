@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('kategori', KategoriController::class);
     Route::resource('forum', ForumController::class);
+    Route::put('/forum/{forum}/reset-password', [ForumController::class, 'resetPassword'])->name('forum.reset-password');
 
     // Lembaga
     Route::resource('lembaga', LembagaController::class);

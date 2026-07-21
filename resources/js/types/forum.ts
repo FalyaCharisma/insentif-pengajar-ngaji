@@ -1,14 +1,20 @@
 export type Forum = {
     id: number;
-    nama: string;
-    kategori_id: number;
-    nik: string;
+    user_id: number;
 
-    kategori?: {
+    kode: string;
+    nama: string;
+    telepon?: string | null;
+    status: "aktif" | "nonaktif";
+
+    user?: {
         id: number;
-        nama: string;
+        name: string;
+        email: string;
+        role?: string;
     };
 
     created_at?: string;
     updated_at?: string;
+    deleted_at?: string | null;
 };
