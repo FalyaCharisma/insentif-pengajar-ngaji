@@ -28,25 +28,7 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
         href: "/dashboard",
         roles: ["superadmin", "dindik", "lembaga", "forum"],
     },
-
-    {
-        title: "Manajemen User",
-        icon: Shield,
-        roles: ["superadmin"],
-        children: [
-            {
-                title: "User",
-                href: "/users",
-                roles: ["superadmin"],
-            },
-            {
-                title: "Role & Permission",
-                href: "/roles",
-                roles: ["superadmin"],
-            },
-        ],
-    },
-
+    
     {
         title: "Master Data",
         icon: FolderKanban,
