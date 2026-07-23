@@ -95,6 +95,14 @@ class PengajuanProposalController extends Controller
 
         $periode = Periode::where('status', true)->first();
 
+        $canCreateProposal = false;
+
+        if ($periode) {
+            $today = now()->toDateString();
+
+            $canCreateProposal = $today >= $periode->mulai_upload && $today <= $periode->selesai_upload;
+        }
+
         $jumlahSiswa = 0;
         $estimasiKuota = 0;
 
@@ -114,15 +122,11 @@ class PengajuanProposalController extends Controller
 
         return Inertia::render('pengajuan-proposal/index', [
             'pengajuanProposal' => $pengajuanProposal,
-
             'periode' => $periode,
-
+            'canCreateProposal' => $canCreateProposal,
             'jumlahSiswa' => $jumlahSiswa,
-
             'estimasiKuota' => $estimasiKuota,
-
             'lembaga' => $lembaga,
-
             'filters' => [
                 'search' => $request->search ?? '',
                 'sort' => $sort,
@@ -136,6 +140,10 @@ class PengajuanProposalController extends Controller
     {
         $this->authorize('create', PengajuanProposal::class);
 
+        $periode = Periode::where('status', true)->first();
+
+        abort_unless($periode && now()->between($periode->mulai_upload, $periode->selesai_upload), 403, 'Periode pengajuan proposal telah berakhir atau belum dibuka.');
+
         $validated = $request->validate([
             'periode_id' => ['required', 'exists:periode,id'],
             'jumlah_guru' => 'required|integer|min:1',
@@ -144,9 +152,7 @@ class PengajuanProposalController extends Controller
 
         $lembaga = auth()->user()->lembaga;
 
-        $kuota = Kuota::where('lembaga_id', $lembaga->id)
-            ->where('periode_id', $validated['periode_id'])
-            ->first();
+        $kuota = Kuota::where('lembaga_id', $lembaga->id)->where('periode_id', $validated['periode_id'])->first();
 
         if (!$kuota) {
             return back()->withErrors([
@@ -201,9 +207,7 @@ class PengajuanProposalController extends Controller
 
         $lembaga = auth()->user()->lembaga;
 
-        $kuota = Kuota::where('lembaga_id', $lembaga->id)
-            ->where('periode_id', $validated['periode_id'])
-            ->first();
+        $kuota = Kuota::where('lembaga_id', $lembaga->id)->where('periode_id', $validated['periode_id'])->first();
 
         if (!$kuota) {
             return back()->withErrors([
