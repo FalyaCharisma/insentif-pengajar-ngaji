@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('proposal_id')->constrained('pengajuan_proposal')->cascadeOnDelete();
             $table->foreignId('pengajar_id')->constrained('pengajar')->cascadeOnDelete();
-            $table->enum('status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'verified', 'rejected', 'revision'])->default('pending');
             $table->text('catatan')->nullable();
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('verified_at')->nullable();

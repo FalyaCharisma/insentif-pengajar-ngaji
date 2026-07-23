@@ -182,35 +182,42 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
     {
         title: "Pengajuan Insentif",
         icon: UserStar,
+        href: "/pengajuan-insentif",
         roles: ["superadmin", "lembaga", "forum", "dindik"],
-        children: [
-            {
-                title: "Pengajuan",
-                href: "/pengajuan-insentif",
-                roles: ["superadmin", "lembaga"],
-            },
-            {
-                title: "Usulan Penerima",
-                href: "/usulan-penerima",
-                roles: ["superadmin", "lembaga"],
-            },
-            {
-                title: "Verifikasi Penerima",
-                href: "/verifikasi-penerima",
-                roles: ["superadmin", "forum"],
-            },
-            {
-                title: "Finalisasi",
-                href: "/finalisasi",
-                roles: ["superadmin", "forum"],
-            },
-            {
-                title: "Kuota Estimasi",
-                href: "/kuota-estimasi",
-                roles: ["superadmin", "lembaga"],
-            },
-        ],
     },
+
+    // {
+    //     title: "Pengajuan Insentif",
+    //     icon: UserStar,
+    //     roles: ["superadmin", "lembaga", "forum", "dindik"],
+    //     children: [
+    //         {
+    //             title: "Pengajuan",
+    //             href: "/pengajuan-insentif",
+    //             roles: ["superadmin", "lembaga"],
+    //         },
+    //         {
+    //             title: "Usulan Penerima",
+    //             href: "/usulan-penerima",
+    //             roles: ["superadmin", "lembaga"],
+    //         },
+    //         {
+    //             title: "Verifikasi Penerima",
+    //             href: "/verifikasi-penerima",
+    //             roles: ["superadmin", "forum"],
+    //         },
+    //         {
+    //             title: "Finalisasi",
+    //             href: "/finalisasi",
+    //             roles: ["superadmin", "forum"],
+    //         },
+    //         {
+    //             title: "Kuota Estimasi",
+    //             href: "/kuota-estimasi",
+    //             roles: ["superadmin", "lembaga"],
+    //         },
+    //     ],
+    // },
 
     {
         title: "Monitoring",

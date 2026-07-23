@@ -82,7 +82,24 @@ class PengajuanInsentifController extends Controller
             $perPage = 10;
         }
 
-        $proposal = $query->paginate($perPage)->withQueryString();
+        $proposal = $query
+            ->paginate($perPage)
+            ->through(function ($item) {
+                if ($item->diajukan_count == 0) {
+                    $item->status_pengajuan = 'belum';
+                } elseif ($item->revision_count > 0) {
+                    $item->status_pengajuan = 'revision';
+                } elseif ($item->pending_count > 0) {
+                    $item->status_pengajuan = 'pending';
+                } elseif ($item->verified_count == $item->diajukan_count && $item->diajukan_count > 0) {
+                    $item->status_pengajuan = 'verified';
+                } else {
+                    $item->status_pengajuan = 'pending';
+                }
+
+                return $item;
+            })
+            ->withQueryString();
 
         return Inertia::render('pengajuan-insentif/index', [
             'pengajuanProposal' => $proposal,
@@ -100,16 +117,39 @@ class PengajuanInsentifController extends Controller
     {
         $proposal->load(['periode', 'lembaga']);
 
-        $pengajar = Pengajar::query()->where('lembaga_id', $proposal->lembaga_id)->where('status', 'aktif')->orderBy('nama')->get();
+        $usulan = PengajuanInsentif::where('proposal_id', $proposal->id)->get()->keyBy('pengajar_id');
 
-        $selectedPengajar = PengajuanInsentif::where('proposal_id', $proposal->id)->pluck('pengajar_id');
+        $pengajar = Pengajar::where('lembaga_id', $proposal->lembaga_id)
+            ->where('status', 'aktif')
+            ->orderBy('nama')
+            ->get()
+            ->map(function ($item) use ($usulan) {
+                $pengajuan = $usulan->get($item->id);
+
+                return [
+                    'id' => $item->id,
+                    'nama' => $item->nama,
+                    'nik' => $item->nik,
+                    'tempat_lahir' => $item->tempat_lahir,
+                    'tgl_lahir' => $item->tgl_lahir,
+                    'pendidikan_terakhir' => $item->pendidikan_terakhir,
+
+                    // status usulan
+                    'selected' => $pengajuan !== null,
+                    'status_pengajuan' => $pengajuan?->status,
+                    'catatan' => $pengajuan?->catatan,
+
+                    // dipakai forum nanti
+                    'pengajuan_insentif_id' => $pengajuan?->id,
+                    'verified_by' => $pengajuan?->verified_by,
+                    'verified_at' => $pengajuan?->verified_at,
+                ];
+            });
 
         return Inertia::render('pengajuan-insentif/usulan', [
             'proposal' => $proposal,
             'pengajar' => $pengajar,
-            'selectedPengajar' => $selectedPengajar,
         ]);
-
     }
 
     public function store(Request $request)
@@ -124,21 +164,9 @@ class PengajuanInsentifController extends Controller
 
         $proposal = PengajuanProposal::findOrFail($request->proposal_id);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Pastikan proposal milik lembaga login
-        |--------------------------------------------------------------------------
-        */
-
         if ($proposal->lembaga_id != auth()->user()->lembaga->id) {
             abort(403);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Proposal harus sudah diverifikasi
-        |--------------------------------------------------------------------------
-        */
 
         if ($proposal->status !== 'verified') {
             return back()->withErrors([
@@ -146,23 +174,11 @@ class PengajuanInsentifController extends Controller
             ]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Maksimal guru sesuai proposal
-        |--------------------------------------------------------------------------
-        */
-
         if (count($request->pengajar) > $proposal->jumlah_guru) {
             return back()->withErrors([
                 'pengajar' => 'Jumlah pengajar melebihi kuota yang diajukan.',
             ]);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Pastikan semua pengajar milik lembaga tersebut
-        |--------------------------------------------------------------------------
-        */
 
         $validPengajar = Pengajar::where('lembaga_id', $proposal->lembaga_id)->where('status', 'aktif')->whereIn('id', $request->pengajar)->count();
 
@@ -170,27 +186,48 @@ class PengajuanInsentifController extends Controller
             abort(403);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Simpan
-        |--------------------------------------------------------------------------
-        */
+        $existing = PengajuanInsentif::where('proposal_id', $proposal->id)->get();
 
-        DB::transaction(function () use ($proposal, $request) {
-            PengajuanInsentif::where('proposal_id', $proposal->id)->delete();
+        $verifiedPengajar = $existing->where('status', 'verified')->pluck('pengajar_id');
 
-            foreach ($request->pengajar as $pengajarId) {
-                PengajuanInsentif::create([
-                    'proposal_id' => $proposal->id,
-
-                    'pengajar_id' => $pengajarId,
-
-                    'status' => 'pending',
+        foreach ($verifiedPengajar as $pengajarId) {
+            if (!in_array($pengajarId, $request->pengajar)) {
+                return back()->withErrors([
+                    'pengajar' => 'Pengajar yang sudah diverifikasi tidak dapat dihapus.',
                 ]);
+            }
+        }
+
+        DB::transaction(function () use ($proposal, $request, $existing) {
+            $selectedIds = collect($request->pengajar);
+
+            foreach ($existing as $item) {
+                if (!$selectedIds->contains($item->pengajar_id) && $item->status !== 'verified') {
+                    $item->delete();
+                }
+            }
+
+            foreach ($selectedIds as $pengajarId) {
+                $exists = $existing->where('pengajar_id', $pengajarId)->first();
+
+                if (!$exists) {
+                    PengajuanInsentif::create([
+                        'proposal_id' => $proposal->id,
+                        'pengajar_id' => $pengajarId,
+                        'status' => 'pending',
+                    ]);
+                } elseif ($exists->status === 'revision') {
+                    $exists->update([
+                        'status' => 'pending',
+                        'catatan' => null,
+                        'verified_by' => null,
+                        'verified_at' => null,
+                    ]);
+                }
             }
         });
 
-        return back()->with('success', 'Pengajuan insentif berhasil disimpan.');
+        return back()->with('success', 'Usulan penerima berhasil disimpan.');
     }
 
     public function show(PengajuanProposal $proposal)
@@ -244,41 +281,89 @@ class PengajuanInsentifController extends Controller
         ]);
     }
 
-    public function verify(PengajuanInsentif $pengajuanInsentif)
+    public function verify(PengajuanInsentif $pengajuan)
     {
-        $this->authorize('verify', $pengajuanInsentif);
+        $this->authorize('verify', $pengajuan);
 
-        $pengajuanInsentif->update([
+        if ($pengajuan->status !== 'pending') {
+            return back()->withErrors([
+                'error' => 'Pengajuan sudah diproses.',
+            ]);
+        }
+
+        $pengajuan->update([
             'status' => 'verified',
-
             'catatan' => null,
-
             'verified_by' => auth()->id(),
-
             'verified_at' => now(),
         ]);
 
-        return back()->with('success', 'Pengajar berhasil diverifikasi.');
+        return back()->with('success', 'Pengajuan berhasil diverifikasi.');
     }
 
-    public function reject(Request $request, PengajuanInsentif $pengajuanInsentif)
+    public function reject(Request $request, PengajuanInsentif $pengajuan)
     {
-        $this->authorize('verify', $pengajuanInsentif);
+        $this->authorize('verify', $pengajuan);
+
+        if ($pengajuan->status !== 'pending') {
+            return back()->withErrors([
+                'error' => 'Pengajuan sudah diproses.',
+            ]);
+        }
 
         $request->validate([
             'catatan' => ['required', 'string', 'max:255'],
         ]);
 
-        $pengajuanInsentif->update([
+        $pengajuan->update([
             'status' => 'revision',
-
             'catatan' => $request->catatan,
-
             'verified_by' => auth()->id(),
-
             'verified_at' => now(),
         ]);
 
         return back()->with('success', 'Pengajar dikembalikan untuk revisi.');
+    }
+
+    public function verifySelected(Request $request)
+    {
+        $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['exists:pengajuan_insentif,id'],
+        ]);
+
+        DB::transaction(function () use ($request) {
+            PengajuanInsentif::whereIn('id', $request->ids)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'verified',
+                    'catatan' => null,
+                    'verified_by' => auth()->id(),
+                    'verified_at' => now(),
+                ]);
+        });
+
+        return back()->with('success', 'Pengajuan berhasil diverifikasi.');
+    }
+    public function rejectSelected(Request $request)
+    {
+        $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['exists:pengajuan_insentif,id'],
+            'catatan' => ['required', 'string'],
+        ]);
+
+        DB::transaction(function () use ($request) {
+            PengajuanInsentif::whereIn('id', $request->ids)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'revision',
+                    'catatan' => $request->catatan,
+                    'verified_by' => auth()->id(),
+                    'verified_at' => now(),
+                ]);
+        });
+
+        return back()->with('success', 'Pengajuan berhasil dikembalikan untuk revisi.');
     }
 }

@@ -16,10 +16,7 @@ import { columns } from "./columns";
 
 import { IndexProps, Proposal } from "@/types/pengajuan-insentif";
 
-export default function Index({
-    pengajuanProposal,
-    filters,
-}: IndexProps) {
+export default function Index({ pengajuanProposal, filters }: IndexProps) {
     const { auth } = usePage().props as any;
 
     const { setParams } = useQueryParams(
@@ -30,8 +27,9 @@ export default function Index({
     const isLembaga = auth.user.role === "lembaga";
 
     const [openModal, setOpenModal] = useState(false);
-    const [selectedProposal, setSelectedProposal] =
-        useState<Proposal | null>(null);
+    const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(
+        null,
+    );
 
     const openDetail = async (proposal: Proposal) => {
         try {
@@ -60,6 +58,68 @@ export default function Index({
                                 : "Monitoring pengajuan insentif."
                         }
                     />
+                    <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5">
+                                <svg
+                                    className="h-5 w-5 text-sky-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
+                                    />
+                                </svg>
+                            </div>
+
+                            <div>
+                                <h3 className="text-sm font-semibold text-sky-800">
+                                    Informasi Pengajuan Insentif
+                                </h3>
+
+                                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-sky-700">
+                                    <li>
+                                        Pengajuan penerima insentif hanya dapat
+                                        dilakukan apabila
+                                        <strong>
+                                            {" "}
+                                            proposal lembaga telah berstatus
+                                            Terverifikasi
+                                        </strong>
+                                        .
+                                    </li>
+
+                                    <li>
+                                        Proposal yang masih berstatus
+                                        <strong>
+                                            {" "}
+                                            Menunggu Verifikasi
+                                        </strong>{" "}
+                                        atau
+                                        <strong> Revisi</strong> belum dapat
+                                        mengajukan penerima insentif.
+                                    </li>
+
+                                    <li>
+                                        Pengajar yang diusulkan sebagai penerima
+                                        insentif harus sesuai dengan kuota yang
+                                        telah ditetapkan pada proposal.
+                                    </li>
+
+                                    <li>
+                                        Setelah usulan disimpan, Forum akan
+                                        melakukan verifikasi terhadap setiap
+                                        pengajar yang diajukan sebelum
+                                        ditetapkan sebagai penerima insentif.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
 
                     <TableToolbar
                         filters={filters}

@@ -20,8 +20,6 @@ use App\Http\Controllers\ProfilLembagaController;
 use App\Http\Controllers\DokumenLembagaController;
 use App\Http\Controllers\PasswordController;
 
-
-
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
 })->name('portal.beranda');
@@ -78,13 +76,19 @@ Route::middleware('auth')->group(function () {
     Route::put('mapping-kategori', [MappingKategoriController::class, 'update'])->name('mapping-kategori.update');
 
     // Route tambahan lembaga
-    Route::prefix('lembaga')->name('lembaga.')->controller(LembagaController::class)->group(function () {
+    Route::prefix('lembaga')
+        ->name('lembaga.')
+        ->controller(LembagaController::class)
+        ->group(function () {
             Route::get('data', 'data')->name('data');
             Route::put('{lembaga}/reset-password', 'resetPassword')->name('reset-password');
         });
 
     // Profil Lembaga
-    Route::prefix('lembaga')->name('lembaga.')->controller(ProfilLembagaController::class)->group(function () {
+    Route::prefix('lembaga')
+        ->name('lembaga.')
+        ->controller(ProfilLembagaController::class)
+        ->group(function () {
             Route::get('{lembaga}/profil', 'index')->name('profil.index');
             Route::put('{lembaga}/profil', 'update')->name('profil.update');
             Route::put('profil/{profil}/verifikasi', 'verifikasi')->name('profil.verifikasi');
@@ -94,15 +98,17 @@ Route::middleware('auth')->group(function () {
     Route::resource('jenis-dokumen', JenisDokumenController::class);
 
     // Dokumen Lembaga
-    Route::controller(DokumenLembagaController::class)->prefix('dokumen')->name('dokumen.')->group(function () {
+    Route::controller(DokumenLembagaController::class)
+        ->prefix('dokumen')
+        ->name('dokumen.')
+        ->group(function () {
             Route::get('/lembaga/{lembaga}', 'index')->name('index');
             Route::post('/lembaga/{lembaga}', 'store')->name('store');
             Route::get('/{dokumenLembaga}', 'show')->name('show');
             Route::put('/{dokumenLembaga}', 'update')->name('update');
             Route::delete('/{dokumenLembaga}', 'destroy')->name('destroy');
             Route::put('/{dokumenLembaga}/verifikasi', 'verifikasi')->name('verifikasi');
-
-    });
+        });
 
     Route::resource('data-siswa', SiswaController::class);
 
@@ -132,11 +138,14 @@ Route::middleware('auth')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
             Route::get('/{proposal}', 'show')->name('show');
-            Route::patch('/{proposal}/verify', 'verify')->name('verify');
-            Route::patch('/{proposal}/reject', 'reject')->name('reject');
+            Route::patch('/{pengajuan}/verify', 'verify')->name('verify');
+            Route::patch('/{pengajuan}/reject', 'reject')->name('reject');
+            Route::get('pengajuan-insentif/{proposal}/usulan', 'usulan')->name('usulan');
         });
 
-    Route::get('pengajuan-insentif/{proposal}/usulan', [PengajuanInsentifController::class, 'usulan'])->name('pengajuan-insentif.usulan');
+    Route::patch('verify-selected', [PengajuanInsentifController::class, 'verifySelected'])->name('pengajuan-insentif.verify-selected');
+
+    Route::patch('reject-selected', [PengajuanInsentifController::class, 'rejectSelected'])->name('pengajuan-insentif.reject-selected');
 });
 
 require __DIR__ . '/auth.php';
