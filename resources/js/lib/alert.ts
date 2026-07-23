@@ -85,3 +85,48 @@ export const inputConfirm = (
         },
     });
 };
+
+export const toggleStatusConfirm = async (
+    status: "aktif" | "nonaktif",
+    nama: string,
+) => {
+    const isAktif = status === "aktif";
+
+    return await Swal.fire({
+        title: isAktif
+            ? "Nonaktifkan Pengajar?"
+            : "Aktifkan Pengajar?",
+
+        text: isAktif
+            ? `Pengajar "${nama}" akan dinonaktifkan.`
+            : `Pengajar "${nama}" akan diaktifkan kembali.`,
+
+        icon: "question",
+
+        showCancelButton: true,
+
+        confirmButtonColor: isAktif ? "#f59e0b" : "#16a34a",
+
+        cancelButtonColor: "#64748b",
+
+        confirmButtonText: isAktif
+            ? "Ya, Nonaktifkan"
+            : "Ya, Aktifkan",
+
+        cancelButtonText: "Batal",
+    });
+};
+
+export const errorAlert = (message: string) => {
+    return Swal.fire({
+        icon: "error",
+
+        title: "Gagal",
+
+        text: message,
+
+        confirmButtonText: "OK",
+
+        confirmButtonColor: "#dc2626",
+    });
+};

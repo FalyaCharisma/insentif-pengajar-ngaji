@@ -72,7 +72,7 @@ class ForumController extends Controller
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'telepon' => 'nullable|string|max:20',
+            'telepon' => ['nullable', 'regex:/^[0-9]{10,12}$/'],
             'status' => 'required|in:aktif,nonaktif',
         ]);
 
@@ -113,7 +113,7 @@ class ForumController extends Controller
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'telepon' => 'nullable|string|max:20',
+            'telepon' => ['nullable', 'regex:/^[0-9]{10,12}$/'],
             'status' => 'required|in:aktif,nonaktif',
         ]);
 

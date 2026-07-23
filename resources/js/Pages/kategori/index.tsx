@@ -9,7 +9,7 @@ import PageHeader from "@/Components/PageHeader";
 import { useState, useEffect } from "react";
 import FormModal from "./form-modal";
 import { router, usePage } from "@inertiajs/react";
-import { deleteConfirm, successAlert } from "@/lib/alert";
+import { deleteConfirm, successAlert, errorAlert } from "@/lib/alert";
 
 type Props = {
     kategori: any;
@@ -33,6 +33,10 @@ export default function Index({ kategori, filters }: Props) {
     useEffect(() => {
         if (flash?.success) {
             successAlert(flash.success);
+        }
+
+        if (flash?.error) {
+            errorAlert(flash.error);
         }
     }, [flash]);
 

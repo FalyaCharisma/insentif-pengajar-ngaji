@@ -15,45 +15,47 @@ export default function KontakCard({
 }: Props) {
     return (
         <>
-            {/* Telepon */}
-            <FormInput
-                label="Nomor Telepon"
-                value={data.telepon}
-                onChange={(e) =>
-                    setData("telepon", e.target.value)
-                }
-                disabled={!canEdit}
-                error={errors.telepon}
-                placeholder="Masukkan nomor telepon"
-                required
-            />
-
-            {/* Email */}
-            <FormInput
-                label="Email"
-                type="email"
-                value={data.email}
-                onChange={(e) =>
-                    setData("email", e.target.value)
-                }
-                disabled={!canEdit}
-                error={errors.email}
-                placeholder="Masukkan email"
-                required
-            />
-
-            {/* Website */}
-            <div className="md:col-span-2">
+            <div className="space-y-2">
+                {/* Telepon */}
                 <FormInput
-                    label="Website"
-                    value={data.website}
+                    label="Nomor Telepon"
+                    value={data.telepon}
                     onChange={(e) =>
-                        setData("website", e.target.value)
+                        setData("telepon", e.target.value)
                     }
                     disabled={!canEdit}
-                    error={errors.website}
-                    placeholder="https://..."
+                    error={errors.telepon}
+                    placeholder="Masukkan nomor telepon"
+                    required
                 />
+
+                {/* Email */}
+                <FormInput
+                    label="Email"
+                    type="email"
+                    value={data.email}
+                    onChange={(e) =>
+                        setData("email", e.target.value)
+                    }
+                    disabled={!canEdit}
+                    error={errors.email}
+                    placeholder="Masukkan email"
+                    required
+                />
+
+                {/* Website */}
+                <div className="md:col-span-2">
+                    <FormInput
+                        label="Website"
+                        value={data.website}
+                        onChange={(e) =>
+                            setData("website", e.target.value)
+                        }
+                        disabled={!canEdit}
+                        error={errors.website}
+                        placeholder="https://..."
+                    />
+                </div>
             </div>
         </>
     );

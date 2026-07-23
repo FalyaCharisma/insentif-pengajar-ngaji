@@ -1,8 +1,11 @@
 import { Pencil, Trash2 } from "lucide-react";
 
 export const columns = (
-    onEdit: (pengajar: any) => void,
-    onDelete: (pengajar: any) => void,
+    role: string,
+    onDetail: (row: any) => void,
+    onEdit: (row: any) => void,
+    onToggleStatus: (row: any) => void,
+    onDelete: (row: any) => void,
 ) => [
     {
         id: "no",
@@ -23,13 +26,16 @@ export const columns = (
     },
 
     {
-        accessorKey: "jabatan",
-        header: "Jabatan",
+        accessorKey: "lembaga.nama",
+        header: "Lembaga",
+        cell: ({ row }: any) => (
+            row.original.lembaga?.nama ?? "-"
+        ),
     },
 
     {
-        accessorKey: "no_hp",
-        header: "No. HP",
+        accessorKey: "jabatan",
+        header: "Jabatan",
     },
 
     {
@@ -51,46 +57,89 @@ export const columns = (
     },
 
     {
-        id: "aksi",
-        header: () => <div className="w-full text-center">Aksi</div>,
-        cell: ({ row }: any) => {
-            const pengajar = row.original;
+    id: "aksi",
+    header: () => <div className="w-full text-center">Aksi</div>,
+    cell: ({ row }: any) => {
+        const pengajar = row.original;
 
-            return (
-                <div className="flex justify-center gap-2">
+        const canViewDetail = ["superadmin", "forum", "dindik"].includes(role);
+        const canManage = ["superadmin", "lembaga"].includes(role);
+        const canDelete = ["superadmin"].includes(role);
+
+
+        return (
+            <div className="flex justify-center gap-2">
+                {/* Detail */}
+                {canViewDetail && (
                     <button
-                        onClick={() => onEdit(pengajar)}
+                        onClick={() => onDetail(pengajar)}
                         className="
                             flex items-center gap-1
                             rounded-lg
-                            bg-amber-500
+                            bg-sky-600
                             px-3 py-1.5
                             text-xs text-white
-                            hover:bg-amber-600
+                            hover:bg-sky-700
                             transition
                         "
                     >
-                        <Pencil className="h-3.5 w-3.5" />
-                        Edit
+                        Detail
                     </button>
+                )}
 
+                {/* Kelola */}
+                {canManage && (
+                    <>
+                        <button
+                            onClick={() => onEdit(pengajar)}
+                            className="
+                                flex items-center gap-1
+                                rounded-lg
+                                bg-amber-500
+                                px-3 py-1.5
+                                text-xs text-white
+                                hover:bg-amber-600
+                                transition
+                            "
+                        >
+                            <Pencil className="h-3.5 w-3.5" />
+                            Edit
+                        </button>
+
+                        <button
+                            onClick={() => onToggleStatus(pengajar)}
+                            className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs text-white transition ${
+                                pengajar.status === "aktif"
+                                    ? "bg-slate-600 hover:bg-slate-700"
+                                    : "bg-emerald-600 hover:bg-emerald-700"
+                            }`}
+                        >
+                            {pengajar.status === "aktif"
+                                ? "Nonaktifkan"
+                                : "Aktifkan"}
+                        </button>
+                    </>
+                )}
+
+                {canDelete && (
                     <button
                         onClick={() => onDelete(pengajar)}
                         className="
                             flex items-center gap-1
                             rounded-lg
-                            bg-red-500
+                            bg-red-600
                             px-3 py-1.5
                             text-xs text-white
-                            hover:bg-red-600
+                            hover:bg-red-700
                             transition
                         "
                     >
                         <Trash2 className="h-3.5 w-3.5" />
                         Hapus
                     </button>
-                </div>
-            );
-        },
+                )}
+            </div>
+        );
     },
+},
 ];

@@ -285,12 +285,16 @@ export default function CreatePengajar({ pengajar }: Props) {
                                 <FormInput
                                     label="No HP"
                                     type="number"
+                                    maxLength={12}
                                     value={data.no_hp}
-                                    onChange={(e) =>
-                                        setData("no_hp", e.target.value)
-                                    }
+                                    onChange={(e) =>{
+                                        const value = e.target.value.replace(/\D/g, "").slice(0, 12);
+                                        setData("no_hp", value)
+                                    }}
+                                    placeholder="08xxxxxxxxxx"
                                     error={errors.no_hp}
                                 />
+
                                 {!isLembaga && (
                                     <FormSelect2
                                         label="Lembaga"
@@ -305,6 +309,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         error={errors.lembaga_id}
                                     />
                                 )}
+                                
                                 <FormInput
                                     label="Jabatan"
                                     value={data.jabatan}

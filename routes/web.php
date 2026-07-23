@@ -19,6 +19,7 @@ use App\Http\Controllers\JenisDokumenController;
 use App\Http\Controllers\ProfilLembagaController;
 use App\Http\Controllers\DokumenLembagaController;
 use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\DashboardController;
 
 
 
@@ -46,13 +47,12 @@ Route::get('/kontak', function () {
 //     return redirect()->route('login');
 // });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})
-    ->middleware(['auth'])
-    ->name('dashboard');
-
 Route::middleware('auth')->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index']) ->name('dashboard');
+
+    // Profil Setting
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/password', [PasswordController::class, 'update'])->name('profile.password');
@@ -104,20 +104,23 @@ Route::middleware('auth')->group(function () {
 
     });
 
+    // Data Siswa
     Route::resource('data-siswa', SiswaController::class);
 
+    // Data Pengurus
     Route::resource('pengurus', PengurusController::class)->parameters([
         'pengurus' => 'pengurus',
     ]);
 
-    Route::resource('pengajar', PengajarController::class)->parameters([
-        'pengajar' => 'pengajar',
-    ]);
+    // Data Pengajar
+    Route::resource('pengajar', PengajarController::class)->parameters(['pengajar' => 'pengajar',]);
+    Route::controller(PengajarController::Class)->prefix('pengajar')->name('pengajar.')->group(function (){
+        Route::patch('/{pengajar}/toggle-status', 'toggleStatus')->name('toggle-status');
+        Route::put('/{pengajar}/verifikasi', 'verifikasi')->name('verifikasi');
+    });
 
-    Route::resource('kuota', KuotaController::class)->parameters([
-        'kuota' => 'kuota',
-    ]);
-
+    // Setting Kuota
+    Route::resource('kuota', KuotaController::class)->parameters(['kuota' => 'kuota']);
     Route::post('kuota/generate', [KuotaController::class, 'generate'])->name('kuota.generate');
 
     Route::delete('kuota/periode/{periode}', [KuotaController::class, 'destroyPeriode'])->name('kuota.destroyPeriode');

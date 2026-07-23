@@ -26,7 +26,7 @@ export default function CardSection({
                 )}
             </div>
 
-            <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+            <div className="p-6">
                 {children}
             </div>
 

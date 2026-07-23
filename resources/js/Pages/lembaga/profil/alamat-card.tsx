@@ -24,75 +24,77 @@ export default function AlamatCard({
 
     return (
         <>
-            <FormAsyncSelect
-                label="Provinsi"
-                value={data.provinsi}
-                onChange={() => {}}
-                loadOptions={async () => []}
-                disabled
-            />
+            <div className="space-y-2">
+                <FormAsyncSelect
+                    label="Provinsi"
+                    value={data.provinsi}
+                    onChange={() => {}}
+                    loadOptions={async () => []}
+                    disabled
+                />
 
-            <FormAsyncSelect
-                label="Kabupaten / Kota"
-                value={data.kabupaten}
-                onChange={() => {}}
-                loadOptions={async () => []}
-                disabled
-            />
+                <FormAsyncSelect
+                    label="Kabupaten / Kota"
+                    value={data.kabupaten}
+                    onChange={() => {}}
+                    loadOptions={async () => []}
+                    disabled
+                />
 
-            <FormAsyncSelect
-                label="Kecamatan"
-                value={data.kecamatan}
-                onChange={(value: any) => {
-                    setData("kecamatan", value);
-                    setData("kelurahan", null);
-                }}
-                loadOptions={searchKecamatanKotaKediri}
-                disabled={!canEdit}
-                error={errors.kecamatan}
-                required
-            />
+                <FormAsyncSelect
+                    label="Kecamatan"
+                    value={data.kecamatan}
+                    onChange={(value: any) => {
+                        setData("kecamatan", value);
+                        setData("kelurahan", null);
+                    }}
+                    loadOptions={searchKecamatanKotaKediri}
+                    disabled={!canEdit}
+                    error={errors.kecamatan}
+                    required
+                />
 
-            <FormAsyncSelect
-                key={data.kecamatan?.value}
-                label="Kelurahan"
-                value={data.kelurahan}
-                onChange={(value: any) =>
-                    setData("kelurahan", value)
-                }
-                loadOptions={(inputValue) =>
-                    searchKelurahan(
-                        data.kecamatan?.value ?? "",
-                        inputValue
-                    )
-                }
-                disabled={!canEdit}
-                required
-            />
+                <FormAsyncSelect
+                    key={data.kecamatan?.value}
+                    label="Kelurahan"
+                    value={data.kelurahan}
+                    onChange={(value: any) =>
+                        setData("kelurahan", value)
+                    }
+                    loadOptions={(inputValue) =>
+                        searchKelurahan(
+                            data.kecamatan?.value ?? "",
+                            inputValue
+                        )
+                    }
+                    disabled={!canEdit}
+                    required
+                />
 
-            <FormInput
-                label="Kode Pos"
-                value={data.kode_pos}
-                onChange={(e) =>
-                    setData("kode_pos", e.target.value)
-                }
-                disabled={!canEdit}
-                error={errors.kode_pos}
-                required
-            />
+                <FormInput
+                    label="Kode Pos"
+                    value={data.kode_pos}
+                    onChange={(e) =>
+                        setData("kode_pos", e.target.value)
+                    }
+                    disabled={!canEdit}
+                    error={errors.kode_pos}
+                    required
+                />
 
-        
-            <FormTextArea
-                label="Alamat Lengkap"
-                value={data.alamat}
-                onChange={(e) =>
-                    setData("alamat", e.target.value)
-                }
-                disabled={!canEdit}
-                error={errors.alamat}
-                rows={4}
-                required
-            />
+            
+                <FormTextArea
+                    label="Alamat Lengkap"
+                    value={data.alamat}
+                    onChange={(e) =>
+                        setData("alamat", e.target.value)
+                    }
+                    disabled={!canEdit}
+                    error={errors.alamat}
+                    rows={4}
+                    required
+                />
+            </div>
         </>
     );
 }

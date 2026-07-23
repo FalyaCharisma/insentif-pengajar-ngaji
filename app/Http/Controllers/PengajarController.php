@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class PengajarController extends Controller
@@ -23,6 +24,12 @@ class PengajarController extends Controller
 
         if ($user->hasRole('lembaga') && $user->lembaga) {
             $query->where('lembaga_id', $user->lembaga->id);
+        }
+
+        if ($user->hasRole('forum') && $user->forum) {
+            $query->whereHas('lembaga', function ($q) use ($user) {
+                $q->where('forum_id', $user->forum->id);
+            });
         }
 
         if ($request->filled('search')) {
@@ -158,7 +165,7 @@ class PengajarController extends Controller
      */
     public function show(Pengajar $pengajar)
     {
-        $pengajar->load('lembaga');
+        $pengajar->load('lembaga', 'verifier');
 
         return inertia('pengajar/show', [
             'pengajar' => $pengajar,
@@ -170,14 +177,12 @@ class PengajarController extends Controller
      */
     public function edit(Pengajar $pengajar)
     {
-        $pengajar->load('lembaga');
+        $pengajar->load([
+            'lembaga',
+        ]);
 
-        $user = auth()->user();
-
-        return Inertia::render('pengajar/create', [
+        return inertia('pengajar/show', [
             'pengajar' => $pengajar,
-
-            'lembaga' => $user->hasRole(['superadmin', 'dindik']) ? Lembaga::orderBy('nama')->get() : [],
         ]);
     }
 
@@ -297,4 +302,45 @@ class PengajarController extends Controller
 
         return redirect()->route('pengajar.index')->with('success', 'Data berhasil dihapus');
     }
+
+    public function toggleStatus(Pengajar $pengajar)
+    {
+        $pengajar->update([
+            'status' => $pengajar->status === 'aktif'
+                ? 'nonaktif'
+                : 'aktif',
+        ]);
+
+        return back()->with(
+            'success',
+            'Status pengajar berhasil diperbarui.'
+        );
+    }
+
+    public function verifikasi(Request $request, Pengajar $pengajar)
+    {
+        $validated = $request->validate([
+            'status_verifikasi' => 'required|in:disetujui,ditolak',
+            'catatan_verifikasi' => 'nullable|string',
+        ]);
+
+        if (
+            $validated['status_verifikasi'] === 'ditolak' &&
+            empty($validated['catatan_verifikasi'])
+        ) {
+            return back()->withErrors([
+                'catatan_verifikasi' => 'Catatan verifikasi wajib diisi jika pengajuan ditolak.',
+            ]);
+        }
+
+        $pengajar->update([
+            'status_verifikasi' => $validated['status_verifikasi'],
+            'catatan_verifikasi' => $validated['catatan_verifikasi'],
+            'verified_by' => Auth::id(),
+            'verified_at' => now(),
+        ]);
+
+        return back()->with('success', 'Verifikasi pengajar berhasil disimpan.');
+    }
+
 }

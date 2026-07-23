@@ -40,6 +40,20 @@ return new class extends Migration {
             $table->string('pas_foto')->nullable();
             $table->string('status_insentif')->nullable();
             $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
+            $table->enum('status_verifikasi', [
+                'pending',
+                'disetujui',
+                'ditolak',
+            ])->default('pending');
+
+            $table->text('catatan_verifikasi')->nullable();
+
+            $table->foreignId('verified_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->timestamp('verified_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

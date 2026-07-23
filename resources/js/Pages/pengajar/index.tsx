@@ -5,11 +5,11 @@ import AdminLayout from "@/layouts/app-layout";
 
 import DataTable from "@/Components/DataTable";
 import PageHeader from "@/Components/PageHeader";
-import Pagination from "@/Components/pagination";
+import Pagination from "@/Components/Pagination";
 import TableToolbar from "@/Components/TableToolbar";
 
 import { useQueryParams } from "@/hooks/use-query-params";
-import { deleteConfirm, successAlert } from "@/lib/alert";
+import { deleteConfirm, successAlert, toggleStatusConfirm } from "@/lib/alert";
 
 import { columns } from "./columns";
 
@@ -31,6 +31,14 @@ export default function Index({ pengajar, filters }: Props) {
         }
     }, [flash]);
 
+    const { auth } = usePage().props as any;
+    const role = auth.user.role;
+    const isForum = role === "forum";
+    const isLembaga = role === "lembaga";
+    const isDindik = role === "dindik";
+    const isSuperadmin = role === "superadmin";
+
+
     return (
         <>
             <Head title="Data Pengajar" />
@@ -47,6 +55,7 @@ export default function Index({ pengajar, filters }: Props) {
                         setParams={setParams}
                         searchPlaceholder="Cari nama atau NIK..."
                         addButtonLabel="Tambah Pengajar"
+                        hideAddButton={isForum}
                         onAdd={() => router.visit(route("pengajar.create"))}
                         sortOptions={[
                             {
@@ -70,19 +79,35 @@ export default function Index({ pengajar, filters }: Props) {
 
                     <DataTable
                         columns={columns(
+                            role,
+
+                            // Detail / Verifikasi
+                            (row) => {
+                                router.get(route("pengajar.show", row.id));
+                            },
+
+                            // Edit
                             (row) => {
                                 router.get(route("pengajar.edit", row.id));
                             },
 
+                            // Toggle Status
+                            (row) => {
+                                toggleStatusConfirm(row.status, row.nama).then((result) => {
+                                    if (!result.isConfirmed) return;
+
+                                    router.patch(route("pengajar.toggle-status", row.id));
+                                });
+                            },
+
+                            // Hapus
                             (row) => {
                                 deleteConfirm(
                                     `Pengajar "${row.nama}" akan dihapus.`,
                                 ).then((result) => {
                                     if (!result.isConfirmed) return;
 
-                                    router.delete(
-                                        route("pengajar.destroy", row.id),
-                                    );
+                                    router.delete(route("pengajar.destroy", row.id));
                                 });
                             },
                         )}

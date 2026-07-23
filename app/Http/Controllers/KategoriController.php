@@ -59,7 +59,7 @@ class KategoriController extends Controller
         return back()->with('success', 'Kategori berhasil ditambahkan');
     }
 
-    public function update(Request $request, Kategori $kategori)
+    public function update(Request $request, KategoriLembaga $kategori)
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
@@ -70,13 +70,22 @@ class KategoriController extends Controller
         return back()->with('success', 'Kategori berhasil diperbarui');
     }
 
-    public function destroy(Kategori $kategori)
+    public function destroy(KategoriLembaga $kategori)
     {
+        $jumlah = $kategori->lembaga()->count();
+
+        if ($jumlah > 0) {
+            return back()->with(
+                'error',
+                "Kategori tidak dapat dihapus karena masih digunakan oleh {$jumlah} lembaga."
+            );
+        }
+
         $kategori->delete();
 
         return back()->with(
             'success',
-            'Kategori berhasil dihapus'
+            'Kategori berhasil dihapus.'
         );
     }
 }

@@ -355,85 +355,86 @@ export default function Profil({
                         onSubmit={submit}
                         className="space-y-6"
                     >
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <CardSection
+                                title="Informasi Lembaga"
+                            >
+                                <InformasiCard
+                                    data={data}
+                                    setData={setData}
+                                    errors={errors}
+                                    canEdit={canEdit}
+                                    lembaga={lembaga}
+                                    kategori={kategori}
+                                />
+                            </CardSection>
 
-                        <CardSection
-                            title="Informasi Lembaga"
-                        >
-                            <InformasiCard
-                                data={data}
-                                setData={setData}
-                                errors={errors}
-                                canEdit={canEdit}
-                                lembaga={lembaga}
-                                kategori={kategori}
-                            />
-                        </CardSection>
+                            <CardSection
+                                title="Alamat"
+                            >
+                                <AlamatCard
+                                    data={data}
+                                    setData={setData}
+                                    errors={errors}
+                                    canEdit={canEdit}
+                                />
+                            </CardSection>
 
-                        <CardSection
-                            title="Alamat"
-                        >
-                            <AlamatCard
-                                data={data}
-                                setData={setData}
-                                errors={errors}
-                                canEdit={canEdit}
-                            />
-                        </CardSection>
+                            <CardSection
+                                title="Kontak"
+                            >
+                                <KontakCard
+                                    data={data}
+                                    setData={setData}
+                                    errors={errors}
+                                    canEdit={canEdit}
+                                />
+                            </CardSection>
 
-                        <CardSection
-                            title="Kontak"
-                        >
-                            <KontakCard
-                                data={data}
-                                setData={setData}
-                                errors={errors}
-                                canEdit={canEdit}
-                            />
-                        </CardSection>
+                            <CardSection
+                                title="Pimpinan"
+                            >
+                                <PimpinanCard
+                                    data={data}
+                                    setData={setData}
+                                    errors={errors}
+                                    canEdit={canEdit}
+                                />
+                            </CardSection>
 
-                        <CardSection
-                            title="Pimpinan"
-                        >
-                            <PimpinanCard
-                                data={data}
-                                setData={setData}
-                                errors={errors}
-                                canEdit={canEdit}
-                            />
-                        </CardSection>
+                            <CardSection
+                                title="Operator"
+                            >
+                                <OperatorCard
+                                    data={data}
+                                    setData={setData}
+                                    errors={errors}
+                                    canEdit={canEdit}
+                                />
+                            </CardSection>
 
-                        <CardSection
-                            title="Operator"
-                        >
-                            <OperatorCard
-                                data={data}
-                                setData={setData}
-                                errors={errors}
-                                canEdit={canEdit}
-                            />
-                        </CardSection>
-
-                        <CardSection
-                            title="Rekening"
-                        >
-                            <RekeningCard
-                                data={data}
-                                setData={setData}
-                                errors={errors}
-                                canEdit={canEdit}
-                            />
-                        </CardSection>
+                            <CardSection
+                                title="Rekening"
+                            >
+                                <RekeningCard
+                                    data={data}
+                                    setData={setData}
+                                    errors={errors}
+                                    canEdit={canEdit}
+                                />
+                            </CardSection>
+                         </div>
 
                         <div className="flex items-center justify-between pt-4">
 
-                        <button
-                            type="button"
-                            onClick={() => router.visit(route("lembaga.index"))}
-                            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-100"
-                        >
-                            <ArrowLeft size={18} />
-                            Kembali
-                        </button>
+                            <button
+                                type="button"
+                                onClick={() => router.visit(route("lembaga.index"))}
+                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-100"
+                            >
+                                <ArrowLeft size={18} />
+                                Kembali
+                            </button>
 
                             <div className="flex items-center gap-3">
 

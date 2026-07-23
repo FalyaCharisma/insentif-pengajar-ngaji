@@ -113,8 +113,13 @@ export default function FormModal({
 
                     <FormInput
                         label="Telepon"
+                        type="number"
+                        maxLength={12}
                         value={data.telepon}
-                        onChange={(e) => setData("telepon", e.target.value)}
+                        onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "").slice(0, 12);
+                            setData("telepon", value);
+                        }}
                         placeholder="08xxxxxxxxxx"
                         error={errors.telepon}
                     />

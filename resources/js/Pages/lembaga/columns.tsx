@@ -2,8 +2,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2, User2, Building2 } from "lucide-react";
 import { Lembaga } from "@/types/lembaga";
 import { router } from "@inertiajs/react";
-
+    
 export const columns = (
+    canDelete: boolean,
     onEdit: (lembaga: Lembaga) => void,
     onDelete: (lembaga: Lembaga) => void,
     onDetailAkun: (lembaga: Lembaga) => void,
@@ -112,14 +113,15 @@ export const columns = (
                         Edit
                     </button>
 
-                    <button
-                        onClick={() => onDelete(lembaga)}
-                        className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white hover:bg-red-600"
-                    >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Hapus
-                    </button>
-
+                    {canDelete && (
+                        <button
+                            onClick={() => onDelete(lembaga)}
+                            className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white hover:bg-red-600"
+                        >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Hapus
+                        </button>
+                    )}
                 </div>
             );
         },

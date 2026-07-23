@@ -123,12 +123,12 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
             {
                 title: "Data Pengajar",
                 href: "/pengajar",
-                roles: ["superadmin", "dindik", "lembaga"],
+                roles: ["superadmin", "lembaga", "dindik"],
             },
             {
                 title: "Verifikasi Pengajar",
-                href: "/verifikasi-pengajar",
-                roles: ["superadmin", "forum"],
+                href: "/pengajar",
+                roles: ["forum"],
             },
         ],
     },
@@ -206,43 +206,36 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
         ],
     },
 
-    {
-        title: "Monitoring",
-        icon: BarChart3,
-        roles: ["superadmin", "dindik", "forum"],
-        children: [
-            {
-                title: "Monitoring Verifikasi",
-                href: "/monitoring",
-                roles: ["superadmin", "dindik", "forum"],
-            },
-            {
-                title: "Lembaga Belum Diverifikasi",
-                href: "/belum-verifikasi",
-                roles: ["superadmin", "dindik"],
-            },
-            {
-                title: "Progress Lembaga",
-                href: "/progress-lembaga",
-                roles: ["superadmin", "forum"],
-            },
-            {
-                title: "Kuota Terpakai",
-                href: "/kuota-terpakai",
-                roles: ["superadmin", "forum"],
-            },
-            {
-                title: "Audit Log",
-                href: "/audit-log",
-                roles: ["superadmin", "superadmin"],
-            },
-        ],
-    },
-
-    {
-        title: "Settings",
-        icon: Settings,
-        href: "/settings",
-        roles: ["superadmin", "dindik", "lembaga", "forum"],
-    },
+    // {
+    //     title: "Monitoring",
+    //     icon: BarChart3,
+    //     roles: ["superadmin", "dindik", "forum"],
+    //     children: [
+    //         {
+    //             title: "Monitoring Verifikasi",
+    //             href: "/monitoring",
+    //             roles: ["superadmin", "dindik", "forum"],
+    //         },
+    //         {
+    //             title: "Lembaga Belum Diverifikasi",
+    //             href: "/belum-verifikasi",
+    //             roles: ["superadmin", "dindik"],
+    //         },
+    //         {
+    //             title: "Progress Lembaga",
+    //             href: "/progress-lembaga",
+    //             roles: ["superadmin", "forum"],
+    //         },
+    //         {
+    //             title: "Kuota Terpakai",
+    //             href: "/kuota-terpakai",
+    //             roles: ["superadmin", "forum"],
+    //         },
+    //         {
+    //             title: "Audit Log",
+    //             href: "/audit-log",
+    //             roles: ["superadmin", "superadmin"],
+    //         },
+    //     ],
+    // },
 ];

@@ -17,6 +17,6 @@ class KategoriLembaga extends Model
 
     public function lembaga()
     {
-        return $this->hasMany(Lembaga::class);
+        return $this->hasMany(Lembaga::class, 'kategori_id', 'id');
     }
 }

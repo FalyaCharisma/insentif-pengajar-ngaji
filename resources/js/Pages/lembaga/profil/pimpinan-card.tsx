@@ -15,37 +15,39 @@ export default function PimpinanCard({
 }: Props) {
     return (
         <>
-            {/* Nama Pimpinan */}
-            <FormInput
-                label="Nama Pimpinan"
-                value={data.nama_pimpinan}
-                onChange={(e) =>
-                    setData(
-                        "nama_pimpinan",
-                        e.target.value
-                    )
-                }
-                disabled={!canEdit}
-                error={errors.nama_pimpinan}
-                placeholder="Masukkan nama pimpinan"
-                required
-            />
+            <div className="space-y-2">
+                {/* Nama Pimpinan */}
+                <FormInput
+                    label="Nama Pimpinan"
+                    value={data.nama_pimpinan}
+                    onChange={(e) =>
+                        setData(
+                            "nama_pimpinan",
+                            e.target.value
+                        )
+                    }
+                    disabled={!canEdit}
+                    error={errors.nama_pimpinan}
+                    placeholder="Masukkan nama pimpinan"
+                    required
+                />
 
-            {/* Jabatan Pimpinan */}
-            <FormInput
-                label="Jabatan Pimpinan"
-                value={data.jabatan_pimpinan}
-                onChange={(e) =>
-                    setData(
-                        "jabatan_pimpinan",
-                        e.target.value
-                    )
-                }
-                disabled={!canEdit}
-                error={errors.jabatan_pimpinan}
-                placeholder="Contoh: Kepala TPQ"
-                required
-            />
+                {/* Jabatan Pimpinan */}
+                <FormInput
+                    label="Jabatan Pimpinan"
+                    value={data.jabatan_pimpinan}
+                    onChange={(e) =>
+                        setData(
+                            "jabatan_pimpinan",
+                            e.target.value
+                        )
+                    }
+                    disabled={!canEdit}
+                    error={errors.jabatan_pimpinan}
+                    placeholder="Contoh: Kepala TPQ"
+                    required
+                />
+            </div>
         </>
     );
 }

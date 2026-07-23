@@ -15,6 +15,8 @@ import { Lembaga } from "@/types/lembaga";
 import FormModal from "./form-modal";
 import DetailAkunModal from "./detail-akun-modal";
 
+import { useAuth } from "@/lib/auth";
+
 type Props = {
     lembaga: any;
     filters: any;
@@ -41,6 +43,10 @@ export default function Index({ lembaga, filters, kategori }: Props) {
             successAlert(flash.success);
         }
     }, [flash]);
+
+    const { hasRole } = useAuth();
+
+    const canDelete = hasRole("superadmin");
 
     return (
         <>
@@ -85,36 +91,38 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                         "
                     >
                     <DataTable
-                            columns={columns(
+                        columns={columns(
 
-                                // Edit
-                                (lembaga) => {
-                                    setSelectedLembaga(lembaga);
-                                    setOpen(true);
-                                },
+                            canDelete,
 
-                                // Delete
-                                (lembaga) => {
-                                    deleteConfirm(
-                                        `Lembaga "${lembaga.nama}" akan dihapus`,
-                                    ).then((result) => {
-                                        if (result.isConfirmed) {
-                                            router.delete(
-                                                route("lembaga.destroy", lembaga.id)
-                                            );
-                                        }
-                                    });
-                                },
+                            // Edit
+                            (lembaga) => {
+                                setSelectedLembaga(lembaga);
+                                setOpen(true);
+                            },
 
-                                // Detail Akun
-                                (lembaga) => {
-                                    setSelectedLembaga(lembaga);
-                                    setOpenDetailAkun(true);
-                                },
+                            // Delete
+                            (lembaga) => {
+                                deleteConfirm(
+                                    `Lembaga "${lembaga.nama}" akan dihapus`,
+                                ).then((result) => {
+                                    if (result.isConfirmed) {
+                                        router.delete(
+                                            route("lembaga.destroy", lembaga.id)
+                                        );
+                                    }
+                                });
+                            },
 
-                            )}
-                            data={lembaga.data}
-                        />
+                            // Detail Akun
+                            (lembaga) => {
+                                setSelectedLembaga(lembaga);
+                                setOpenDetailAkun(true);
+                            },
+
+                        )}
+                        data={lembaga.data}
+                    />
                     </div>
 
                     {/* Pagination */}
