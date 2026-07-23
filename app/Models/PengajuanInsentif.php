@@ -12,20 +12,20 @@ class PengajuanInsentif extends Model
 
     protected $table = 'pengajuan_insentif';
 
-    protected $fillable = [
-        'proposal_id',
-        'pengurus_id',
-        'tanggal',
-        'status',
-    ];
+    protected $fillable = ['proposal_id', 'pengajar_id', 'status', 'catatan', 'verified_by', 'verified_at'];
 
     public function proposal()
     {
         return $this->belongsTo(PengajuanProposal::class, 'proposal_id');
     }
 
-    public function pengurus()
+    public function pengajar()
     {
-        return $this->belongsTo(Pengurus::class, 'pengurus_id');
+        return $this->belongsTo(Pengajar::class, 'pengajar_id');
+    }
+
+    public function verifier()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 }

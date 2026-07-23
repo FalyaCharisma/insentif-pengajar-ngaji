@@ -139,72 +139,85 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
         href: "/data-siswa",
         roles: ["superadmin", "lembaga"],
     },
-
     {
-        title: "Proposal",
+        title: "Pengajuan Proposal",
         icon: FileText,
-        roles: ["superadmin", "dindik", "lembaga", "forum"],
-        children: [
-            {
-                title: "Pengajuan Proposal",
-                href: "/pengajuan-proposal",
-                roles: ["superadmin", "lembaga"],
-            },
-            // {
-            //     title: "Data Proposal",
-            //     href: "/proposal",
-            //     roles: ["superadmin", "dindik", "superadmin"],
-            // },
-            // {
-            //     title: "Verifikasi Proposal",
-            //     href: "/verifikasi-proposal",
-            //     roles: ["superadmin", "forum"],
-            // },
-            // {
-            //     title: "Status Proposal",
-            //     href: "/status-proposal",
-            //     roles: ["superadmin", "lembaga", "dindik"],
-            // },
-            // {
-            //     title: "Catatan Revisi",
-            //     href: "/catatan-revisi",
-            //     roles: ["superadmin", "lembaga"],
-            // },
-        ],
+        href: "/pengajuan-proposal",
+        roles: ["superadmin", "lembaga", "forum", "dindik"],
     },
+
+    // {
+    //     title: "Proposal",
+    //     icon: FileText,
+    //     roles: ["superadmin", "dindik", "lembaga", "forum"],
+    //     children: [
+    //         {
+    //             title: "Pengajuan Proposal",
+    //             href: "/pengajuan-proposal",
+    //             roles: ["superadmin", "lembaga"],
+    //         },
+    //         {
+    //             title: "Data Proposal",
+    //             href: "/proposal",
+    //             roles: ["superadmin", "dindik", "superadmin"],
+    //         },
+    //         {
+    //             title: "Verifikasi Proposal",
+    //             href: "/verifikasi-proposal",
+    //             roles: ["superadmin", "forum"],
+    //         },
+    //         {
+    //             title: "Status Proposal",
+    //             href: "/status-proposal",
+    //             roles: ["superadmin", "lembaga", "dindik"],
+    //         },
+    //         {
+    //             title: "Catatan Revisi",
+    //             href: "/catatan-revisi",
+    //             roles: ["superadmin", "lembaga"],
+    //         },
+    //     ],
+    // },
 
     {
         title: "Pengajuan Insentif",
         icon: UserStar,
+        href: "/pengajuan-insentif",
         roles: ["superadmin", "lembaga", "forum", "dindik"],
-        children: [
-            {
-                title: "Pengajuan",
-                href: "/pengajuan-insentif",
-                roles: ["superadmin", "lembaga"],
-            },
-            {
-                title: "Usulan Penerima",
-                href: "/usulan-penerima",
-                roles: ["superadmin", "lembaga"],
-            },
-            {
-                title: "Verifikasi Penerima",
-                href: "/verifikasi-penerima",
-                roles: ["superadmin", "forum"],
-            },
-            {
-                title: "Finalisasi",
-                href: "/finalisasi",
-                roles: ["superadmin", "forum"],
-            },
-            {
-                title: "Kuota Estimasi",
-                href: "/kuota-estimasi",
-                roles: ["superadmin", "lembaga"],
-            },
-        ],
     },
+
+    // {
+    //     title: "Pengajuan Insentif",
+    //     icon: UserStar,
+    //     roles: ["superadmin", "lembaga", "forum", "dindik"],
+    //     children: [
+    //         {
+    //             title: "Pengajuan",
+    //             href: "/pengajuan-insentif",
+    //             roles: ["superadmin", "lembaga"],
+    //         },
+    //         {
+    //             title: "Usulan Penerima",
+    //             href: "/usulan-penerima",
+    //             roles: ["superadmin", "lembaga"],
+    //         },
+    //         {
+    //             title: "Verifikasi Penerima",
+    //             href: "/verifikasi-penerima",
+    //             roles: ["superadmin", "forum"],
+    //         },
+    //         {
+    //             title: "Finalisasi",
+    //             href: "/finalisasi",
+    //             roles: ["superadmin", "forum"],
+    //         },
+    //         {
+    //             title: "Kuota Estimasi",
+    //             href: "/kuota-estimasi",
+    //             roles: ["superadmin", "lembaga"],
+    //         },
+    //     ],
+    // },
 
     // {
     //     title: "Monitoring",

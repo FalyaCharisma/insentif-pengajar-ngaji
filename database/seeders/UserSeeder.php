@@ -52,7 +52,7 @@ class UserSeeder extends Seeder
 
         // Admin Lembaga
         // username: lmb00001@mail.com
-        // password: LMB00001@kdr
+        // password: LMB00001
 
         $forum->assignRole('forum');
     }

@@ -139,7 +139,8 @@ export default function TableToolbar({
             </div>
 
             {/* RIGHT */}
-            {!hideAddButton && (
+            {/* RIGHT */}
+            {!hideAddButton && onAdd && addButtonLabel && (
                 <button
                     onClick={onAdd}
                     className="

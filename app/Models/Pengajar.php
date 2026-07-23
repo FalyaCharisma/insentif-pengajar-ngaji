@@ -23,4 +23,9 @@ class Pengajar extends Model
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
+
+    public function pengajuanInsentif()
+    {
+        return $this->hasMany(PengajuanInsentif::class);
+    }
 }

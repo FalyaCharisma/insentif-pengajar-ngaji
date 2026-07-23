@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { router } from "@inertiajs/react";
 
 import { deleteConfirm, inputConfirm, verifyConfirm } from "@/lib/alert";
@@ -136,50 +136,54 @@ export const columns = (
 
                     {hasRole("forum") && proposal.status === "pending" && (
                         <>
-                            <button
-                                onClick={() =>
-                                    verifyConfirm(
-                                        "Verifikasi Proposal",
-                                        "Apakah proposal ini sudah sesuai dan akan diverifikasi?",
-                                    ).then((result) => {
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() =>
+                                        verifyConfirm(
+                                            "Verifikasi Proposal",
+                                            "Apakah proposal ini sudah sesuai dan akan diverifikasi?",
+                                        ).then((result) => {
+                                            if (result.isConfirmed) {
+                                                router.patch(
+                                                    route(
+                                                        "pengajuan-proposal.verify",
+                                                        proposal.id,
+                                                    ),
+                                                );
+                                            }
+                                        })
+                                    }
+                                    className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs text-white hover:bg-emerald-600"
+                                >
+                                    <Check className="h-3.5 w-3.5" />
+                                    Verifikasi
+                                </button>
+
+                                <button
+                                    onClick={async () => {
+                                        const result = await inputConfirm(
+                                            "Catatan Revisi",
+                                            "Masukkan catatan revisi",
+                                        );
+
                                         if (result.isConfirmed) {
                                             router.patch(
                                                 route(
-                                                    "pengajuan-proposal.verify",
+                                                    "pengajuan-proposal.unverify",
                                                     proposal.id,
                                                 ),
+                                                {
+                                                    catatan: result.value,
+                                                },
                                             );
                                         }
-                                    })
-                                }
-                                className="rounded-lg bg-green-600 px-3 py-1.5 text-xs text-white"
-                            >
-                                Verifikasi
-                            </button>
-
-                            <button
-                                onClick={async () => {
-                                    const result = await inputConfirm(
-                                        "Catatan Revisi",
-                                        "Masukkan catatan revisi",
-                                    );
-
-                                    if (result.isConfirmed) {
-                                        router.patch(
-                                            route(
-                                                "pengajuan-proposal.unverify",
-                                                proposal.id,
-                                            ),
-                                            {
-                                                catatan: result.value,
-                                            },
-                                        );
-                                    }
-                                }}
-                                className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-white"
-                            >
-                                Revisi
-                            </button>
+                                    }}
+                                    className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white hover:bg-red-600"
+                                >
+                                    <RotateCcw className="h-3.5 w-3.5" />
+                                    Revisi
+                                </button>
+                            </div>
                         </>
                     )}
                 </div>
