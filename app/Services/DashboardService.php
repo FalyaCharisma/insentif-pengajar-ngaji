@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services;
+use App\Models\Periode;
 
 class DashboardService
 {
@@ -13,20 +14,22 @@ class DashboardService
 
     public function index(): array
     {
+        $selectedPeriode = request()->integer('periode_id')
+            ?: Periode::where('status', true)->value('id');
+
         $user = auth()->user();
 
-        if ($user->hasRole('dindik')) {
-            return $this->dindik->index();
-        }
+        $data = match (true) {
+            $user->hasRole('dindik') => $this->dindik->index($selectedPeriode),
+            $user->hasRole('forum') => $this->forum->index($selectedPeriode),
+            $user->hasRole('lembaga') => $this->lembaga->index($selectedPeriode),
+            default => $this->superadmin->index($selectedPeriode),
+        };
 
-        if ($user->hasRole('forum')) {
-            return $this->forum->index();
-        }
+        return array_merge($data, [
+            'periode' => Periode::orderByDesc('tahun')->get(),
+            'selectedPeriode' => $selectedPeriode,
+        ]);
 
-        if ($user->hasRole('lembaga')) {
-            return $this->lembaga->index();
-        }
-
-        return $this->superadmin->index();
     }
 }

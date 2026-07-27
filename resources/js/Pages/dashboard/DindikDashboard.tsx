@@ -1,23 +1,27 @@
 import AdminLayout from "@/layouts/app-layout";
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import WelcomeCard from "@/Components/dashboard/WelcomeCard";
 import StatCard from "@/Components/dashboard/StatCard";
 import ChartCard from "@/Components/dashboard/ChartCard";
 import ActivityCard from "@/Components/dashboard/ActivityCard";
 import QuickActionCard from "@/Components/dashboard/QuickActionCard";
 import { DashboardData } from "@/types/dashboard";
+import DashboardFilter from "@/Components/dashboard/DashboardFilter";
 
 import {
     Building2,
     Users,
-    FileText,
     Wallet,
+    UserStar,
+    CirclePile
 } from "lucide-react";
 
 export default function DindikDashboard({
     statistics,
     chart,
     activities,
+    periode,
+    selectedPeriode,
 }: DashboardData) {
     return (
         <>
@@ -32,13 +36,30 @@ export default function DindikDashboard({
                     role="Administrator"
                 />
 
+                <DashboardFilter
+                    periode={periode}
+                    value={selectedPeriode}
+                    onChange={(value) => {
+                        router.get(
+                            route("dashboard"),
+                            {
+                                periode_id: value,
+                            },
+                            {
+                                preserveState: true,
+                                replace: true,
+                            }
+                        );
+                    }}
+                />
+
                 {/* Statistik */}
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
 
                     <StatCard
                         title="Forum"
                         value={statistics.total_forum}
-                        icon={Wallet}
+                        icon={CirclePile}
                     />
 
                      <StatCard
@@ -54,15 +75,9 @@ export default function DindikDashboard({
                     />
 
                     <StatCard
-                        title="Proposal"
-                        value={statistics.total_proposal}
-                        icon={FileText}
-                    />
-
-                    <StatCard
-                        title="Pengajuan"
-                        value={statistics.total_pengajuan}
-                        icon={Wallet}
+                        title="Total Siswa"
+                        value={statistics.total_pengajar}
+                        icon={UserStar}
                     />
 
                 </div>

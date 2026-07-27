@@ -1,3 +1,5 @@
+import { Periode } from "./periode";
+
 export interface Statistics {
     total_forum: number;
     total_lembaga: number;
@@ -24,4 +26,7 @@ export interface DashboardData {
     statistics: Statistics;
     chart: ChartData;
     activities: Activity[];
+
+    periode: Periode[];
+    selectedPeriode: number;
 }
