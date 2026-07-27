@@ -29,7 +29,7 @@ class Lembaga extends Model
 
     public function pengurus()
     {
-        return $this->hasMany(Pengurus::class);
+        return $this->hasMany(Pengajar::class);
     }
 
     public function pengajuanProposal()

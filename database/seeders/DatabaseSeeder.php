@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             KategoriSeeder::class,
             LembagaSeeder::class,
             ProfilLembagaSeeder::class,
+            PengajarSeeder::class,
             ForumSeeder::class,
         ]);
     }

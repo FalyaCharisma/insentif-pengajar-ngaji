@@ -254,7 +254,7 @@ function PetaSebaran() {
         if (!keyword) return selected.lembaga;
 
         return selected.lembaga.filter((item: any) =>
-            [item.nama, item.jenis, item.kelurahan, item.status]
+            [item.nama, item.kategori?.nama, item.kelurahan, item.status]
                 .join(" ")
                 .toLowerCase()
                 .includes(keyword),
