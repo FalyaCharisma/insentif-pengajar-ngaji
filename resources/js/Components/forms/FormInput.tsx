@@ -21,7 +21,7 @@ export default function FormInput({
     return (
         <div>
             <InputLabel
-                label={label}
+                value={label}
                 required={required}
             />
 

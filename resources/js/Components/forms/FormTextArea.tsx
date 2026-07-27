@@ -21,7 +21,7 @@ export default function FormTextarea({
     return (
         <div>
             <InputLabel
-                label={label}
+                value={label}
                 required={required}
             />
 

@@ -24,6 +24,7 @@ type Props = {
     };
 
     periode: any;
+    canCreateProposal: boolean;
 
     jumlahSiswa: number;
 
@@ -38,6 +39,7 @@ export default function Index({
     pengajuanProposal,
     lembaga,
     periode,
+    canCreateProposal,
     jumlahSiswa,
     estimasiKuota,
     filters,
@@ -64,6 +66,16 @@ export default function Index({
         }
     }, [flash]);
 
+    const formatDate = (date?: string) => {
+        if (!date) return "-";
+
+        return new Date(date).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        });
+    };
+
     return (
         <>
             <Head title="Pengajuan Proposal" />
@@ -76,6 +88,63 @@ export default function Index({
                         subtitle="Kelola data pengajuan proposal"
                     />
 
+                    <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5">
+                                <svg
+                                    className="h-5 w-5 text-sky-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
+                                    />
+                                </svg>
+                            </div>
+
+                            <div>
+                                <h3 className="text-sm font-semibold text-sky-800">
+                                    Informasi Pengajuan Proposal
+                                </h3>
+
+                                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-sky-700">
+                                    <li>
+                                        Pengajuan proposal hanya dapat dilakukan
+                                        pada periode pengajuan yang sedang
+                                        aktif.
+                                    </li>
+                                    <li>
+                                        Periode pengajuan:
+                                        <strong>
+                                            {" "}
+                                            {periode
+                                                ? `${formatDate(periode.mulai_upload)} s.d. ${formatDate(periode.selesai_upload)}`
+                                                : "Saat ini belum dibuka"}
+                                        </strong>
+                                    </li>
+
+                                    <li>
+                                        Setelah proposal diajukan, proposal akan
+                                        diverifikasi oleh Forum sebelum lembaga
+                                        dapat mengajukan calon penerima
+                                        insentif.
+                                    </li>
+
+                                    <li>
+                                        Hanya proposal yang telah berstatus
+                                        <strong> Terverifikasi</strong> yang
+                                        dapat digunakan untuk mengajukan
+                                        penerima insentif.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* TOOLBAR */}
                     <div className="w-full overflow-hidden">
                         <TableToolbar
@@ -83,12 +152,12 @@ export default function Index({
                             setParams={setParams}
                             searchPlaceholder="Cari proposal..."
                             addButtonLabel={
-                                hasRole("lembaga")
+                                hasRole("lembaga") && canCreateProposal
                                     ? "Tambah Proposal"
                                     : undefined
                             }
                             onAdd={
-                                hasRole("lembaga")
+                                hasRole("lembaga") && canCreateProposal
                                     ? () => {
                                           setSelectedProposal(null);
                                           setOpen(true);

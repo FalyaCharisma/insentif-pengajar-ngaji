@@ -32,7 +32,7 @@ export default function FormFile({
         <div>
 
             <InputLabel
-                label={label}
+                value={label}
                 required={required}
             />
 

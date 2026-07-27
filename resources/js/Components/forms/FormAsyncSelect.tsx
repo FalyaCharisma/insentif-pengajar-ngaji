@@ -40,7 +40,7 @@ export default function FormSelect2({
         <div>
 
             <InputLabel
-                label={label}
+                value={label}
                 required={required}
             />
 

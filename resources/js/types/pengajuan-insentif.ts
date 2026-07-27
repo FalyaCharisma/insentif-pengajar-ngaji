@@ -1,3 +1,5 @@
+import { QueryParams } from "@/hooks/use-query-params";
+
 export interface PaginationLink {
     url: string | null;
     label: string;
@@ -65,7 +67,7 @@ export interface Proposal {
     pengajuan_insentif?: PengajuanInsentif[];
 }
 
-export interface Filters {
+export interface Filters  extends QueryParams{
     search: string;
     sort: string;
     order: string;

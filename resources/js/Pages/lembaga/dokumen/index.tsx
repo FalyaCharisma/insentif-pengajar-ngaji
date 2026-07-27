@@ -6,7 +6,7 @@ import AdminLayout from "@/layouts/app-layout";
 import PageHeader from "@/Components/PageHeader";
 import DataTable from "@/Components/DataTable";
 import TableToolbar from "@/Components/TableToolbar";
-import Pagination from "@/Components/Pagination";
+import Pagination from "@/Components/pagination";
 
 import { useAuth } from "@/lib/auth";
 
