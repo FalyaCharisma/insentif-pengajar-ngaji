@@ -70,7 +70,7 @@ class LembagaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'kategori_id' => 'required|exists:kategori,id',
+            'kategori_id' => 'required',
             'nama' => 'required|string|max:255',
         ]);
 
