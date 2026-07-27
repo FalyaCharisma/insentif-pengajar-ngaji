@@ -22,7 +22,7 @@ export default function FormSelect({
     return (
         <div>
             <InputLabel
-                label={label}
+                value={label}
                 required={required}
             />
 

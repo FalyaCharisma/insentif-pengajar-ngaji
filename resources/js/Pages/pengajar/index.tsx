@@ -5,7 +5,7 @@ import AdminLayout from "@/layouts/app-layout";
 
 import DataTable from "@/Components/DataTable";
 import PageHeader from "@/Components/PageHeader";
-import Pagination from "@/Components/Pagination";
+import Pagination from "@/Components/pagination";
 import TableToolbar from "@/Components/TableToolbar";
 
 import { useQueryParams } from "@/hooks/use-query-params";

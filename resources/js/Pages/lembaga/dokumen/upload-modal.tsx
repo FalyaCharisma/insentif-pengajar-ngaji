@@ -120,7 +120,7 @@ export default function UploadModal({
                         />
                     ) : (
                         <div>
-                            <InputLabel label="Jenis Dokumen" />
+                            <InputLabel value="Jenis Dokumen" />
                             <div className="mt-2 rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-700">
                                 {item.jenis_dokumen?.nama}
                             </div>
@@ -129,7 +129,7 @@ export default function UploadModal({
 
                     <div>
                         <InputLabel
-                            label="File Dokumen"
+                            value="File Dokumen"
                             required
                         />
 
