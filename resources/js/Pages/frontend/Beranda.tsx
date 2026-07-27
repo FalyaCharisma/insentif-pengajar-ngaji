@@ -401,7 +401,7 @@ function Beranda() {
                 shadow: true,
                 backgroundColor: "#ffffff",
                 formatter: function () {
-                    const point = this.point as any;
+                    const point = this.points as any;
 
                     if (point.lembaga) {
                         return `
@@ -443,7 +443,7 @@ function Beranda() {
                         enabled: true,
                         allowOverlap: true,
                         formatter: function () {
-                            return (this.point as any).name;
+                            return (this.points as any).name;
                         },
                         style: {
                             color: "#ffffff",
@@ -831,33 +831,7 @@ function Beranda() {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {filteredLembaga.map(
-                                                        (item) => (
-                                                            <tr key={item.nama}>
-                                                                <td className="fw-bold text-dark">
-                                                                    {item.nama}
-                                                                </td>
-                                                                <td>
-                                                                    {item.kategori.nama}
-                                                                </td>
-                                                                <td>
-                                                                    {
-                                                                        item.kelurahan
-                                                                    }
-                                                                </td>
-                                                                <td className="fw-bold">
-                                                                    {
-                                                                        item.jumlah_guru
-                                                                    }
-                                                                </td>
-                                                                <td className="fw-bold">
-                                                                    {
-                                                                        item.jumlah_siswa
-                                                                    }
-                                                                </td>
-                                                            </tr>
-                                                        ),
-                                                    )}
+                                                    
                                                 </tbody>
                                             </table>
                                         </div>

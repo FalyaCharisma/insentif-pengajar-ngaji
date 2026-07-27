@@ -379,7 +379,7 @@ function PetaSebaran() {
                 shadow: true,
                 backgroundColor: "#ffffff",
                 formatter: function () {
-                    const point = this.point as any;
+                    const point = this.points as any;
 
                     if (point.lembaga) {
                         return `
@@ -420,7 +420,7 @@ function PetaSebaran() {
                     dataLabels: {
                         enabled: true,
                         formatter: function () {
-                            return (this.point as any).name;
+                            return (this.points as any).name;
                         },
                         style: {
                             color: "#ffffff",
