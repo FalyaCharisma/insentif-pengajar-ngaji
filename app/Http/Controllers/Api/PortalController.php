@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lembaga;
-use App\Models\Pengurus;
+use App\Models\Pengajar;
 
 class PortalController extends Controller
 {
@@ -12,9 +12,9 @@ class PortalController extends Controller
     {
 
         $totalLembaga = Lembaga::count();
-        $totalPendidik = Pengurus::count();
-        $totalTervalidasi = Pengurus::where('status_insentif', 'aktif')->count();
-        $totalTidakTervalidasi = Pengurus::where('status_insentif', 'nonaktif')->count();
+        $totalPendidik = Pengajar::count();
+        $totalTervalidasi = Pengajar::where('status_insentif', 'aktif')->count();
+        $totalTidakTervalidasi = Pengajar::where('status_insentif', 'nonaktif')->count();
 
         $statistik = [
             ['label' => 'Total Lembaga', 'value' => $totalLembaga, 'icon' => 'Building2', 'tone' => 'success'],

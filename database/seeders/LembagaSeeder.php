@@ -9,54 +9,59 @@ use Illuminate\Support\Facades\Hash;
 
 class LembagaSeeder extends Seeder
 {
+    private array $kecamatanList = ['Mojoroto', 'Kota', 'Pesantren'];
+
+    private array $kategoriIds = [1, 2, 3]; // TPA, TPQ, Madin
+
+    private array $namaLembaga = [
+        'TPQ', 'TPA', 'Madin', 'RA', 'PIAUD', 'DTA', 'MDTA',
+        'Sekolah Minggu', 'PAUD', 'TK Islam',
+    ];
+
     public function run(): void
     {
-        $data = [
-            [
-                'kode' => 'LMB00001',
-                'nama' => 'TPQ Al Huda',
-                'kategori_id' => 1,
-            ],
-            [
-                'kode' => 'LMB00002',
-                'nama' => 'TPQ Nurul Iman',
-                'kategori_id' => 1,
-            ],
-            [
-                'kode' => 'LMB00003',
-                'nama' => 'Madin Al Ikhlas',
-                'kategori_id' => 2,
-            ],
-            [
-                'kode' => 'LMB00004',
-                'nama' => 'Sekolah Minggu Eben Haezer',
-                'kategori_id' => 3,
-            ],
-            [
-                'kode' => 'LMB00005',
-                'nama' => 'TPA Baiturrahman',
-                'kategori_id' => 1,
-            ],
+        $counter = 1;
+
+        foreach ($this->kecamatanList as $kecamatan) {
+
+            for ($i = 1; $i <= 25; $i++) {
+                $kode = 'LMB' . str_pad((string) $counter, 5, '0', STR_PAD_LEFT);
+                $nama = $this->generateNamaLembaga($kecamatan, $i);
+
+                $user = User::create([
+                    'name' => $nama,
+                    'email' => strtolower($kode) . '@mail.com',
+                    'password' => Hash::make('password'),
+                    'status' => 'aktif',
+                    'force_change_password' => false,
+                ]);
+
+                $user->assignRole('lembaga');
+
+                Lembaga::create([
+                    'user_id' => $user->id,
+                    'kategori_id' => $this->kategoriIds[array_rand($this->kategoriIds)],
+                    'kode' => $kode,
+                    'nama' => $nama,
+                ]);
+
+                $counter++;
+            }
+        }
+    }
+
+    private function generateNamaLembaga(string $kecamatan, int $index): string
+    {
+        unset($kecamatan);
+        $prefix = $this->namaLembaga[array_rand($this->namaLembaga)];
+        $suffixes = ['Al Huda', 'Al Ikhlas', 'Al Falah', 'Al Barokah', 'Al Hidayah',
+            'Al Mubarak', 'Al Amin', 'Nurul Iman', 'Nurul Huda', 'Nurul Falah',
+            'Baiturrahman', 'Al Ihsan', 'Al Jannah', 'Miftahul Ulum', 'Darul Hikmah',
+            'Al Kautsar', 'Al Anwar', 'Raudlatul Ulum', 'Al Mutaalim', 'At Taqwa',
         ];
 
-        foreach ($data as $item) {
+        $suffix = $suffixes[array_rand($suffixes)];
 
-            $user = User::create([
-                'name' => $item['nama'],
-                'email' => strtolower($item['kode']) . '@mail.com',
-                'password' => Hash::make($item['kode']) . '@kdr',
-                'status' => 'aktif',
-                'force_change_password' => true,
-            ]);
-
-            $user->assignRole('lembaga');
-
-            Lembaga::create([
-                'user_id' => $user->id,
-                'kategori_id' => $item['kategori_id'],
-                'kode' => $item['kode'],
-                'nama' => $item['nama'],
-            ]);
-        }
+        return "$prefix $suffix $index";
     }
 }

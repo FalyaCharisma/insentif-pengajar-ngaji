@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lembaga;
-use App\Models\Pengurus;
+use App\Models\Pengajar;
 
 class KecamatanController extends Controller
 {
@@ -34,16 +34,43 @@ class KecamatanController extends Controller
         $kecamatanData = collect($kecamatanList)->map(function ($kec) {
             $name = $kec['name'];
 
-            $pendidikQuery = fn() => Pengurus::whereHas('lembaga', fn($q) => $q->where('kecamatan', $name));
+            $pendidikQuery = fn() => Pengajar::whereHas('lembaga.profil', fn($q) => $q->where('kecamatan', $name));
+
+            $lembagaList = Lembaga::with([
+                'kategori',
+                'profil',
+                'pengurus',
+            ])
+                ->whereHas('profil', fn($q) => $q->where('kecamatan', $name))
+                ->get()
+                ->map(function ($lembaga) {
+                    $profil = $lembaga->profil;
+
+                    return [
+                        'id'              => $lembaga->id,
+                        'kode'            => $lembaga->kode,
+                        'nama'            => $lembaga->nama,
+                        'status'          => $lembaga->status,
+                        'kategori'        => $lembaga->kategori,
+                        'pengurus'        => $lembaga->pengurus,
+                        'jumlah_guru'     => $lembaga->pengurus->count(),
+                        'jumlah_siswa'    => 0,
+                        'alamat'          => $profil?->alamat,
+                        'kelurahan'       => $profil?->kelurahan,
+                        'kecamatan'       => $profil?->kecamatan,
+                        'telp'            => $profil?->telepon,
+                        'email'           => $profil?->email,
+                    ];
+                });
 
             return array_merge($kec, [
                 'stats' => [
-                    'lembaga'           => Lembaga::where('kecamatan', $name)->count(),
+                    'lembaga'           => $lembagaList->count(),
                     'pendidik'          => $pendidikQuery()->count(),
                     'tervalidasi'       => $pendidikQuery()->where('status_insentif', 'aktif')->count(),
                     'tidak_tervalidasi' => $pendidikQuery()->where('status_insentif', 'nonaktif')->count(),
                 ],
-                'lembaga' => Lembaga::with('kategori', 'pengurus')->where('kecamatan', $name)->get(),
+                'lembaga' => $lembagaList,
             ]);
         });
 
