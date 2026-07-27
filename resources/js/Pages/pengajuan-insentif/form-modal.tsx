@@ -80,7 +80,7 @@ export default function FormModal({ open, onClose, proposal }: Props) {
                         </thead>
 
                         <tbody>
-                            {proposal.pengajuan_insentif.map((item) => (
+                            {(proposal.pengajuan_insentif ?? []).map((item) => (
                                 <tr key={item.id} className="border-b">
                                     <td className="py-3">
                                         {item.pengajar.nama}
