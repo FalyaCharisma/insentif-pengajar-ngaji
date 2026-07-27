@@ -47,6 +47,7 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
                 forceFormData: true,
 
                 onSuccess: () => {
+                    reset();
                     onClose();
                 },
             });
@@ -58,6 +59,7 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
             forceFormData: true,
 
             onSuccess: () => {
+                reset();
                 onClose();
             },
         });

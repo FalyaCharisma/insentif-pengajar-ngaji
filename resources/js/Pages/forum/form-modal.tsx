@@ -66,14 +66,20 @@ export default function FormModal({
             setData("_method", "put");
 
             post(route("forum.update", forum.id), {
-                onSuccess: () => onClose(),
+                onSuccess: () => {
+                    reset();
+                    onClose();
+                },
             });
 
             return;
         }
 
         post(route("forum.store"), {
-            onSuccess: () => onClose(),
+            onSuccess: () => {
+                reset();
+                onClose();
+            },
         });
     };
 
