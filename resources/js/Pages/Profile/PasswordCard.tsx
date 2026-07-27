@@ -52,6 +52,8 @@ export default function PasswordCard() {
         }),
         [password]
     );
+    
+    const isPasswordValid = Object.values(checks).every(Boolean);
 
     const score = Object.values(checks).filter(Boolean).length;
 
@@ -246,7 +248,8 @@ export default function PasswordCard() {
                         disabled={
                             passwordForm.processing ||
                             !isPasswordMatch ||
-                            !isConfirmationFilled
+                            !isConfirmationFilled ||
+                            !isPasswordValid
                         }
                         className="
                             inline-flex

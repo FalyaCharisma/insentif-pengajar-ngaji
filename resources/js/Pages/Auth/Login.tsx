@@ -213,14 +213,14 @@ export default function Login({
                                         </label>
                                     </div>
 
-                                    {canResetPassword && (
+                                    {/* {canResetPassword && (
                                         <Link
                                             href={route('password.request')}
                                             className="auth-forgot-link"
                                         >
                                             Forget password?
                                         </Link>
-                                    )}
+                                    )} */}
                                 </div>
 
                                 <button
