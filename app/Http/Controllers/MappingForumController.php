@@ -15,70 +15,58 @@ class MappingForumController extends Controller
     {
         $forums = Forum::orderBy('nama')->get();
 
-        $selectedForum = $request->filled('forum_id') ? (int) $request->forum_id : null;
+        // Forum tujuan (kanan)
+        $targetForum = $request->filled('target_forum') ? (int) $request->target_forum : $forums->first()?->id;
 
-        if (!$selectedForum && $forums->isNotEmpty()) {
-            $selectedForum = $forums->first()->id;
-        }
-
-        if (!$selectedForum && $forums->count()) {
-            $selectedForum = $forums->first()->id;
-        }
+        // Forum asal (kiri)
+        // "null" = Belum Mapping
+        $sourceForum = $request->source_forum ?? 'null';
 
         $query = Lembaga::with(['kategori', 'forum']);
 
+        // Search
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('nama', 'like', '%' . $request->search . '%')->orWhere('kode', 'like', '%' . $request->search . '%');
             });
         }
 
+        // Filter kategori
         if ($request->filled('kategori_id')) {
             $query->where('kategori_id', $request->kategori_id);
         }
 
         return Inertia::render('mapping-forum/index', [
             'forums' => $forums,
-            'kategori' => KategoriLembaga::orderBy('nama')->get(),
-            'selectedForum' => $selectedForum,
 
-            'lembagas' => $query
-                ->orderBy('nama')
-                ->paginate($request->per_page ?? 25)
-                ->withQueryString(),
+            'kategori' => KategoriLembaga::orderBy('nama')->get(),
+
+            // semua lembaga
+            'lembagas' => $query->orderBy('nama')->get(),
 
             'filters' => [
                 'search' => $request->search,
 
                 'kategori_id' => $request->kategori_id,
 
-                'per_page' => $request->per_page ?? 25,
+                'source_forum' => $sourceForum,
+
+                'target_forum' => $targetForum,
             ],
         ]);
     }
-
-    public function update(Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
-            'forum_id' => ['required', 'exists:forum,id'],
-
-            'lembaga_ids' => ['array'],
-
-            'lembaga_ids.*' => ['exists:lembaga,id'],
+            'mappings' => ['required', 'array'],
+            'mappings.*.id' => ['required', 'exists:lembaga,id'],
+            'mappings.*.forum_id' => ['nullable', 'exists:forum,id'],
         ]);
 
         DB::transaction(function () use ($validated) {
-            // lepas semua lembaga pada forum ini
-
-            Lembaga::where('forum_id', $validated['forum_id'])->update([
-                'forum_id' => null,
-            ]);
-
-            // assign ulang
-
-            if (!empty($validated['lembaga_ids'])) {
-                Lembaga::whereIn('id', $validated['lembaga_ids'])->update([
-                    'forum_id' => $validated['forum_id'],
+            foreach ($validated['mappings'] as $mapping) {
+                Lembaga::where('id', $mapping['id'])->update([
+                    'forum_id' => $mapping['forum_id'],
                 ]);
             }
         });
