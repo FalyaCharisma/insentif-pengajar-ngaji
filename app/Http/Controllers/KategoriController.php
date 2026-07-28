@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\KategoriLembaga;
 use Inertia\Inertia;
+use Illuminate\Validation\Rule;
 
 class KategoriController extends Controller
 {
@@ -50,9 +51,20 @@ class KategoriController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-        ]);
+        $validated = $request->validate(
+            [
+                'nama' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('kategori_lembaga', 'nama')
+                        ->whereNull('deleted_at'),
+                ],
+            ],
+            [
+                'nama.unique' => 'Nama kategori sudah digunakan.',
+            ]
+        );
 
         KategoriLembaga::create($validated);
 
@@ -61,9 +73,21 @@ class KategoriController extends Controller
 
     public function update(Request $request, KategoriLembaga $kategori)
     {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-        ]);
+        $validated = $request->validate(
+            [
+                'nama' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('kategori_lembaga', 'nama')
+                        ->whereNull('deleted_at')
+                        ->ignore($kategori->id),
+                ],
+            ],
+            [
+                'nama.unique' => 'Nama kategori sudah digunakan.',
+            ]
+        );
 
         $kategori->update($validated);
 

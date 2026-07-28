@@ -71,9 +71,17 @@ class ForumController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('forum', 'nama')->whereNull('deleted_at'),
+            ],
             'telepon' => ['nullable', 'regex:/^[0-9]{10,12}$/'],
             'status' => 'required|in:aktif,nonaktif',
+        ],
+        [
+            'nama.unique' => 'Nama forum sudah digunakan.',
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -112,9 +120,19 @@ class ForumController extends Controller
     public function update(Request $request, Forum $forum)
     {
         $validated = $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('forum', 'nama')
+                    ->whereNull('deleted_at')
+                    ->ignore($forum->id),
+            ],
             'telepon' => ['nullable', 'regex:/^[0-9]{10,12}$/'],
             'status' => 'required|in:aktif,nonaktif',
+        ],
+        [
+            'nama.unique' => 'Nama forum sudah digunakan.',
         ]);
 
         DB::transaction(function () use ($forum, $validated) {

@@ -19,13 +19,19 @@ export default function KontakCard({
                 {/* Telepon */}
                 <FormInput
                     label="Nomor Telepon"
+                    type="tel"
                     value={data.telepon}
-                    onChange={(e) =>
-                        setData("telepon", e.target.value)
-                    }
+                    onChange={(e) => {
+                        const value = e.target.value
+                            .replace(/\D/g, "") // hanya angka
+                            .slice(0, 12);      // maksimal 15 digit
+
+                        setData("telepon", value);
+                    }}
+                    maxLength={12}
                     disabled={!canEdit}
                     error={errors.telepon}
-                    placeholder="Masukkan nomor telepon"
+                    placeholder="Contoh: 081234567890"
                     required
                 />
 
@@ -53,7 +59,7 @@ export default function KontakCard({
                         }
                         disabled={!canEdit}
                         error={errors.website}
-                        placeholder="https://..."
+                        placeholder="https://example.com"
                     />
                 </div>
             </div>

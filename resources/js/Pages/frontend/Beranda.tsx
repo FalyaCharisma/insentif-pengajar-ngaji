@@ -832,7 +832,7 @@ function Beranda() {
                                                 </thead>
                                                 <tbody>
                                                     {filteredLembaga.map(
-                                                        (item) => (
+                                                        (item: any) => (
                                                             <tr key={item.id ?? item.nama}>
                                                                 <td className="fw-bold text-dark">
                                                                     {item.nama}

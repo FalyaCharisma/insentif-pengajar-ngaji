@@ -32,10 +32,15 @@ export default function RekeningCard({
                 {/* Nomor Rekening */}
                 <FormInput
                     label="Nomor Rekening"
+                    type="text"
                     value={data.nomor_rekening}
                     onChange={(e) =>
-                        setData("nomor_rekening", e.target.value)
+                        setData(
+                            "nomor_rekening",
+                            e.target.value.replace(/\D/g, "")
+                        )
                     }
+                    maxLength={50}
                     disabled={!canEdit}
                     error={errors.nomor_rekening}
                     placeholder="Masukkan nomor rekening"

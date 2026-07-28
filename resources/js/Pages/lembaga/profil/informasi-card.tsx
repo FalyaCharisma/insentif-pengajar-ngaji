@@ -21,6 +21,8 @@ export default function InformasiCard({
     errors,
     canEdit,
 }: Props) {
+
+    const currentYear = new Date().getFullYear();
     return (
         <>
             <div className="space-y-2">
@@ -62,20 +64,21 @@ export default function InformasiCard({
                 />
 
                 {/* Tahun Berdiri */}
-                <FormInput
-                    type="number"
+                <FormSelect2
                     label="Tahun Berdiri"
                     value={data.tahun_berdiri}
-                    onChange={(e) =>
-                        setData(
-                            "tahun_berdiri",
-                            e.target.value
-                        )
-                    }
-                    disabled={!canEdit}
-                    error={errors.tahun_berdiri}
-                    placeholder="Contoh: 2015"
-                    required
+                    options={Array.from(
+                        { length: new Date().getFullYear() - 1899 },
+                        (_, i) => {
+                            const year = new Date().getFullYear() - i;
+
+                            return {
+                                value: year.toString(),
+                                label: year.toString(),
+                            };
+                        }
+                    )}
+                    onChange={(value) => setData("tahun_berdiri", value)}
                 />
             </div>
         </>

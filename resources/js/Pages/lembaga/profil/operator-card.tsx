@@ -32,10 +32,16 @@ export default function OperatorCard({
                 {/* No HP Operator */}
                 <FormInput
                     label="Nomor HP Operator"
+                    type="tel"
                     value={data.no_hp_operator}
-                    onChange={(e) =>
-                        setData("no_hp_operator", e.target.value)
-                    }
+                    onChange={(e) => {
+                        const value = e.target.value
+                            .replace(/\D/g, "") // hanya angka
+                            .slice(0, 12);      // maksimal 15 digit
+
+                        setData("no_hp_operator", value);
+                    }}
+                    maxLength={12}
                     disabled={!canEdit}
                     error={errors.no_hp_operator}
                     placeholder="08xxxxxxxxxx"

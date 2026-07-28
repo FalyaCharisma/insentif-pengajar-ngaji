@@ -30,6 +30,7 @@ export default function FormModal({
         processing,
         errors,
         reset,
+        clearErrors,
     } = useForm({
         _method: "",
         nama: "",
@@ -39,6 +40,7 @@ export default function FormModal({
 
         if (!open) {
             reset();
+            clearErrors();
             return;
         }
 
@@ -50,7 +52,7 @@ export default function FormModal({
             });
 
         } else {
-
+            clearErrors();
             reset();
         }
 
@@ -67,6 +69,7 @@ export default function FormModal({
                 {
                     onSuccess: () => {
                         reset();
+                        clearErrors();
                         onClose();
                     },
                 },
@@ -79,6 +82,7 @@ export default function FormModal({
 
             onSuccess: () => {
                 reset();
+                clearErrors();
                 onClose();
             },
         });

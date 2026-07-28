@@ -30,6 +30,7 @@ export default function FormModal({
         processing,
         errors,
         reset,
+        clearErrors,
     } = useForm({
         _method: "",
 
@@ -51,7 +52,7 @@ export default function FormModal({
             });
 
         } else {
-
+            clearErrors();
             reset();
         }
 
@@ -67,6 +68,7 @@ export default function FormModal({
 
             post(route("forum.update", forum.id), {
                 onSuccess: () => {
+                    clearErrors();
                     reset();
                     onClose();
                 },
@@ -77,6 +79,7 @@ export default function FormModal({
 
         post(route("forum.store"), {
             onSuccess: () => {
+                clearErrors();
                 reset();
                 onClose();
             },
