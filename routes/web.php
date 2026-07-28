@@ -70,8 +70,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('mapping-forum', MappingForumController::class);
 
-    Route::get('mapping-kategori', [MappingKategoriController::class, 'index'])->name('mapping-kategori.index');
-    Route::put('mapping-kategori', [MappingKategoriController::class, 'update'])->name('mapping-kategori.update');
+    Route::resource('mapping-kategori', MappingKategoriController::class);
 
     // Route tambahan lembaga
     Route::prefix('lembaga')
