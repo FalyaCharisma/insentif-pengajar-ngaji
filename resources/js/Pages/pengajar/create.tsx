@@ -14,7 +14,7 @@ import SecondaryButton from "@/Components/SecondaryButton";
 
 import { useAlamat } from "@/hooks/useAlamat";
 import { useLembaga } from "@/hooks/useLembaga";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
     Save,
@@ -34,7 +34,7 @@ const initialValues = {
     nik: "",
     nama: "",
 
-    tempat_lahir: "",
+    tempat_lahir: null as SelectOption | null,
     tgl_lahir: "",
     jk: null as SelectOption | null,
 
@@ -78,6 +78,7 @@ export default function CreatePengajar({ pengajar }: Props) {
     );
 
     const isEdit = !!pengajar;
+    const [loadedAlamat, setLoadedAlamat] = useState(false);
 
     const {
         searchProvinsi,
@@ -99,29 +100,29 @@ export default function CreatePengajar({ pengajar }: Props) {
 
             nik: pengajar?.nik ?? "",
             nama: pengajar?.nama ?? "",
-            tempat_lahir: pengajar?.tempat_lahir ?? "",
+            tempat_lahir: null,
             tgl_lahir: pengajar?.tgl_lahir ?? "",
             jk: pengajar?.jk ?? "",
             agama: pengajar?.agama ?? "",
             no_hp: pengajar?.no_hp ?? "",
-            lembaga_id: String(pengajar?.lembaga_id ?? ""),
+            lembaga_id: pengajar?.lembaga_id ?? "",
             jabatan: pengajar?.jabatan ?? "",
             pendidikan_terakhir: pengajar?.pendidikan_terakhir ?? "",
             jurusan: pengajar?.jurusan ?? "",
             sekolah_universitas: pengajar?.sekolah_universitas ?? "",
             tahun_lulus: pengajar?.tahun_lulus ?? "",
-            provinsi: pengajar?.provinsi
-                ? { label: pengajar.provinsi, value: pengajar.id_provinsi }
-                : null,
-            kabkota: pengajar?.kabkota
-                ? { label: pengajar.kabkota, value: pengajar.id_kabkota }
-                : null,
-            kecamatan: pengajar?.kecamatan
-                ? { label: pengajar.kecamatan, value: pengajar.id_kecamatan }
-                : null,
-            kelurahan: pengajar?.kelurahan
-                ? { label: pengajar.kelurahan, value: pengajar.id_kelurahan }
-                : null,
+            // provinsi: pengajar?.provinsi
+            //     ? { label: pengajar.provinsi, value: pengajar.id_provinsi }
+            //     : null,
+            // kabkota: pengajar?.kabkota
+            //     ? { label: pengajar.kabkota, value: pengajar.id_kabkota }
+            //     : null,
+            // kecamatan: pengajar?.kecamatan
+            //     ? { label: pengajar.kecamatan, value: pengajar.id_kecamatan }
+            //     : null,
+            // kelurahan: pengajar?.kelurahan
+            //     ? { label: pengajar.kelurahan, value: pengajar.id_kelurahan }
+            //     : null,
             alamat: pengajar?.alamat ?? "",
             bank: pengajar?.bank ?? "",
             no_rekening: pengajar?.no_rekening ?? "",
@@ -129,6 +130,94 @@ export default function CreatePengajar({ pengajar }: Props) {
             pas_foto: null,
         });
 
+    const normalize = (text?: string) => (text ?? "").trim().toLowerCase();
+
+    useEffect(() => {
+        if (!pengajar?.tempat_lahir) return;
+
+        searchAllKabkota(pengajar.tempat_lahir).then((options) => {
+            const selected = options.find(
+                (x: any) =>
+                    normalize(x.label) === normalize(pengajar.tempat_lahir),
+            );
+
+            if (selected) {
+                setData("tempat_lahir", selected);
+            }
+        });
+    }, []);
+    useEffect(() => {
+        if (!isEdit) return;
+        if (loadedAlamat) return;
+        if (!pengajar?.provinsi) return;
+
+        searchProvinsi("").then((options) => {
+            const selected = options.find(
+                (x: any) => normalize(x.label) === normalize(pengajar.provinsi),
+            );
+
+            if (selected) {
+                setData("provinsi", selected);
+            }
+        });
+    }, [loadedAlamat]);
+    useEffect(() => {
+        if (!isEdit) return;
+        if (loadedAlamat) return;
+        if (!data.provinsi) return;
+        if (!pengajar?.kabkota) return;
+
+        searchKabkota(data.provinsi.value, pengajar.kabkota).then((options) => {
+            const selected = options.find(
+                (x: any) => normalize(x.label) === normalize(pengajar.kabkota),
+            );
+
+            if (selected) {
+                setData("kabkota", selected);
+            }
+        });
+    }, [data.provinsi, loadedAlamat]);
+    useEffect(() => {
+        if (!isEdit) return;
+        if (loadedAlamat) return;
+        if (!data.kabkota) return;
+        if (!pengajar?.kecamatan) return;
+
+        searchKecamatan(data.kabkota.value, pengajar.kecamatan).then(
+            (options) => {
+                const selected = options.find(
+                    (x: any) =>
+                        normalize(x.label) === normalize(pengajar.kecamatan),
+                );
+
+                if (selected) {
+                    setData("kecamatan", selected);
+                }
+            },
+        );
+    }, [data.kabkota, loadedAlamat]);
+    useEffect(() => {
+        if (!isEdit) return;
+        if (loadedAlamat) return;
+        if (!data.kecamatan) return;
+        if (!pengajar?.kelurahan) return;
+
+        searchKelurahan(data.kecamatan.value, pengajar.kelurahan).then(
+            (options) => {
+                const selected = options.find(
+                    (x: any) =>
+                        normalize(x.label) === normalize(pengajar.kelurahan),
+                );
+
+                if (selected) {
+                    setData("kelurahan", selected);
+                }
+
+                // preload selesai
+                setLoadedAlamat(true);
+            },
+        );
+    }, [data.kecamatan, loadedAlamat]);
     // =========================
     // NIK VALIDATION
     // =========================
@@ -154,6 +243,11 @@ export default function CreatePengajar({ pengajar }: Props) {
                 },
                 {
                     forceFormData: true,
+
+                    onStart: () => console.log("START"),
+                    onSuccess: () => console.log("SUCCESS"),
+                    onError: (e) => console.log(e),
+                    onFinish: () => console.log("FINISH"),
                 },
             );
         } else {
@@ -240,11 +334,11 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     options={[
                                         {
                                             label: "Laki-laki",
-                                            value: "L",
+                                            value: "laki-laki",
                                         },
                                         {
                                             label: "Perempuan",
-                                            value: "P",
+                                            value: "perempuan",
                                         },
                                     ]}
                                 />
@@ -287,9 +381,11 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     type="number"
                                     maxLength={12}
                                     value={data.no_hp}
-                                    onChange={(e) =>{
-                                        const value = e.target.value.replace(/\D/g, "").slice(0, 12);
-                                        setData("no_hp", value)
+                                    onChange={(e) => {
+                                        const value = e.target.value
+                                            .replace(/\D/g, "")
+                                            .slice(0, 12);
+                                        setData("no_hp", value);
                                     }}
                                     placeholder="08xxxxxxxxxx"
                                     error={errors.no_hp}
@@ -309,7 +405,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         error={errors.lembaga_id}
                                     />
                                 )}
-                                
+
                                 <FormInput
                                     label="Jabatan"
                                     value={data.jabatan}
@@ -349,16 +445,28 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     error={errors.pendidikan_terakhir}
                                     options={[
                                         {
+                                            label: "S2",
+                                            value: "S2",
+                                        },
+                                        {
                                             label: "S1",
                                             value: "S1",
                                         },
                                         {
-                                            label: "D-III",
-                                            value: "D-III",
+                                            label: "D4",
+                                            value: "D4",
                                         },
                                         {
-                                            label: "SMA / Sederajat",
-                                            value: "SMA / Sederajat",
+                                            label: "D3",
+                                            value: "D3",
+                                        },
+                                        {
+                                            label: "SMA",
+                                            value: "SMA",
+                                        },
+                                        {
+                                            label: "MA",
+                                            value: "MA",
                                         },
                                     ]}
                                 />
@@ -429,7 +537,6 @@ export default function CreatePengajar({ pengajar }: Props) {
                                 />
 
                                 <FormAsyncSelect
-                                    key={data.provinsi?.value}
                                     label="Kabupaten / Kota"
                                     value={data.kabkota}
                                     onChange={(value: any) => {
@@ -447,7 +554,6 @@ export default function CreatePengajar({ pengajar }: Props) {
                                 />
 
                                 <FormAsyncSelect
-                                    key={data.kabkota?.value}
                                     label="Kecamatan"
                                     value={data.kecamatan}
                                     onChange={(value: any) => {
@@ -464,7 +570,6 @@ export default function CreatePengajar({ pengajar }: Props) {
                                 />
 
                                 <FormAsyncSelect
-                                    key={data.kecamatan?.value}
                                     label="Kelurahan"
                                     value={data.kelurahan}
                                     onChange={(value: any) =>
@@ -522,18 +627,23 @@ export default function CreatePengajar({ pengajar }: Props) {
                                 <FormInput
                                     label="No Rekening"
                                     value={data.no_rekening}
-                                    onChange={(e) =>
-                                        setData("no_rekening", e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(
+                                            /\D/g,
+                                            "",
+                                        );
+                                        setData("no_rekening", value);
+                                    }}
                                     error={errors.no_rekening}
                                 />
 
                                 <FormInput
                                     label="No BPJS"
                                     value={data.no_bpjs}
-                                    onChange={(e) =>
-                                        setData("no_bpjs", e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/\D/g, "").slice(0, 13);
+                                        setData("no_bpjs", value);
+                                    }}
                                     error={errors.no_bpjs}
                                 />
 

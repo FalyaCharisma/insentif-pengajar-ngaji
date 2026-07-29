@@ -227,14 +227,6 @@ export default function Index({ kategori, lembagas, filters }: Props) {
                         </div>
                     </div>
 
-                    <TableToolbar
-                        filters={filters}
-                        setParams={setParams}
-                        hideAddButton
-                        hideSort
-                        searchPlaceholder="Cari nama atau kode lembaga..."
-                    />
-
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                         {/* Panel Kiri */}
                         <div className="rounded-2xl border border-slate-200 bg-white">
@@ -254,9 +246,9 @@ export default function Index({ kategori, lembagas, filters }: Props) {
                                         }
                                         className="w-56 rounded-lg border border-slate-300 px-3 py-2 text-sm"
                                     >
-                                        {/* <option value="null">
+                                        <option value="null">
                                             Belum Mapping
-                                        </option> */}
+                                        </option>
 
                                         {kategori.map((item: any) => (
                                             <option
@@ -273,7 +265,7 @@ export default function Index({ kategori, lembagas, filters }: Props) {
                                         onChange={(e) =>
                                             setSearchLeft(e.target.value)
                                         }
-                                        placeholder="Cari lembaga..."
+                                        placeholder="Cari nama atau kode lembaga..."
                                         className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
                                     />
                                 </div>

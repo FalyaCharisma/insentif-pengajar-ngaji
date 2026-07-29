@@ -41,6 +41,9 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
     const [searchLeft, setSearchLeft] = useState("");
     const [searchRight, setSearchRight] = useState("");
 
+    const [leftKategori, setLeftKategori] = useState("");
+    const [rightKategori, setRightKategori] = useState("");
+
     const moveToRight = () => {
         if (leftSelected.length === 0) return;
 
@@ -172,17 +175,29 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
 
         setRightItems(right);
     }, [sourceForum, targetForum, lembagas]);
-    const filteredLeft = leftItems.filter(
-        (item: any) =>
+    const filteredLeft = leftItems.filter((item: any) => {
+        const keyword =
             item.nama.toLowerCase().includes(searchLeft.toLowerCase()) ||
-            item.kode.toLowerCase().includes(searchLeft.toLowerCase()),
-    );
+            item.kode.toLowerCase().includes(searchLeft.toLowerCase());
 
-    const filteredRight = rightItems.filter(
-        (item: any) =>
+        const kategoriMatch =
+            leftKategori === "" ||
+            Number(item.kategori_id) === Number(leftKategori);
+
+        return keyword && kategoriMatch;
+    });
+
+    const filteredRight = rightItems.filter((item: any) => {
+        const keyword =
             item.nama.toLowerCase().includes(searchRight.toLowerCase()) ||
-            item.kode.toLowerCase().includes(searchRight.toLowerCase()),
-    );
+            item.kode.toLowerCase().includes(searchRight.toLowerCase());
+
+        const kategoriMatch =
+            rightKategori === "" ||
+            Number(item.kategori_id) === Number(rightKategori);
+
+        return keyword && kategoriMatch;
+    });
 
     useEffect(() => {
         console.log(changedItems);
@@ -198,12 +213,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                         title="Mapping Forum"
                         subtitle="Pemetaan forum ke lembaga"
                     />
-                    <div className="flex items-center justify-between">
-                        <PageHeader
-                            title="Mapping Forum"
-                            subtitle="Pemetaan forum ke lembaga"
-                        />
-                    </div>
+
                     <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5">
@@ -247,40 +257,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                             </div>
                         </div>
                     </div>
-                    <TableToolbar
-                        filters={filters}
-                        setParams={setParams}
-                        hideAddButton
-                        hideSort
-                        searchPlaceholder="Cari nama atau kode lembaga..."
-                    >
-                        {/* Filter kategori */}
-                        <select
-                            value={filters.kategori_id ?? ""}
-                            onChange={(e) =>
-                                setParams({
-                                    kategori_id: e.target.value,
-                                    page: 1,
-                                })
-                            }
-                            className="
-                                h-11
-                                rounded-2xl
-                                border
-                                border-slate-200
-                                px-4
-                                text-sm
-                            "
-                        >
-                            <option value="">Semua Kategori</option>
 
-                            {kategori.map((item: any) => (
-                                <option key={item.id} value={item.id}>
-                                    {item.nama}
-                                </option>
-                            ))}
-                        </select>
-                    </TableToolbar>
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                         <div className="rounded-2xl border border-slate-200 bg-white">
                             <div className="border-b p-4">
@@ -312,6 +289,25 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                                 value={forum.id}
                                             >
                                                 {forum.nama}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    <select
+                                        value={leftKategori}
+                                        onChange={(e) =>
+                                            setLeftKategori(e.target.value)
+                                        }
+                                        className="w-52 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                                    >
+                                        <option value="">Semua Kategori</option>
+
+                                        {kategori.map((item: any) => (
+                                            <option
+                                                key={item.id}
+                                                value={item.id}
+                                            >
+                                                {item.nama}
                                             </option>
                                         ))}
                                     </select>
@@ -439,13 +435,30 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                             </option>
                                         ))}
                                     </select>
+                                    <select
+                                        value={rightKategori}
+                                        onChange={(e) =>
+                                            setRightKategori(e.target.value)
+                                        }
+                                        className="w-52 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                                    >
+                                        <option value="">Semua Kategori</option>
 
+                                        {kategori.map((item: any) => (
+                                            <option
+                                                key={item.id}
+                                                value={item.id}
+                                            >
+                                                {item.nama}
+                                            </option>
+                                        ))}
+                                    </select>
                                     <input
                                         value={searchRight}
                                         onChange={(e) =>
                                             setSearchRight(e.target.value)
                                         }
-                                        placeholder="Cari lembaga..."
+                                        placeholder="Cari nama atau kode lembaga..."
                                         className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
                                     />
                                 </div>
