@@ -17,6 +17,8 @@ class DokumenLembagaController extends Controller
 {
     public function index(Lembaga $lembaga)
     {
+        $this->authorize('view', $lembaga);
+        
         $lembaga->load([
             'kategori',
             'user',

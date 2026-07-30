@@ -149,7 +149,7 @@ export default function Profil({
         );
     };
 
-    const verificationStatus = lembaga.profil?.status_verifikasi ?? "ditolak";
+    const verificationStatus = lembaga.profil?.status_verifikasi ?? "pending";
 
     const statusConfig = {
         disetujui: {

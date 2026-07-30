@@ -5,6 +5,7 @@ import StatCard from "@/Components/dashboard/StatCard";
 import ChartCard from "@/Components/dashboard/ChartCard";
 import ActivityCard from "@/Components/dashboard/ActivityCard";
 import QuickActionCard from "@/Components/dashboard/QuickActionCard";
+import { usePage } from "@inertiajs/react";
 
 import {
     BadgeCheck,
@@ -15,6 +16,10 @@ import {
 
 export default function LembagaDashboard() {
 
+    const { auth } = usePage().props as any;
+
+    const user = auth?.user;
+
     return (
         <>
             <Head title="Dashboard" />
@@ -23,8 +28,8 @@ export default function LembagaDashboard() {
                 <div className="space-y-6">
 
                     <WelcomeCard
-                        name="Nama Lembaga"
-                        role="Lembaga"
+                        name={auth.user.name}
+                        role=""
                     />
 
                     {/* Statistik */}

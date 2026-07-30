@@ -5,6 +5,7 @@ import StatCard from "@/Components/dashboard/StatCard";
 import ChartCard from "@/Components/dashboard/ChartCard";
 import ActivityCard from "@/Components/dashboard/ActivityCard";
 import QuickActionCard from "@/Components/dashboard/QuickActionCard";
+import { usePage } from "@inertiajs/react";
 
 import {
     FileClock,
@@ -14,6 +15,10 @@ import {
 } from "lucide-react";
 
 export default function ForumDashboard() {
+    const { auth } = usePage().props as any;
+
+    const user = auth?.user;
+    
     return (
         <>
             <Head title="Dashboard" />
@@ -21,8 +26,8 @@ export default function ForumDashboard() {
                 <div className="space-y-6">
 
                     <WelcomeCard
-                        name="Forum"
-                        role="Tim Verifikasi"
+                        name={auth.user.name}
+                        role=""
                     />
 
                     {/* Statistik */}
