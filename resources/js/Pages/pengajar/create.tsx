@@ -24,6 +24,7 @@ import {
     ImagePlus,
     ArrowLeft,
 } from "lucide-react";
+import axios from "axios";
 
 type SelectOption = {
     label: string;
@@ -36,7 +37,7 @@ const initialValues = {
 
     tempat_lahir: null as SelectOption | null,
     tgl_lahir: "",
-    jk: null as SelectOption | null,
+    jk: "",
 
     jabatan: "",
     lembaga_id: "",
@@ -88,6 +89,18 @@ export default function CreatePengajar({ pengajar }: Props) {
         searchAllKabkota,
     } = useAlamat();
 
+    const tahunOptions = Array.from(
+        { length: new Date().getFullYear() - 1970 + 1 },
+        (_, i) => {
+            const tahun = String(new Date().getFullYear() - i);
+
+            return {
+                label: tahun,
+                value: tahun,
+            };
+        },
+    );
+
     const page: any = usePage().props;
 
     const lembagas = page.lembaga ?? [];
@@ -131,6 +144,119 @@ export default function CreatePengajar({ pengajar }: Props) {
         });
 
     const normalize = (text?: string) => (text ?? "").trim().toLowerCase();
+    const resetDataNik = () => {
+        setData((data) => ({
+            ...data,
+            nama: "",
+            tempat_lahir: null,
+            tgl_lahir: "",
+            jk: "",
+            alamat: "",
+            provinsi: null,
+            kabkota: null,
+            kecamatan: null,
+            kelurahan: null,
+        }));
+    };
+    const handleNikChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value.replace(/\D/g, "").slice(0, 16);
+
+        setData("nik", value);
+
+        if (value.length < 16) {
+            resetDataNik();
+            return;
+        }
+
+        await ambilDataNik(value);
+    };
+    const ambilDataNik = async (nik: string) => {
+        try {
+            const res = await axios.get(route("pengajar.cekNik"), {
+                params: { nik },
+            });
+
+            const api = res.data.data;
+            const alamat = [
+                api.alamat_ktp,
+                api.rt_ktp && api.rw_ktp
+                    ? `RT ${api.rt_ktp}/RW ${api.rw_ktp}`
+                    : null,
+            ]
+                .filter(Boolean)
+                .join(", ");
+
+            const kodeProvinsi = api.kode_kecamatan_ktp.substring(0, 2);
+            const kodeKabkota = api.kode_kecamatan_ktp.substring(0, 5);
+            const provinsiOptions = await searchProvinsi("");
+
+            const provinsi = provinsiOptions.find(
+                (x: any) => Number(x.value) === Number(kodeProvinsi),
+            );
+
+            if (provinsi) {
+                setData("provinsi", provinsi);
+            }
+            const kabOptions = await searchKabkota(kodeProvinsi, "Kota Kediri");
+
+            const kab = kabOptions.find((x: any) => x.value === kodeKabkota);
+
+            if (kab) {
+                setData("kabkota", kab);
+            }
+
+            const kecamatanOptions = await searchKecamatan(kodeKabkota, "");
+
+            const kecamatan = kecamatanOptions.find(
+                (x: any) => x.value === api.kode_kecamatan_ktp,
+            );
+
+            if (kecamatan) {
+                setData("kecamatan", kecamatan);
+            }
+            const kelurahanOptions = await searchKelurahan(
+                api.kode_kecamatan_ktp,
+                "",
+            );
+
+            const kelurahan = kelurahanOptions.find(
+                (x: any) => x.value === api.kode_kelurahan_ktp,
+            );
+
+            if (kelurahan) {
+                setData("kelurahan", kelurahan);
+            }
+
+            // Field biasa
+            setData("nama", api.nama ?? "");
+            setData("alamat", alamat);
+
+            setData("tgl_lahir", api.tgl_lahir ?? "");
+
+            // FormSelect2 -> STRING
+            if (api.gender === "L") {
+                setData("jk", "laki-laki");
+            } else if (api.gender === "P") {
+                setData("jk", "perempuan");
+            }
+
+            // FormAsyncSelect -> OBJECT
+            if (api.tempat_lahir) {
+                const options = await searchAllKabkota(api.tempat_lahir);
+
+                const selected =
+                    options.find((x: any) =>
+                        x.label.toLowerCase().includes("kediri"),
+                    ) ?? null;
+
+                if (selected) {
+                    setData("tempat_lahir", selected);
+                }
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
 
     useEffect(() => {
         if (!pengajar?.tempat_lahir) return;
@@ -218,15 +344,6 @@ export default function CreatePengajar({ pengajar }: Props) {
             },
         );
     }, [data.kecamatan, loadedAlamat]);
-    // =========================
-    // NIK VALIDATION
-    // =========================
-    const handleNikChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        const onlyNumber = value.replace(/\D/g, "").slice(0, 16);
-
-        setData("nik", onlyNumber);
-    };
 
     // =========================
     // SUBMIT
@@ -259,13 +376,13 @@ export default function CreatePengajar({ pengajar }: Props) {
 
     return (
         <>
-            <Head title="Tambah Pengajar" />
+            <Head title={isEdit ? "Edit Pengajar" : "Tambah Pengajar"} />
 
             <AdminLayout>
                 <div className="space-y-5">
                     <div className="flex items-start justify-between gap-3">
                         <PageHeader
-                            title="Tambah Pengajar"
+                            title={isEdit ? "Edit Pengajar" : "Tambah Pengajar"}
                             subtitle="Tambahkan data pengajar beserta akun staff"
                         />
                     </div>
@@ -292,6 +409,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <FormInput
                                     label="NIK"
+                                    placeholder="Masukkan 16 digit NIK"
                                     value={data.nik}
                                     onChange={handleNikChange}
                                     error={errors.nik}
@@ -299,6 +417,7 @@ export default function CreatePengajar({ pengajar }: Props) {
 
                                 <FormInput
                                     label="Nama"
+                                    placeholder="Masukkan nama lengkap"
                                     value={data.nama}
                                     onChange={(e) =>
                                         setData("nama", e.target.value)
@@ -408,6 +527,7 @@ export default function CreatePengajar({ pengajar }: Props) {
 
                                 <FormInput
                                     label="Jabatan"
+                                    placeholder="Contoh: Guru Fiqih"
                                     value={data.jabatan}
                                     onChange={(e) =>
                                         setData("jabatan", e.target.value)
@@ -473,6 +593,7 @@ export default function CreatePengajar({ pengajar }: Props) {
 
                                 <FormInput
                                     label="Jurusan"
+                                    placeholder="Contoh: Pendidikan Matematika"
                                     value={data.jurusan}
                                     onChange={(e) =>
                                         setData("jurusan", e.target.value)
@@ -482,6 +603,7 @@ export default function CreatePengajar({ pengajar }: Props) {
 
                                 <FormInput
                                     label="Sekolah / Universitas"
+                                    placeholder="Contoh: Universitas Negeri Malang"
                                     value={data.sekolah_universitas}
                                     onChange={(e) =>
                                         setData(
@@ -492,13 +614,11 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     error={errors.sekolah_universitas}
                                 />
 
-                                <FormInput
+                                <FormSelect2
                                     label="Tahun Lulus"
-                                    type="number"
                                     value={data.tahun_lulus}
-                                    onChange={(e) =>
-                                        setData("tahun_lulus", e.target.value)
-                                    }
+                                    onChange={(v) => setData("tahun_lulus", v)}
+                                    options={tahunOptions}
                                     error={errors.tahun_lulus}
                                 />
                             </div>
@@ -586,6 +706,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                 <div className="md:col-span-2">
                                     <FormTextArea
                                         label="Alamat Lengkap"
+                                        placeholder="Contoh: Jl. Diponegoro No. 10 RT 01/RW 02"
                                         value={data.alamat}
                                         onChange={(e) =>
                                             setData("alamat", e.target.value)
@@ -615,17 +736,50 @@ export default function CreatePengajar({ pengajar }: Props) {
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <FormInput
+                                <FormSelect2
                                     label="Bank"
                                     value={data.bank}
-                                    onChange={(e) =>
-                                        setData("bank", e.target.value)
-                                    }
+                                    onChange={(v) => setData("bank", v)}
                                     error={errors.bank}
+                                    options={[
+                                        {
+                                            label: "Bank Jatim",
+                                            value: "Bank Jatim",
+                                        },
+                                        { label: "BRI", value: "BRI" },
+                                        { label: "BNI", value: "BNI" },
+                                        { label: "Mandiri", value: "Mandiri" },
+                                        { label: "BCA", value: "BCA" },
+                                        { label: "BTN", value: "BTN" },
+                                        { label: "BSI", value: "BSI" },
+                                        {
+                                            label: "CIMB Niaga",
+                                            value: "CIMB Niaga",
+                                        },
+                                        { label: "Danamon", value: "Danamon" },
+                                        {
+                                            label: "Permata Bank",
+                                            value: "Permata Bank",
+                                        },
+                                        {
+                                            label: "Panin Bank",
+                                            value: "Panin Bank",
+                                        },
+                                        {
+                                            label: "Bank Mega",
+                                            value: "Bank Mega",
+                                        },
+                                        {
+                                            label: "Bank Syariah Jatim",
+                                            value: "Bank Syariah Jatim",
+                                        },
+                                        { label: "Lainnya", value: "Lainnya" },
+                                    ]}
                                 />
 
                                 <FormInput
                                     label="No Rekening"
+                                    placeholder="Masukkan nomor rekening"
                                     value={data.no_rekening}
                                     onChange={(e) => {
                                         const value = e.target.value.replace(
@@ -639,9 +793,12 @@ export default function CreatePengajar({ pengajar }: Props) {
 
                                 <FormInput
                                     label="No BPJS"
+                                    placeholder="Masukkan 13 digit nomor BPJS"
                                     value={data.no_bpjs}
                                     onChange={(e) => {
-                                        const value = e.target.value.replace(/\D/g, "").slice(0, 13);
+                                        const value = e.target.value
+                                            .replace(/\D/g, "")
+                                            .slice(0, 13);
                                         setData("no_bpjs", value);
                                     }}
                                     error={errors.no_bpjs}

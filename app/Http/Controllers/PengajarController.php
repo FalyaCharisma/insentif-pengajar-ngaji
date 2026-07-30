@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Http;
 
 class PengajarController extends Controller
 {
@@ -64,6 +65,31 @@ class PengajarController extends Controller
         ]);
     }
 
+    public function cekNik(Request $request)
+    {
+        $request->validate([
+            'nik' => ['required', 'digits:16'],
+        ]);
+
+        $response = Http::get('https://walidata.kedirikota.go.id/api/dtks/check', [
+            'nik' => $request->nik,
+        ]);
+
+        if (!$response->successful()) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'Gagal mengambil data.',
+                ],
+                500,
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $response->json(),
+        ]);
+    }
     /**
      * Show the form for creating a new resource.
      */
