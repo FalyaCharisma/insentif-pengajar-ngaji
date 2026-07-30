@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { Plus, Filter } from "lucide-react";
 
 type Props = {
     filters: any;
@@ -22,6 +22,12 @@ type Props = {
     hidePerPage?: boolean;
 
     children?: React.ReactNode;
+    
+    hideFilterButton?: boolean;
+    onFilter?: () => void;
+
+    hasFilter?: boolean;
+    activeFilterCount?: number;
 };
 
 export default function TableToolbar({
@@ -42,6 +48,13 @@ export default function TableToolbar({
     hidePerPage = false,
 
     children,
+
+    hideFilterButton = true,
+    onFilter,
+
+    hasFilter = false,
+    activeFilterCount = 0,
+    
 }: Props) {
     return (
         <div
@@ -51,32 +64,27 @@ export default function TableToolbar({
             "
         >
             {/* LEFT */}
-            <div
-                className="
-        flex flex-col gap-3
-        md:flex-row md:flex-wrap md:items-center
-    "
-            >
+            <div className="flex flex-wrap items-center gap-3">
                 {!hideSearch && (
                     <input
                         type="text"
                         defaultValue={filters.search}
                         placeholder={searchPlaceholder}
                         className="
-                w-full
-                md:w-72
-                h-11
-                px-4
-                rounded-2xl
-                border border-slate-200
-                bg-white
-                text-sm
-                outline-none
-                transition
-                focus:ring-2
-                focus:ring-indigo-500
-                focus:border-indigo-500
-            "
+                            w-full
+                            md:w-72
+                            h-11
+                            px-4
+                            rounded-2xl
+                            border border-slate-200
+                            bg-white
+                            text-sm
+                            outline-none
+                            transition
+                            focus:ring-2
+                            focus:ring-indigo-500
+                            focus:border-indigo-500
+                        "
                         onChange={(e) =>
                             setParams({
                                 search: e.target.value,
@@ -90,12 +98,12 @@ export default function TableToolbar({
                     <select
                         defaultValue={filters.per_page}
                         className="
-                h-11
-                rounded-2xl
-                border border-slate-200
-                px-4
-                text-sm
-            "
+                            h-11
+                            rounded-2xl
+                            border border-slate-200
+                            px-4
+                            text-sm
+                        "
                         onChange={(e) =>
                             setParams({
                                 per_page: Number(e.target.value),
@@ -114,12 +122,12 @@ export default function TableToolbar({
                     <select
                         defaultValue={filters.sort}
                         className="
-                h-11
-                rounded-2xl
-                border border-slate-200
-                px-4
-                text-sm
-            "
+                            h-11
+                            rounded-2xl
+                            border border-slate-200
+                            px-4
+                            text-sm
+                        "
                         onChange={(e) =>
                             setParams({
                                 sort: e.target.value,
@@ -139,28 +147,74 @@ export default function TableToolbar({
             </div>
 
             {/* RIGHT */}
-            {/* RIGHT */}
-            {!hideAddButton && onAdd && addButtonLabel && (
-                <button
-                    onClick={onAdd}
-                    className="
-            w-full
-            md:w-auto
-            h-11
-            px-5
-            rounded-2xl
-            bg-indigo-600
-            hover:bg-indigo-700
-            text-white
-            text-sm
-            font-medium
-            transition
-            shadow-sm
-        "
-                >
-                    + {addButtonLabel}
-                </button>
-            )}
+            <div className="flex items-center gap-2">
+
+                {!hideFilterButton && onFilter && (
+                    <button
+                        onClick={onFilter}
+                        className={`
+                            h-11
+                            px-5
+                            rounded-2xl
+                            text-sm
+                            font-medium
+                            inline-flex
+                            items-center
+                            gap-2
+                            transition
+                            ${
+                                hasFilter
+                                    ? "bg-pink-600 text-white border border-pink-600 hover:bg-pink-700"
+                                    : "border border-pink-500 text-pink-600 bg-pink-50 hover:bg-pink-100"
+                            }
+                        `}
+                    >
+                        <Filter size={18} />
+                        Filter
+                        {activeFilterCount > 0 && (
+                            <span
+                                className="
+                                    ml-1
+                                    rounded-full
+                                    bg-white
+                                    text-pink-600
+                                    text-xs
+                                    font-bold
+                                    px-2
+                                "
+                            >
+                                {activeFilterCount}
+                            </span>
+                        )}
+                    </button>
+                )}
+
+                {!hideAddButton && onAdd && addButtonLabel && (
+                    <button
+                        onClick={onAdd}
+                        className="
+                            h-11
+                            px-5
+                            rounded-2xl
+                            bg-indigo-600
+                            hover:bg-indigo-700
+                            text-white
+                            text-sm
+                            font-medium
+                            inline-flex
+                            items-center
+                            gap-2
+                            transition
+                        "
+                    >
+                        <Plus size={18} />
+                        {addButtonLabel}
+                    </button>
+                )}
+
+            </div>
+
+            
         </div>
     );
 }

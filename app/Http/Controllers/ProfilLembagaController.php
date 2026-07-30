@@ -16,6 +16,8 @@ class ProfilLembagaController extends Controller
      */
     public function index(Lembaga $lembaga)
     {
+        $this->authorize('view', $lembaga);
+        
         $lembaga->load([
             'kategori',
             'user',
@@ -60,6 +62,7 @@ class ProfilLembagaController extends Controller
                     'required',
                     'string',
                     'max:100',
+                    Rule::unique('profil_lembaga', 'nomor_registrasi')->ignore($lembaga->profil?->id),
                 ],
                 'tahun_berdiri' => [
                     'required',
@@ -155,6 +158,7 @@ class ProfilLembagaController extends Controller
                 // Informasi
                 'nomor_registrasi.required' => 'Nomor registrasi wajib diisi.',
                 'nomor_registrasi.max' => 'Nomor registrasi maksimal 100 karakter.',
+                'nomor_registrasi.unique' => 'Nomor registrasi sudah digunakan.',
 
                 'tahun_berdiri.required' => 'Tahun berdiri wajib diisi.',
                 'tahun_berdiri.integer' => 'Tahun berdiri harus berupa angka.',
@@ -257,6 +261,9 @@ class ProfilLembagaController extends Controller
                 ]),
             ],
             'catatan_verifikasi' => [
+                Rule::requiredIf(
+                    $request->status_verifikasi === 'ditolak'
+                ),
                 'nullable',
                 'string',
             ],
@@ -264,7 +271,9 @@ class ProfilLembagaController extends Controller
 
         $profil->update([
             'status_verifikasi' => $request->status_verifikasi,
-            'catatan_verifikasi' => $request->catatan_verifikasi,
+            'catatan_verifikasi' => $request->status_verifikasi === 'ditolak'
+                ? $request->catatan_verifikasi
+                : null,
             'verified_by' => auth()->id(),
             'verified_at' => now(),
         ]);

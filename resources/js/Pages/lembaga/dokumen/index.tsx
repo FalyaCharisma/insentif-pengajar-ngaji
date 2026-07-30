@@ -33,13 +33,9 @@ export default function Index({
 }: Props) {
     const { hasRole } = useAuth();
 
-    const canUpload =
-        hasRole("lembaga") ||
-        hasRole("superadmin");
-
-    const canVerify =
-        hasRole("dindik") ||
-        hasRole("superadmin");
+    const canUpload = hasRole("lembaga") || hasRole("superadmin");
+    const canVerify = hasRole("dindik") || hasRole("superadmin");
+    const canCreate = hasRole("superadmin") || hasRole("lembaga");
 
     const [selected, setSelected] = useState<any>(null);
 
@@ -68,6 +64,7 @@ export default function Index({
                             setSelected(null);
                             setOpenUpload(true);
                         }}
+                        hideAddButton={!canCreate}
                     />
 
                     <div

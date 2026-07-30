@@ -32,20 +32,11 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
     {
         title: "Master Data",
         icon: FolderKanban,
-        roles: ["superadmin", "dindik"],
+        roles: ["superadmin", "dindik",],
         children: [
             {
                 title: "Kategori Lembaga",
                 href: "/kategori",
-                roles: ["superadmin", "dindik"],
-            },
-            {
-                title: "Lembaga",
-                href: "/lembaga",
-                activeMatch: [
-                    "/lembaga",
-                    "/dokumen/lembaga",
-                ],
                 roles: ["superadmin", "dindik"],
             },
             {
@@ -65,6 +56,18 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
             },
         ],
     },
+
+    {
+        title: "Lembaga",
+        icon: Building2,
+        href: "/lembaga",
+        activeMatch: [
+            "/lembaga",
+            "/dokumen/lembaga",
+        ],
+        roles: ["superadmin", "dindik", "forum"],
+    },
+    
     {
         title: "Program Insentif",
         icon: Wallet,

@@ -74,7 +74,7 @@ export function useAlamat() {
         }));
     };
 
-    // ================= KELURAHAN =================
+    // ================= ALL KAB KOTA =================
     const searchAllKabkota = async (
         inputValue: string,
     ) => {

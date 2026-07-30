@@ -31,12 +31,39 @@ class LembagaController extends Controller
 
     public function index(Request $request)
     {
+        $user = auth()->user();
+
+        $query = Lembaga::with([
+            'kategori',
+            'user',
+            'profil',
+        ]);
+
+        // Forum hanya melihat lembaga yang dikelolanya
+        if ($user->hasRole('forum')) {
+            $query->where('forum_id', $user->forum->id);
+        }
+
+        if ($request->filled('status_verifikasi')) {
+            $query->whereHas('profil', function ($q) use ($request) {
+                $q->where('status_verifikasi', $request->status_verifikasi);
+            });
+        }
+
+        if ($request->filled('kecamatan')) {
+            $query->whereHas('profil', function ($q) use ($request) {
+                $q->where('kode_kecamatan', $request->kecamatan);
+            });
+        }
+
+        if ($request->filled('kelurahan')) {
+            $query->whereHas('profil', function ($q) use ($request) {
+                $q->where('kode_kelurahan', $request->kelurahan);
+            });
+        }
+
         $lembaga = $this->datatable(
-            query: Lembaga::with([
-                'kategori',
-                'user',
-                'profil',
-            ]),
+            query: $query,
             request: $request,
             searchable: [
                 'nama',
@@ -60,6 +87,9 @@ class LembagaController extends Controller
                 [
                     'kategori_id',
                     'status',
+                    'status_verifikasi',
+                    'kecamatan',
+                    'kelurahan',
                 ]
             ),
 
@@ -70,7 +100,7 @@ class LembagaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'kategori_id' => 'required|exists:kategori,id',
+            'kategori_id' => 'required',
             'nama' => 'required|string|max:255',
         ]);
 
@@ -92,12 +122,18 @@ class LembagaController extends Controller
             $user->assignRole('lembaga');
 
             // Simpan lembaga
-            Lembaga::create([
+            $lembaga = Lembaga::create([
                 'user_id' => $user->id,
                 'kategori_id' => $validated['kategori_id'],
                 'kode' => $kode,
                 'nama' => $validated['nama'],
             ]);
+
+            ProfilLembaga::create([
+                'lembaga_id' => $lembaga->id,
+                'status_verifikasi' => 'pending',
+            ]);
+
         });
 
         return back()->with(

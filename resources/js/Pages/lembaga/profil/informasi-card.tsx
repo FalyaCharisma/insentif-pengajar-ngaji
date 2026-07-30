@@ -79,6 +79,7 @@ export default function InformasiCard({
                         }
                     )}
                     onChange={(value) => setData("tahun_berdiri", value)}
+                    disabled={!canEdit}
                 />
             </div>
         </>
