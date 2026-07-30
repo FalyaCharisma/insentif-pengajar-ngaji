@@ -65,12 +65,6 @@ class KuotaController extends Controller
 
         $periodeId = $periode->id;
 
-        if (Kuota::where('periode_id', $periodeId)->exists()) {
-            return back()->withErrors([
-                'generate' => 'Kuota periode tersebut sudah pernah dibuat.',
-            ]);
-        }
-
         $dataSiswa = Siswa::where('periode_id', $periodeId)->get();
 
         if ($dataSiswa->isEmpty()) {
@@ -79,26 +73,35 @@ class KuotaController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($dataSiswa, $periodeId) {
+        $jumlahGenerate = 0;
+
+        DB::transaction(function () use ($dataSiswa, $periodeId, &$jumlahGenerate) {
             foreach ($dataSiswa as $item) {
+                $sudahAda = Kuota::where('periode_id', $periodeId)->where('lembaga_id', $item->lembaga_id)->exists();
+
+                if ($sudahAda) {
+                    continue;
+                }
+
                 $estimasi = $this->hitungEstimasi($item->jumlah_siswa);
 
                 Kuota::create([
                     'periode_id' => $periodeId,
-
                     'lembaga_id' => $item->lembaga_id,
-
                     'estimasi_kuota' => $estimasi,
-
-                    // default sama
                     'kuota_final' => $estimasi,
-
                     'keterangan' => null,
                 ]);
+
+                $jumlahGenerate++;
             }
         });
 
-        return back()->with('success', 'Generate kuota berhasil.');
+        if ($jumlahGenerate === 0) {
+            return back()->with('info', 'Seluruh lembaga pada periode ini sudah memiliki data kuota.');
+        }
+
+        return back()->with('success', "Berhasil membuat {$jumlahGenerate} data kuota baru.");
     }
 
     /**

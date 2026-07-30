@@ -40,7 +40,7 @@ export default function Index({ kuota, filters, periodes }: Props) {
     const generate = () => {
         verifyConfirm(
             "Generate Kuota",
-            "Sistem akan membuat data kuota berdasarkan periode yang sedang aktif. Pastikan data jumlah siswa setiap lembaga sudah lengkap.",
+            "Sistem akan membuat data kuota untuk lembaga pada periode aktif yang belum memiliki data kuota. Data kuota yang sudah ada tidak akan diubah.",
             "Ya, Generate",
             "info",
         ).then((result) => {
@@ -85,29 +85,23 @@ export default function Index({ kuota, filters, periodes }: Props) {
 
                                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-sky-700">
                                     <li>
-                                        Generate kuota hanya dapat dilakukan
-                                        satu kali pada setiap periode.
+                                        Sistem akan membuat data kuota untuk setiap lembaga pada periode aktif yang belum memiliki data kuota.
                                     </li>
 
                                     <li>
-                                        Sistem akan mengambil seluruh data
-                                        jumlah siswa yang telah diinput oleh
-                                        setiap lembaga.
+                                        Data kuota yang sudah pernah dibuat tidak akan dibuat ulang maupun diubah.
                                     </li>
 
                                     <li>
-                                        Estimasi kuota dihitung secara otomatis
-                                        berdasarkan jumlah siswa.
+                                        Estimasi kuota dihitung secara otomatis berdasarkan jumlah siswa.
                                     </li>
 
                                     <li>
-                                        Kuota Final akan diisi sama dengan
-                                        Estimasi Kuota sebagai nilai awal.
+                                       Kuota Final akan diisi sama dengan Estimasi Kuota sebagai nilai awal dan dapat disesuaikan oleh Admin Dinas Pendidikan.
                                     </li>
 
                                     <li>
-                                        Admin Dinas Pendidikan dapat mengubah
-                                        Kuota Final sesuai hasil kebijakan.
+                                        Apabila terdapat lembaga baru pada periode aktif, Admin dapat menjalankan Generate Kuota kembali tanpa memengaruhi data kuota yang sudah ada.
                                     </li>
                                 </ul>
                             </div>
