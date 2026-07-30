@@ -46,9 +46,8 @@ Route::get('/kontak', function () {
 // });
 
 Route::middleware('auth')->group(function () {
-
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index']) ->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profil Setting
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -69,11 +68,9 @@ Route::middleware('auth')->group(function () {
             Route::put('{lembaga}/reset-password', 'resetPassword')->name('reset-password');
         });
 
-    Route::get('mapping-forum', [MappingForumController::class, 'index'])->name('mapping-forum.index');
-    Route::put('mapping-forum', [MappingForumController::class, 'update'])->name('mapping-forum.update');
+    Route::resource('mapping-forum', MappingForumController::class);
 
-    Route::get('mapping-kategori', [MappingKategoriController::class, 'index'])->name('mapping-kategori.index');
-    Route::put('mapping-kategori', [MappingKategoriController::class, 'update'])->name('mapping-kategori.update');
+    Route::resource('mapping-kategori', MappingKategoriController::class);
 
     // Route tambahan lembaga
     Route::prefix('lembaga')
@@ -119,11 +116,14 @@ Route::middleware('auth')->group(function () {
     ]);
 
     // Data Pengajar
-    Route::resource('pengajar', PengajarController::class)->parameters(['pengajar' => 'pengajar',]);
-    Route::controller(PengajarController::Class)->prefix('pengajar')->name('pengajar.')->group(function (){
-        Route::patch('/{pengajar}/toggle-status', 'toggleStatus')->name('toggle-status');
-        Route::put('/{pengajar}/verifikasi', 'verifikasi')->name('verifikasi');
-    });
+    Route::resource('pengajar', PengajarController::class)->parameters(['pengajar' => 'pengajar']);
+    Route::controller(PengajarController::Class)
+        ->prefix('pengajar')
+        ->name('pengajar.')
+        ->group(function () {
+            Route::patch('/{pengajar}/toggle-status', 'toggleStatus')->name('toggle-status');
+            Route::put('/{pengajar}/verifikasi', 'verifikasi')->name('verifikasi');
+        });
 
     // Setting Kuota
     Route::resource('kuota', KuotaController::class)->parameters(['kuota' => 'kuota']);

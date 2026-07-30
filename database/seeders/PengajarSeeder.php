@@ -48,7 +48,7 @@ class PengajarSeeder extends Seeder
                     'nik' => $nik,
                     'nama' => $nama,
 
-                    'tempat_lahir' => 'Kediri',
+                    'tempat_lahir' => 'Kota Kediri',
                     'tgl_lahir' => now()->subYears(rand(22, 55))->subDays(rand(1, 365)),
                     'jk' => fake()->randomElement(['laki-laki', 'perempuan']),
 

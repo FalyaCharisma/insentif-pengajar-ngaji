@@ -87,7 +87,7 @@ class PengajarController extends Controller
             'nama' => 'required|string|max:255',
             'tempat_lahir' => 'required|max:100',
             'tgl_lahir' => 'required|date',
-            'jk' => 'required|in:L,P',
+            'jk' => 'required|in:laki-laki,perempuan',
             'jabatan' => 'required|string|max:100',
             'pendidikan_terakhir' => 'required|string|max:100',
             'jurusan' => 'required|string|max:100',
@@ -177,12 +177,13 @@ class PengajarController extends Controller
      */
     public function edit(Pengajar $pengajar)
     {
-        $pengajar->load([
-            'lembaga',
-        ]);
+        $user = auth()->user();
 
-        return inertia('pengajar/show', [
+        $pengajar->load('lembaga');
+
+        return Inertia::render('pengajar/create', [
             'pengajar' => $pengajar,
+            'lembaga' => $user->hasRole(['superadmin', 'dindik']) ? Lembaga::orderBy('nama')->get() : [],
         ]);
     }
 
@@ -198,7 +199,7 @@ class PengajarController extends Controller
             'nama' => 'required|string|max:255',
             'tempat_lahir' => 'required',
             'tgl_lahir' => 'required|date',
-            'jk' => 'required|in:L,P',
+            'jk' => 'required|in:laki-laki,perempuan',
             'jabatan' => 'required|string|max:100',
             'pendidikan_terakhir' => 'required|string|max:100',
             'jurusan' => 'required|string|max:100',
@@ -247,7 +248,7 @@ class PengajarController extends Controller
 
                 'nama' => $request->nama,
 
-                'tempat_lahir' => $request->tempat_lahir['value'] ?? null,
+                'tempat_lahir' => $request->tempat_lahir['label'] ?? null,
 
                 'tgl_lahir' => $request->tgl_lahir,
                 'jk' => $request->jk,
@@ -306,15 +307,10 @@ class PengajarController extends Controller
     public function toggleStatus(Pengajar $pengajar)
     {
         $pengajar->update([
-            'status' => $pengajar->status === 'aktif'
-                ? 'nonaktif'
-                : 'aktif',
+            'status' => $pengajar->status === 'aktif' ? 'nonaktif' : 'aktif',
         ]);
 
-        return back()->with(
-            'success',
-            'Status pengajar berhasil diperbarui.'
-        );
+        return back()->with('success', 'Status pengajar berhasil diperbarui.');
     }
 
     public function verifikasi(Request $request, Pengajar $pengajar)
@@ -324,10 +320,7 @@ class PengajarController extends Controller
             'catatan_verifikasi' => 'nullable|string',
         ]);
 
-        if (
-            $validated['status_verifikasi'] === 'ditolak' &&
-            empty($validated['catatan_verifikasi'])
-        ) {
+        if ($validated['status_verifikasi'] === 'ditolak' && empty($validated['catatan_verifikasi'])) {
             return back()->withErrors([
                 'catatan_verifikasi' => 'Catatan verifikasi wajib diisi jika pengajuan ditolak.',
             ]);
@@ -342,5 +335,4 @@ class PengajarController extends Controller
 
         return back()->with('success', 'Verifikasi pengajar berhasil disimpan.');
     }
-
 }

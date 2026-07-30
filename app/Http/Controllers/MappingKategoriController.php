@@ -14,14 +14,15 @@ class MappingKategoriController extends Controller
     {
         $kategori = KategoriLembaga::orderBy('nama')->get();
 
-        $selectedKategori = $request->filled('kategori_id') ? (int) $request->kategori_id : null;
+        // Kategori tujuan (kanan)
+        $targetKategori = $request->filled('target_kategori') ? (int) $request->target_kategori : $kategori->first()?->id;
 
-        if (!$selectedKategori && $kategori->isNotEmpty()) {
-            $selectedKategori = $kategori->first()->id;
-        }
+        // Kategori asal (kiri)
+        $sourceKategori = $request->source_kategori ?? 'null';
 
         $query = Lembaga::with(['kategori', 'forum']);
 
+        // Search
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('nama', 'like', '%' . $request->search . '%')->orWhere('kode', 'like', '%' . $request->search . '%');
@@ -31,37 +32,31 @@ class MappingKategoriController extends Controller
         return Inertia::render('mapping-kategori/index', [
             'kategori' => $kategori,
 
-            'selectedKategori' => $selectedKategori,
-
-            'lembagas' => $query
-                ->orderBy('nama')
-                ->paginate($request->per_page ?? 25)
-                ->withQueryString(),
+            // semua lembaga
+            'lembagas' => $query->orderBy('nama')->get(),
 
             'filters' => [
                 'search' => $request->search,
 
-                'per_page' => $request->per_page ?? 25,
+                'source_kategori' => $sourceKategori,
 
-                'kategori_id' => $selectedKategori,
+                'target_kategori' => $targetKategori,
             ],
         ]);
     }
 
-    public function update(Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
-            'kategori_id' => ['required', 'exists:kategori,id'],
-
-            'lembaga_ids' => ['array'],
-
-            'lembaga_ids.*' => ['exists:lembaga,id'],
+            'mappings' => ['required', 'array'],
+            'mappings.*.id' => ['required', 'exists:lembaga,id'],
+            'mappings.*.kategori_id' => ['nullable', 'exists:kategori_lembaga,id'],
         ]);
 
         DB::transaction(function () use ($validated) {
-            if (!empty($validated['lembaga_ids'])) {
-                Lembaga::whereIn('id', $validated['lembaga_ids'])->update([
-                    'kategori_id' => $validated['kategori_id'],
+            foreach ($validated['mappings'] as $mapping) {
+                Lembaga::where('id', $mapping['id'])->update([
+                    'kategori_id' => $mapping['kategori_id'],
                 ]);
             }
         });
