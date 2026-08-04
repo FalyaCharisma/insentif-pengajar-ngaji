@@ -9,6 +9,7 @@ type Props = {
 
     iconBg?: string;
     iconColor?: string;
+    children?: React.ReactNode;
 };
 
 export default function StatCard({
@@ -18,6 +19,7 @@ export default function StatCard({
     description,
     iconBg = "bg-indigo-100",
     iconColor = "text-indigo-600",
+    children
 }: Props) {
     return (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
@@ -33,6 +35,10 @@ export default function StatCard({
                     <h2 className="mt-2 text-3xl font-bold text-slate-800">
                         {value}
                     </h2>
+
+                    <div className="mt-4">
+                        {children}
+                    </div>
 
                     {description && (
                         <p className="mt-2 text-sm text-slate-500">
