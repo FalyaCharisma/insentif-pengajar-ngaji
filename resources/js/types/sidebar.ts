@@ -7,4 +7,5 @@ export interface SidebarMenu {
     roles: string[];
     activeMatch?: string[];
     children?: SidebarMenu[];
+    badge?: number;
 }
