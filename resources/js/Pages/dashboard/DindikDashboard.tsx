@@ -16,11 +16,21 @@ import {
     CirclePile
 } from "lucide-react";
 
+const colors = [
+    "#3B82F6",
+    "#10B981",
+    "#F59E0B",
+    "#EF4444",
+    "#8B5CF6",
+    "#06B6D4",
+];
+
 export default function DindikDashboard({
     statistics,
     proposalSummary,
     chart,
-    activities,
+    kategoriChart,
+    kecamatanChart,
     periode,
     selectedPeriode,
 }: DashboardData) {
@@ -275,14 +285,130 @@ export default function DindikDashboard({
                         title="Distribusi Kategori Lembaga"
                         subtitle="Berdasarkan kategori lembaga"
                     >
-                        {/* Donut Chart */}
+                        <div className="grid grid-cols-[1fr_180px] items-center gap-4">
+
+                            <ReactApexChart
+                                type="donut"
+                                height={300}
+                                series={kategoriChart.series}
+                                options={{
+                                    labels: kategoriChart.labels,
+                                    colors,
+
+                                    chart: {
+                                        toolbar: {
+                                            show: false,
+                                        },
+                                    },
+
+                                    legend: {
+                                        show: false,
+                                    },
+
+                                    dataLabels: {
+                                        enabled: false,
+                                    },
+
+                                    stroke: {
+                                        width: 3,
+                                        colors: ["#fff"],
+                                    },
+
+                                    plotOptions: {
+                                        pie: {
+                                            expandOnClick: true,
+
+                                            donut: {
+                                                size: "55%",
+
+                                                labels: {
+                                                    show: true,
+
+                                                    total: {
+                                                        show: true,
+                                                        label: "Total",
+                                                        formatter: () =>
+                                                            kategoriChart.series
+                                                                .reduce((a, b) => a + b, 0)
+                                                                .toString(),
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                }}
+                            />
+
+                            {/* Custom Legend */}
+                            <div className="space-y-3">
+                                {kategoriChart.labels.map((label, index) => (
+                                    <div
+                                        key={label}
+                                        className="flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <div
+                                                className="h-3 w-3 rounded-full"
+                                                style={{
+                                                    backgroundColor: colors[index],
+                                                }}
+                                            />
+
+                                            <span className="text-sm text-slate-600">
+                                                {label}
+                                            </span>
+                                        </div>
+
+                                        <span className="font-semibold text-slate-900">
+                                            {kategoriChart.series[index]}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                        </div>
                     </ChartCard>
 
                     <ChartCard
                         title="Sebaran Lembaga per Kecamatan"
                         subtitle="Jumlah lembaga pada setiap kecamatan"
                     >
-                        {/* Horizontal Bar */}
+                        <ReactApexChart
+                            type="bar"
+                            height={320}
+                            series={kecamatanChart.series}
+                            options={{
+                                chart: {
+                                    toolbar: {
+                                        show: false,
+                                    },
+                                },
+
+                                plotOptions: {
+                                    bar: {
+                                        horizontal: true,
+                                        borderRadius: 6,
+                                        barHeight: "45%",
+                                    },
+                                },
+
+                                xaxis: {
+                                    categories: kecamatanChart.categories,
+                                },
+
+                                dataLabels: {
+                                    enabled: true,
+                                },
+
+                                legend: {
+                                    show: false,
+                                },
+
+                                grid: {
+                                    borderColor: "#E2E8F0",
+                                },
+                            }}
+                        />
                     </ChartCard>
 
                 </div>

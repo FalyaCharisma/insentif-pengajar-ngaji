@@ -3,6 +3,7 @@
 namespace App\Services;
 use App\Models\Lembaga;
 use App\Models\ProfilLembaga;
+use App\Models\KategoriLembaga;
 use App\Models\Pengajar;
 use App\Models\Forum;
 use App\Models\Siswa;
@@ -19,7 +20,9 @@ class DindikDashboardService
             'statistics' => $this->getStatistics(),
             'proposalSummary' => $this->getProposalSummary(),
             'chart' => $this->getProposalChart(),
-            'activities' => [],
+            
+            'kategoriChart'    => $this->getKategoriChart(),
+            'kecamatanChart'   => $this->getKecamatanChart(),
         ];
 
         return $data;
@@ -118,6 +121,28 @@ class DindikDashboardService
         return [
             'labels' => $data->pluck('nama')->toArray(),
             'series' => $data->pluck('lembaga_count')->toArray(),
+        ];
+    }
+
+    private function getKecamatanChart(): array
+    {
+        $data = ProfilLembaga::selectRaw("
+                kecamatan,
+                COUNT(*) as total
+            ")
+            ->groupBy('kecamatan')
+            ->orderByDesc('total')
+            ->get();
+
+        return [
+            'categories' => $data->pluck('kecamatan')->toArray(),
+
+            'series' => [
+                [
+                    'name' => 'Jumlah Lembaga',
+                    'data' => $data->pluck('total')->toArray(),
+                ],
+            ],
         ];
     }
 }

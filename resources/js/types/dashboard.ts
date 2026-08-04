@@ -28,6 +28,19 @@ export interface ChartData {
     }[];
 }
 
+export interface DonutChartData {
+    labels: string[];
+    series: number[];
+}
+
+export interface HorizontalChartData {
+    categories: string[];
+    series: {
+        name: string;
+        data: number[];
+    }[];
+}
+
 export interface Activity {
     title: string;
     description: string;
@@ -40,6 +53,9 @@ export interface DashboardData {
     proposalSummary: ProposalSummary;
 
     chart: ChartData;
+
+    kategoriChart: DonutChartData;
+    kecamatanChart: HorizontalChartData;
 
     activities: Activity[];
 
