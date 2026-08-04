@@ -153,7 +153,21 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                                 return (
                                     <div key={menu.title}>
                                         <button
-                                            onClick={() => toggleMenu(menu.title)}
+                                            onClick={() => {
+                                                if (collapsed) {
+                                                    // Buka sidebar terlebih dahulu
+                                                    setCollapsed(false);
+
+                                                    // Buka submenu
+                                                    setOpenMenus((prev) =>
+                                                        prev.includes(menu.title)
+                                                            ? prev
+                                                            : [...prev, menu.title]
+                                                    );
+                                                } else {
+                                                    toggleMenu(menu.title);
+                                                }
+                                            }}
                                             className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-800 ${
                                                 isParentActive(menu) ? "bg-slate-800" : ""
                                             }`}
