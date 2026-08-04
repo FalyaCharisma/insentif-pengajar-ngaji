@@ -4,12 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { sidebarMenus } from "@/data/sidebarMenus";
 import type { SidebarMenu } from "@/types/sidebar";
 
-import {
-    ChevronLeft,
-    ChevronRight,
-    Menu,
-    X,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 
 type Props = {
     collapsed: boolean;
@@ -22,21 +17,28 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
 
     const lembagaId = props.auth?.user?.lembaga_id;
 
-    const menus = sidebarMenus(lembagaId);
+    const jumlahBelumVerifikasi = props.badge?.pengajuan_belum_verifikasi ?? 0;
+    const jumlahInsentifBelumVerifikasi =
+        props.badge?.insentif_belum_verifikasi ?? 0;
 
+    const menus = sidebarMenus(
+        lembagaId,
+        jumlahBelumVerifikasi,
+        jumlahInsentifBelumVerifikasi,
+    );
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const [openMenus, setOpenMenus] = useState<string[]>([]);
 
     const isParentActive = (menu: SidebarMenu) => {
-        return menu.children?.some(child => isActive(child));
+        return menu.children?.some((child) => isActive(child));
     };
 
     const toggleMenu = (title: string) => {
         setOpenMenus((prev) =>
             prev.includes(title)
                 ? prev.filter((item) => item !== title)
-                : [...prev, title]
+                : [...prev, title],
         );
     };
 
@@ -45,7 +47,7 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
 
         const matches = menu.activeMatch ?? [menu.href];
 
-        return matches.some(match => url.startsWith(match));
+        return matches.some((match) => url.startsWith(match));
     };
 
     const menuClass = (menu: SidebarMenu) =>
@@ -58,16 +60,14 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                 ? "bg-indigo-600 text-white shadow-lg"
                 : "text-slate-300 hover:bg-slate-800"
         }
-    `;
+        `;
 
     useEffect(() => {
         const activeParents = menus
-            .filter(menu =>
-                menu.children?.some(child => isActive(child))
-            )
-            .map(menu => menu.title);
+            .filter((menu) => menu.children?.some((child) => isActive(child)))
+            .map((menu) => menu.title);
 
-        setOpenMenus(prev => {
+        setOpenMenus((prev) => {
             const merged = [...new Set([...prev, ...activeParents])];
             return merged;
         });
@@ -93,15 +93,10 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
 
             {/* SIDEBAR */}
             <aside
-                className={`
-                    fixed top-0 left-0 z-50 h-screen
-                    bg-slate-950 border-r border-slate-800
-                    flex flex-col
-                    transition-all duration-300
-                    ${collapsed ? "w-20" : "w-72"}
-                    ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
-                    lg:translate-x-0
-                `}
+                className={` fixed top-0 left-0 z-50 h-screen bg-slate-950 border-r border-slate-800 flex
+                    flex-col transition-all duration-300 ${collapsed ? "w-20" : "w-72"} ${
+                        mobileOpen ? "translate-x-0" : "-translate-x-full"
+                    } lg:translate-x-0 `}
             >
                 {/* HEADER */}
                 <div className="h-16 border-b border-slate-800 flex items-center justify-between px-4">
@@ -143,7 +138,9 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                 {/* MENU */}
                 <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-2">
                     {menus
-                        .filter((menu) => menu.roles.some((role) => hasRole(role)))
+                        .filter((menu) =>
+                            menu.roles.some((role) => hasRole(role)),
+                        )
                         .map((menu) => {
                             const Icon = menu.icon;
                             const isOpen = openMenus.includes(menu.title);
@@ -153,22 +150,25 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                                 return (
                                     <div key={menu.title}>
                                         <button
-                                            onClick={() => toggleMenu(menu.title)}
-                                            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-slate-300 hover:bg-slate-800 ${
-                                                isParentActive(menu) ? "bg-slate-800" : ""
-                                            }`}
+                                            onClick={() =>
+                                                toggleMenu(menu.title)
+                                            }
+                                            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl
+                                text-slate-300 hover:bg-slate-800 ${
+                                    isParentActive(menu) ? "bg-slate-800" : ""
+                                }`}
                                         >
                                             <div className="flex items-center gap-3">
                                                 {Icon && <Icon size={20} />}
-                                                {!collapsed && <span>{menu.title}</span>}
+                                                {!collapsed && (
+                                                    <span>{menu.title}</span>
+                                                )}
                                             </div>
 
                                             {!collapsed && (
                                                 <ChevronRight
                                                     size={18}
-                                                    className={`transition ${
-                                                        isOpen ? "rotate-90" : ""
-                                                    }`}
+                                                    className={`transition ${isOpen ? "rotate-90" : ""}`}
                                                 />
                                             )}
                                         </button>
@@ -177,20 +177,27 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                                             <div className="ml-5 mt-2 space-y-1 border-l border-slate-800 pl-3">
                                                 {menu.children
                                                     .filter((child) =>
-                                                        child.roles.some((role) =>
-                                                            hasRole(role)
-                                                        )
+                                                        child.roles.some(
+                                                            (role) =>
+                                                                hasRole(role),
+                                                        ),
                                                     )
                                                     .map((child) => (
                                                         <Link
                                                             key={child.title}
                                                             href={child.href!}
-                                                            className={menuClass(child)}
+                                                            className={menuClass(
+                                                                child,
+                                                            )}
                                                         >
                                                             {child.icon && (
-                                                                <child.icon size={18} />
+                                                                <child.icon
+                                                                    size={18}
+                                                                />
                                                             )}
-                                                            <span>{child.title}</span>
+                                                            <span>
+                                                                {child.title}
+                                                            </span>
                                                         </Link>
                                                     ))}
                                             </div>
@@ -206,8 +213,56 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                                     href={menu.href!}
                                     className={menuClass(menu)}
                                 >
-                                    {Icon && <Icon size={20} />}
-                                    {!collapsed && <span>{menu.title}</span>}
+                                    {Icon && (
+                                        <div className="relative shrink-0">
+                                            <Icon size={20} />
+
+                                            {/* Badge ketika sidebar collapse */}
+                                            {collapsed &&
+                                                menu.badge !== undefined &&
+                                                menu.badge > 0 && (
+                                                    <span
+                                                        className="
+                            absolute -right-2 -top-2
+                            flex h-4 min-w-4
+                            items-center justify-center
+                            rounded-full bg-red-500
+                            px-1 text-[9px] font-bold
+                            text-white
+                        "
+                                                    >
+                                                        {menu.badge > 99
+                                                            ? "99+"
+                                                            : menu.badge}
+                                                    </span>
+                                                )}
+                                        </div>
+                                    )}
+
+                                    {!collapsed && (
+                                        <>
+                                            <span className="flex-1">
+                                                {menu.title}
+                                            </span>
+
+                                            {menu.badge !== undefined &&
+                                                menu.badge > 0 && (
+                                                    <span
+                                                        className="
+                            ml-auto flex h-5 min-w-5
+                            items-center justify-center
+                            rounded-full bg-red-500
+                            px-1.5 text-xs font-semibold
+                            text-white
+                        "
+                                                    >
+                                                        {menu.badge > 99
+                                                            ? "99+"
+                                                            : menu.badge}
+                                                    </span>
+                                                )}
+                                        </>
+                                    )}
                                 </Link>
                             );
                         })}

@@ -1,5 +1,4 @@
-
-import type { SidebarMenu } from "@/types/sidebar"; 
+import type { SidebarMenu } from "@/types/sidebar";
 import {
     LayoutDashboard,
     FolderKanban,
@@ -19,20 +18,24 @@ import {
     Menu,
     X,
 } from "lucide-react";
+import { usePage } from "@inertiajs/react";
 
-
-export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
+export const sidebarMenus = (
+    lembagaId?: number,
+    jumlahBelumVerifikasi: number = 0,
+    jumlahInsentifBelumVerifikasi: number = 0,
+): SidebarMenu[] => [
     {
         title: "Dashboard",
         icon: LayoutDashboard,
         href: "/dashboard",
         roles: ["superadmin", "dindik", "lembaga", "forum"],
     },
-    
+
     {
         title: "Master Data",
         icon: FolderKanban,
-        roles: ["superadmin", "dindik",],
+        roles: ["superadmin", "dindik"],
         children: [
             {
                 title: "Kategori Lembaga",
@@ -61,13 +64,10 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
         title: "Lembaga",
         icon: Building2,
         href: "/lembaga",
-        activeMatch: [
-            "/lembaga",
-            "/dokumen/lembaga",
-        ],
+        activeMatch: ["/lembaga", "/dokumen/lembaga"],
         roles: ["superadmin", "dindik", "forum"],
     },
-    
+
     {
         title: "Program Insentif",
         icon: Wallet,
@@ -103,16 +103,12 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
         children: [
             {
                 title: "Profil",
-                href: lembagaId
-                    ? `/lembaga/${lembagaId}/profil`
-                    : "#",
+                href: lembagaId ? `/lembaga/${lembagaId}/profil` : "#",
                 roles: ["lembaga"],
             },
             {
                 title: "Dokumen Lembaga",
-                href: lembagaId
-                    ? `/dokumen/lembaga/${lembagaId}`
-                    : "#",
+                href: lembagaId ? `/dokumen/lembaga/${lembagaId}` : "#",
                 roles: ["lembaga"],
             },
         ],
@@ -147,6 +143,7 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
         icon: FileText,
         href: "/pengajuan-proposal",
         roles: ["superadmin", "lembaga", "forum", "dindik"],
+        badge: jumlahBelumVerifikasi,
     },
 
     // {
@@ -187,6 +184,7 @@ export const sidebarMenus = (lembagaId?: number): SidebarMenu[] => [
         icon: UserStar,
         href: "/pengajuan-insentif",
         roles: ["superadmin", "lembaga", "forum", "dindik"],
+        badge: jumlahInsentifBelumVerifikasi,
     },
 
     // {
