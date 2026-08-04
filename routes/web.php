@@ -115,13 +115,18 @@ Route::middleware('auth')->group(function () {
         'pengurus' => 'pengurus',
     ]);
 
+    // Cek NIK
+    Route::get('/pengajar/cek-nik', [PengajarController::class, 'cekNik'])->name('pengajar.cekNik');
+
     // Data Pengajar
     Route::resource('pengajar', PengajarController::class)->parameters(['pengajar' => 'pengajar']);
-    Route::controller(PengajarController::Class)
+
+    Route::controller(PengajarController::class)
         ->prefix('pengajar')
         ->name('pengajar.')
         ->group(function () {
             Route::patch('/{pengajar}/toggle-status', 'toggleStatus')->name('toggle-status');
+
             Route::put('/{pengajar}/verifikasi', 'verifikasi')->name('verifikasi');
         });
 
