@@ -44,8 +44,4 @@ class Forum extends Model
         return 'FRM' . str_pad($number, 5, '0', STR_PAD_LEFT);
     }
 
-    public function forum()
-    {
-        return $this->hasOne(Forum::class);
-    }
 }
