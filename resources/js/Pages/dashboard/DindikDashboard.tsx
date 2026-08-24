@@ -3,8 +3,6 @@ import { Head, router } from "@inertiajs/react";
 import WelcomeCard from "@/Components/dashboard/WelcomeCard";
 import StatCard from "@/Components/dashboard/StatCard";
 import ChartCard from "@/Components/dashboard/ChartCard";
-import ActivityCard from "@/Components/dashboard/ActivityCard";
-import QuickActionCard from "@/Components/dashboard/QuickActionCard";
 import { DashboardData } from "@/types/dashboard";
 import DashboardFilter from "@/Components/dashboard/DashboardFilter";
 import ReactApexChart from "react-apexcharts";
@@ -113,7 +111,7 @@ export default function DindikDashboard({
 
                     <StatCard
                         title="Siswa"
-                        value={statistics.total_pengajar}
+                        value={statistics.total_siswa}
                         icon={UserStar}
                         iconBg="bg-indigo-100"
                         iconColor="text-indigo-600"

@@ -129,7 +129,9 @@ class PengajarController extends Controller
             'bank' => 'required|string|max:100',
             'no_rekening' => 'required|string|max:50',
             'no_bpjs' => 'required|string|max:50',
-            'pas_foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'pas_foto' => 'required|image|mimes:jpg,jpeg,png|max:1024',
+            'ktp' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
+            'ijazah' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
         ]);
 
         $foto = null;
@@ -139,9 +141,33 @@ class PengajarController extends Controller
 
             $filename = time() . '_pas_foto.' . $extension;
 
-            $request->file('pas_foto')->storeAs('pengajar', $filename, 'public');
+            $request->file('pas_foto')->storeAs('pengajar/foto', $filename, 'public');
 
             $foto = $filename;
+        }
+
+        $ktp = null;
+
+        if ($request->hasFile('ktp')) {
+            $extension = $request->file('ktp')->getClientOriginalExtension();
+
+            $filename = time() . '_ktp.' . $extension;
+
+            $request->file('ktp')->storeAs('pengajar/ktp', $filename, 'public');
+
+            $ktp = $filename;
+        }
+
+        $ijazah = null;
+
+        if ($request->hasFile('ijazah')) {
+            $extension = $request->file('ijazah')->getClientOriginalExtension();
+
+            $filename = time() . '_ijazah.' . $extension;
+
+            $request->file('ijazah')->storeAs('pengajar/ijazah', $filename, 'public');
+
+            $ijazah = $filename;
         }
 
         $user = auth()->user();
@@ -241,7 +267,9 @@ class PengajarController extends Controller
             'bank' => 'required|string|max:100',
             'no_rekening' => 'required|string|max:50',
             'no_bpjs' => 'required|string|max:50',
-            'pas_foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'pas_foto' => 'nullable|image|mimes:jpg,jpeg,png|max:1048',
+            'ktp' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
+            'ijazah' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
         ]);
 
         DB::transaction(function () use ($request, $pengajar) {
@@ -250,7 +278,7 @@ class PengajarController extends Controller
             if ($request->hasFile('pas_foto')) {
                 // hapus foto lama
                 if ($foto) {
-                    Storage::disk('public')->delete('pengajar/' . $foto);
+                    Storage::disk('public')->delete('pengajar/foto' . $foto);
                 }
 
                 $extension = $request->file('pas_foto')->getClientOriginalExtension();
@@ -261,6 +289,40 @@ class PengajarController extends Controller
 
                 $foto = $filename;
             }
+
+            $ktp = $pengajar->ktp;
+
+            if ($request->hasFile('ktp')) {
+
+                if ($ktp) {
+                    Storage::disk('public')->delete('pengajar/ktp' . $ktp);
+                }
+
+                $extension = $request->file('ktp')->getClientOriginalExtension();
+
+                $filename = time() . '_ktp.' . $extension;
+
+                $request->file('ktp')->storeAs('pengajar/ktp', $filename, 'public');
+
+                $ktp = $filename;
+            }
+
+            $ijazah = $pengajar->ijazah;
+
+            if ($request->hasFile('ijazah')) {
+                if ($ijazah) {
+                    Storage::disk('ijazah')->delete('pengajar/ijazah' . $ijazah);
+                }
+
+                $extension = $request->file('ijazah')->getClientOriginalExtension();
+
+                $filename = time() . '_ijazah.' . $extension;
+
+                $request->file('ijazah')->storeAs('pengajar/ijazah', $filename, 'public');
+
+                $ijazah = $filename;
+            }
+
             $user = auth()->user();
 
             if ($user->hasRole('lembaga')) {
@@ -308,6 +370,8 @@ class PengajarController extends Controller
                 'no_bpjs' => $request->no_bpjs,
 
                 'pas_foto' => $foto,
+                'ktp' => $ktp,
+                'ijazah' => $ijazah
             ]);
         });
 

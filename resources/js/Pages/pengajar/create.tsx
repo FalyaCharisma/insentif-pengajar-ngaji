@@ -63,6 +63,8 @@ const initialValues = {
     no_bpjs: "",
 
     pas_foto: null as File | null,
+    ktp: null as File | null,
+    ijazah: null as File | null,
 
     status: "aktif",
 };
@@ -74,8 +76,23 @@ type Props = {
 };
 
 export default function CreatePengajar({ pengajar }: Props) {
+
     const [previewFoto, setPreviewFoto] = useState(
-        pengajar?.pas_foto ? `/storage/pengajar/${pengajar.pas_foto}` : null,
+        pengajar?.pas_foto
+            ? `/storage/pengajar/foto/${pengajar.pas_foto}`
+            : null,
+    );
+
+    const [previewKtp, setPreviewKtp] = useState(
+        pengajar?.ktp
+            ? `/storage/pengajar/ktp/${pengajar.ktp}`
+            : null,
+    );
+
+    const [previewIjazah, setPreviewIjazah] = useState(
+        pengajar?.ijazah
+            ? `/storage/pengajar/ijazah/${pengajar.ijazah}`
+            : null,
     );
 
     const isEdit = !!pengajar;
@@ -124,18 +141,6 @@ export default function CreatePengajar({ pengajar }: Props) {
             jurusan: pengajar?.jurusan ?? "",
             sekolah_universitas: pengajar?.sekolah_universitas ?? "",
             tahun_lulus: pengajar?.tahun_lulus ?? "",
-            // provinsi: pengajar?.provinsi
-            //     ? { label: pengajar.provinsi, value: pengajar.id_provinsi }
-            //     : null,
-            // kabkota: pengajar?.kabkota
-            //     ? { label: pengajar.kabkota, value: pengajar.id_kabkota }
-            //     : null,
-            // kecamatan: pengajar?.kecamatan
-            //     ? { label: pengajar.kecamatan, value: pengajar.id_kecamatan }
-            //     : null,
-            // kelurahan: pengajar?.kelurahan
-            //     ? { label: pengajar.kelurahan, value: pengajar.id_kelurahan }
-            //     : null,
             alamat: pengajar?.alamat ?? "",
             bank: pengajar?.bank ?? "",
             no_rekening: pengajar?.no_rekening ?? "",
@@ -633,7 +638,7 @@ export default function CreatePengajar({ pengajar }: Props) {
 
                                 <div>
                                     <h2 className="text-base font-bold text-slate-800">
-                                        Alamat
+                                        Alamat Sesuai KTP
                                     </h2>
 
                                     <p className="text-sm text-slate-500">
@@ -657,24 +662,32 @@ export default function CreatePengajar({ pengajar }: Props) {
                                 />
 
                                 <FormAsyncSelect
+                                    key={data.provinsi?.value}
                                     label="Kabupaten / Kota"
                                     value={data.kabkota}
                                     onChange={(value: any) => {
                                         setData("kabkota", value);
-
                                         setData("kecamatan", null);
                                         setData("kelurahan", null);
                                     }}
-                                    loadOptions={(inputValue) =>
-                                        searchKabkota(
-                                            data.provinsi?.value ?? "",
+                                    loadOptions={(inputValue) => {
+                                        if (!data.provinsi?.value) {
+                                            return Promise.resolve([]);
+                                        }
+
+                                        return searchKabkota(
+                                            String(data.provinsi.value),
                                             inputValue,
-                                        )
-                                    }
+                                        ).then((options) => {
+                                            console.log("HASIL KABKOTA:", options);
+                                            return options;
+                                        });
+                                    }}
                                 />
 
                                 <FormAsyncSelect
                                     label="Kecamatan"
+                                    key={data.kabkota?.value}
                                     value={data.kecamatan}
                                     onChange={(value: any) => {
                                         setData("kecamatan", value);
@@ -691,6 +704,7 @@ export default function CreatePengajar({ pengajar }: Props) {
 
                                 <FormAsyncSelect
                                     label="Kelurahan"
+                                    key={data.kecamatan?.value}
                                     value={data.kelurahan}
                                     onChange={(value: any) =>
                                         setData("kelurahan", value)
@@ -807,6 +821,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                 <div>
                                     <FormFile
                                         label="Pas Foto"
+                                        hint="Maks. 1 MB (JPG, PNG, PDF)"
                                         onChange={(e) => {
                                             const file =
                                                 e.target.files?.[0] || null;
@@ -823,18 +838,109 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     />
 
                                     {previewFoto && (
-                                        <a
-                                            href={previewFoto}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="mt-3 block"
-                                        >
-                                            <img
-                                                src={previewFoto}
-                                                alt="Pas Foto"
-                                                className="h-32 w-32 rounded-lg object-cover border"
-                                            />
-                                        </a>
+                                        <div className="mt-3">
+                                            <a
+                                                href={previewFoto}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="
+                                                    inline-flex items-center gap-2
+                                                    rounded-lg border border-slate-200
+                                                    bg-slate-50 px-4 py-2.5
+                                                    text-sm font-medium text-indigo-600
+                                                    transition hover:bg-slate-100
+                                                "
+                                            >
+                                                Lihat Pas Foto
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {/* KTP */}
+                                <div>
+                                    <FormFile
+                                        label="KTP"
+                                        hint="Maks. 1 MB (JPG, PNG, PDF)"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0] || null;
+
+                                            if (!file) {
+                                                setData("ktp", null);
+                                                setPreviewKtp(null);
+                                                return;
+                                            }
+
+                                            if (file.size > 1 * 1024 * 1024) {
+                                                alert("Ukuran file KTP maksimal 1 MB.");
+                                                e.target.value = "";
+                                                setData("ktp", null);
+                                                setPreviewKtp(null);
+                                                return;
+                                            }
+
+                                            setData("ktp", file);
+                                            setPreviewKtp(URL.createObjectURL(file));
+                                        }}
+                                        error={errors.ktp}
+                                    />
+
+                                    {previewKtp && (
+                                        <div className="mt-3">
+                                            <a
+                                                href={previewKtp}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="
+                                                    inline-flex items-center gap-2
+                                                    rounded-lg border border-slate-200
+                                                    bg-slate-50 px-4 py-2.5
+                                                    text-sm font-medium text-indigo-600
+                                                    transition hover:bg-slate-100
+                                                "
+                                            >
+                                                Lihat Dokumen KTP
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* IJAZAH */}
+                                <div>
+                                    <FormFile
+                                        label="Ijazah Terakhir"
+                                        hint="Maks. 1 MB (JPG, PNG, PDF)"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0] || null;
+
+                                            setData("ijazah", file);
+
+                                            if (file) {
+                                                setPreviewIjazah(URL.createObjectURL(file));
+                                            } else {
+                                                setPreviewIjazah(null);
+                                            }
+                                        }}
+                                        error={errors.ijazah}
+                                    />
+
+                                    {previewIjazah && (
+                                        <div className="mt-3">
+                                            <a
+                                                href={previewIjazah}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="
+                                                    inline-flex items-center gap-2
+                                                    rounded-lg border border-slate-200
+                                                    bg-slate-50 px-4 py-2.5
+                                                    text-sm font-medium text-indigo-600
+                                                    transition hover:bg-slate-100
+                                                "
+                                            >
+                                                Lihat Dokumen Ijazah
+                                            </a>
+                                        </div>
                                     )}
                                 </div>
                             </div>

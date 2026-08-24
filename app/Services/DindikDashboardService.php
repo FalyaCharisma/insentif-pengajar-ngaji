@@ -14,11 +14,11 @@ use Illuminate\Support\Facades\DB;
 
 class DindikDashboardService
 {
-    public function index(): array
+    public function index(int $periodeId): array
     {
         $data = [
-            'statistics' => $this->getStatistics(),
-            'proposalSummary' => $this->getProposalSummary(),
+            'statistics' => $this->getStatistics($periodeId),
+            'proposalSummary' => $this->getProposalSummary($periodeId),
             'chart' => $this->getProposalChart(),
             
             'kategoriChart'    => $this->getKategoriChart(),
@@ -28,33 +28,76 @@ class DindikDashboardService
         return $data;
     }
 
-    private function getStatistics(): array
+    private function getStatistics(int $periodeId): array
     {
         return [
-            'total_forum'            => Forum::count(),
-            'total_lembaga'          => Lembaga::count(),
-            'verified_lembaga'       => ProfilLembaga::where('status_verifikasi', 'disetujui')->count(),
-            'pending_lembaga'        => ProfilLembaga::where('status_verifikasi', 'pending')->count(),
-            'total_pengajar'         => Pengajar::count(),
-            'verified_pengajar'      => Pengajar::where('status_verifikasi', 'disetujui')->count(),
-            'pending_pengajar'       => Pengajar::where('status_verifikasi', 'pending')->count(),
-            'total_siswa'            => Siswa::count(),
-            'total_proposal'         => PengajuanProposal::count(),
-            'total_pengajuan'        => PengajuanInsentif::count(),
+            // MASTER
+            'total_forum'       => Forum::count(),
+
+            'total_lembaga'     => Lembaga::count(),
+
+            'verified_lembaga'  => ProfilLembaga::where(
+                'status_verifikasi',
+                'disetujui'
+            )->count(),
+
+            'pending_lembaga'   => ProfilLembaga::where(
+                'status_verifikasi',
+                'pending'
+            )->count(),
+
+            'total_pengajar'    => Pengajar::count(),
+
+            'verified_pengajar' => Pengajar::where(
+                'status_verifikasi',
+                'disetujui'
+            )->count(),
+
+            'pending_pengajar'  => Pengajar::where(
+                'status_verifikasi',
+                'pending'
+            )->count(),
+
+            // TRANSAKSI
+            'total_siswa' => Siswa::where(
+                'periode_id',
+                $periodeId
+            )->sum('jumlah_siswa'),
+
+            'total_proposal' => PengajuanProposal::where(
+                'periode_id',
+                $periodeId
+            )->count(),
+
+            'total_pengajuan' => PengajuanInsentif::whereHas(
+                'proposal',
+                fn ($q) => $q->where('periode_id', $periodeId)
+            )->count(),
         ];
     }
 
-    private function getProposalSummary(): array
+    private function getProposalSummary(int $periodeId): array
     {
-        $proposal = PengajuanProposal::count();
+        $proposal = PengajuanProposal::where(
+            'periode_id',
+            $periodeId
+        )->count();
 
-        $verified = PengajuanProposal::where('status', 'verified')->count();
+        $verified = PengajuanProposal::where(
+            'periode_id',
+            $periodeId
+        )->where('status', 'verified')->count();
 
-        $pending = PengajuanProposal::where('status', 'pending')->count();
+        $pending = PengajuanProposal::where(
+            'periode_id',
+            $periodeId
+        )->where('status', 'pending')->count();
 
-        $revision = PengajuanProposal::where('status', 'revision')->count();
+        $revision = PengajuanProposal::where(
+            'periode_id',
+            $periodeId
+        )->where('status', 'revision')->count();
 
-        // dd($proposal, $verified, $pending, $revision);
         return [
             'proposal' => $proposal,
             'verified' => $verified,

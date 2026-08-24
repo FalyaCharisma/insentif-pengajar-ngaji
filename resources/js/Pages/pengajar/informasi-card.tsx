@@ -25,7 +25,7 @@ export default function InformasiCard({ pengajar }: Props) {
                 <div className="flex justify-center">
                     {pengajar.pas_foto ? (
                         <img
-                            src={`/storage/pengajar/${pengajar.pas_foto}`}
+                            src={`/storage/pengajar/foto/${pengajar.pas_foto}`}
                             alt={pengajar.nama}
                             className="h-52 w-40 rounded-lg border object-cover shadow-sm"
                         />
