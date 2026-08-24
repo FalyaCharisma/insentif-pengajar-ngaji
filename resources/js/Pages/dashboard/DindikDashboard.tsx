@@ -29,6 +29,8 @@ export default function DindikDashboard({
     chart,
     kategoriChart,
     kecamatanChart,
+    pengajarKecamatanChart,
+    pengajarWilayahChart,
     periode,
     selectedPeriode,
 }: DashboardData) {
@@ -223,56 +225,207 @@ export default function DindikDashboard({
                     
                     <div className="xl:col-span-2">
                         <ChartCard
-                            title="Trend Pengajuan Proposal"
-                            subtitle="5 Periode Terakhir"
-                        >
-                            {/* Chart */}
-                            <div className="mb-6 rounded-xl border border-slate-200 bg-white p-3">
-
-                                <ReactApexChart
-                                    type="bar"
-                                    height={300}
-                                    series={chart.series}
-                                    options={{
-                                        chart: {
-                                            toolbar: {
-                                                show: false,
-                                            },
+                        title="Rekap Pengajar Penerima Insentif per Kecamatan"
+                        subtitle="Perbandingan pengajar yang menerima dan tidak menerima insentif berdasarkan kecamatan lembaga"
+                    >
+                        {pengajarKecamatanChart?.categories?.length > 0 ? (
+                            <ReactApexChart
+                                type="bar"
+                                height={380}
+                                series={pengajarKecamatanChart.series}
+                                options={{
+                                    chart: {
+                                        toolbar: {
+                                            show: false,
                                         },
+                                    },
 
-                                        xaxis: {
-                                            categories: chart.categories,
+                                    plotOptions: {
+                                        bar: {
+                                            horizontal: true,
+                                            borderRadius: 6,
+                                            barHeight: "55%",
                                         },
+                                    },
 
-                                        legend: {
-                                            position: "top",
-                                            horizontalAlign: "left",
-                                        },
+                                    xaxis: {
+                                        categories: pengajarKecamatanChart.categories,
+                                        min: 0,
+                                    },
 
-                                        dataLabels: {
-                                            enabled: false,
-                                        },
+                                    colors: ["#10B981", "#EF4444"],
 
-                                        plotOptions: {
-                                            bar: {
-                                                borderRadius: 6,
-                                                columnWidth: "45%",
-                                            },
-                                        },
+                                    dataLabels: {
+                                        enabled: true,
+                                    },
 
-                                        grid: {
-                                            borderColor: "#E2E8F0",
-                                        },
+                                    legend: {
+                                        show: true,
+                                        position: "top",
+                                        horizontalAlign: "left",
+                                    },
 
-                                        yaxis: {
-                                            min: 0,
-                                        },
-                                    }}
-                                />
-
+                                    grid: {
+                                        borderColor: "#E2E8F0",
+                                    },
+                                }}
+                            />
+                        ) : (
+                            <div className="flex h-[380px] items-center justify-center">
+                                <div className="text-center">
+                                    <p className="text-sm font-medium text-slate-500">
+                                        Belum ada data pengajar
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-400">
+                                        Data penerima insentif per kecamatan akan ditampilkan di sini.
+                                    </p>
+                                </div>
                             </div>
-                        </ChartCard>
+                        )}
+                    </ChartCard>
                     </div>
+
+                </div>
+                
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+                    {/* Trend Pengajuan Proposal */}
+                    <ChartCard
+                        title="Trend Pengajuan Proposal"
+                        subtitle="5 Periode Terakhir"
+                    >
+                        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-3">
+                            <ReactApexChart
+                                type="bar"
+                                height={300}
+                                series={chart.series}
+                                options={{
+                                    chart: {
+                                        toolbar: {
+                                            show: false,
+                                        },
+                                    },
+
+                                    xaxis: {
+                                        categories: chart.categories,
+                                    },
+
+                                    legend: {
+                                        position: "top",
+                                        horizontalAlign: "left",
+                                    },
+
+                                    dataLabels: {
+                                        enabled: false,
+                                    },
+
+                                    plotOptions: {
+                                        bar: {
+                                            borderRadius: 6,
+                                            columnWidth: "45%",
+                                        },
+                                    },
+
+                                    grid: {
+                                        borderColor: "#E2E8F0",
+                                    },
+
+                                    yaxis: {
+                                        min: 0,
+                                    },
+                                }}
+                            />
+                        </div>
+                    </ChartCard>
+
+
+                    {/* Statistik Pengajar Berdasarkan Wilayah */}
+                    <ChartCard
+                        title="Distribusi Pengajar Berdasarkan Wilayah"
+                        subtitle="Perbandingan pengajar Kota Kediri dan luar Kota Kediri"
+                    >
+                        <div className="flex items-center justify-center">
+                            <ReactApexChart
+                                type="donut"
+                                height={330}
+                                series={pengajarWilayahChart.series}
+                                options={{
+                                    labels: pengajarWilayahChart.labels,
+
+                                    chart: {
+                                        toolbar: {
+                                            show: false,
+                                        },
+                                    },
+
+                                    colors: ["#4F46E5", "#F97316"],
+
+                                    legend: {
+                                        position: "bottom",
+                                        horizontalAlign: "center",
+                                        fontSize: "12px",
+                                    },
+
+                                    dataLabels: {
+                                        enabled: true,
+                                        formatter: (val: number | string) =>
+                                            `${Math.round(Number(val))}%`,
+                                    },
+
+                                    plotOptions: {
+                                        pie: {
+                                            donut: {
+                                                size: "55%",
+
+                                                labels: {
+                                                    show: true,
+
+                                                    name: {
+                                                        show: true,
+                                                        fontSize: "11px",
+                                                    },
+
+                                                    value: {
+                                                        show: true,
+                                                        fontSize: "18px",
+                                                        fontWeight: 700,
+                                                    },
+
+                                                    total: {
+                                                        show: true,
+                                                        label: "Total Pengajar",
+                                                        fontSize: "11px",
+                                                        formatter: (w) => {
+                                                            return w.globals.seriesTotals
+                                                                .reduce(
+                                                                    (
+                                                                        a: number,
+                                                                        b: number,
+                                                                    ) => a + b,
+                                                                    0,
+                                                                )
+                                                                .toString();
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+
+                                    stroke: {
+                                        width: 3,
+                                    },
+
+                                    tooltip: {
+                                        y: {
+                                            formatter: (value) =>
+                                                `${value} pengajar`,
+                                        },
+                                    },
+                                }}
+                            />
+                        </div>
+                    </ChartCard>
 
                 </div>
 

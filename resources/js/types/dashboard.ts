@@ -108,4 +108,8 @@ export interface DashboardData {
     periode: Periode[];
 
     selectedPeriode: number;
+
+    pengajarKecamatanChart: ChartData;
+
+    pengajarWilayahChart: DonutChartData;
 }

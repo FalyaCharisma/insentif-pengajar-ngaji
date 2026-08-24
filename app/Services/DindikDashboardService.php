@@ -23,6 +23,8 @@ class DindikDashboardService
             
             'kategoriChart'    => $this->getKategoriChart(),
             'kecamatanChart'   => $this->getKecamatanChart(),
+            'pengajarKecamatanChart' => $this->getPengajarKecamatanChart($periodeId),
+            'pengajarWilayahChart' => $this->getPengajarWilayahChart(),
         ];
 
         return $data;
@@ -185,6 +187,106 @@ class DindikDashboardService
                     'name' => 'Jumlah Lembaga',
                     'data' => $data->pluck('total')->toArray(),
                 ],
+            ],
+        ];
+    }
+
+    private function getPengajarKecamatanChart(int $periodeId): array
+    {
+        // 1. Ambil semua profil lembaga dan kelompokkan berdasarkan kecamatan
+        $profilLembaga = ProfilLembaga::select(
+            'lembaga_id',
+            'kecamatan'
+        )
+            ->whereNotNull('kecamatan')
+            ->get()
+            ->groupBy('kecamatan');
+
+        $categories = [];
+        $menerima = [];
+        $tidakMenerima = [];
+
+        // 2. Loop setiap kecamatan
+        foreach ($profilLembaga as $kecamatan => $profils) {
+
+            // Semua lembaga yang berada di kecamatan tersebut
+            $lembagaIds = $profils
+                ->pluck('lembaga_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            // 3. Ambil semua pengajar dari lembaga-lembaga tersebut
+            $pengajarIds = Pengajar::whereIn(
+                'lembaga_id',
+                $lembagaIds
+            )
+                ->pluck('id');
+
+            $totalPengajar = $pengajarIds->count();
+
+            // 4. Hitung pengajar yang menerima insentif
+            // pada periode yang dipilih
+            $jumlahMenerima = PengajuanInsentif::whereIn(
+                'pengajar_id',
+                $pengajarIds
+            )
+                ->where('status', 'verified')
+                ->whereHas('proposal', function ($query) use ($periodeId) {
+                    $query->where('periode_id', $periodeId);
+                })
+                ->distinct('pengajar_id')
+                ->count('pengajar_id');
+
+            // 5. Yang tidak menerima = total pengajar - penerima
+            $jumlahTidakMenerima =
+                $totalPengajar - $jumlahMenerima;
+
+            $categories[] = $kecamatan;
+            $menerima[] = $jumlahMenerima;
+            $tidakMenerima[] = $jumlahTidakMenerima;
+        }
+
+        return [
+            'categories' => $categories,
+
+            'series' => [
+                [
+                    'name' => 'Menerima',
+                    'data' => $menerima,
+                ],
+                [
+                    'name' => 'Tidak Menerima',
+                    'data' => $tidakMenerima,
+                ],
+            ],
+        ];
+    }
+
+    private function getPengajarWilayahChart(): array
+    {
+        $kotaKediri = Pengajar::where(
+            'id_kabkota',
+            '35.71'
+        )->count();
+
+        $luarKotaKediri = Pengajar::where(
+            'id_kabkota',
+            '!=',
+            '35.71'
+        )
+            ->orWhereNull('id_kabkota')
+            ->count();
+
+        return [
+            'labels' => [
+                'Kota Kediri',
+                'Luar Kota Kediri',
+            ],
+
+            'series' => [
+                $kotaKediri,
+                $luarKotaKediri,
             ],
         ];
     }
