@@ -29,7 +29,7 @@
     },
     "dependencies": {
         "@tanstack/react-table": "^8.21.3",
-        "apexcharts": "^6.6.1",
+        "apexcharts": "^6.7.0",
         "axios": "^1.16.1",
         "bootstrap": "^5.3.8",
         "dayjs": "^1.11.21",
