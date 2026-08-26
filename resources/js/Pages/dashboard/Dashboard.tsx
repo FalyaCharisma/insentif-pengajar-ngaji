@@ -21,5 +21,7 @@ export default function Dashboard(props: DashboardData) {
         return <ForumDashboard />;
     }
 
-    return <LembagaDashboard />;
+    if (hasRole("lembaga")) {
+        return <LembagaDashboard {...props} />;
+    }
 }

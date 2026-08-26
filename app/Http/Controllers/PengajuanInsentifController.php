@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Pengajar;
 use App\Models\PengajuanInsentif;
 use App\Models\PengajuanProposal;
+use App\Models\Periode;
 use App\Models\Kuota;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\RekapInsentifExport;
 
 class PengajuanInsentifController extends Controller
 {
@@ -116,6 +119,14 @@ class PengajuanInsentifController extends Controller
         });
 
         $proposal->withQueryString();
+        
+        $periodes = Periode::orderByDesc('tahun')->get([
+            'id',
+            'tahun',
+            'mulai_upload',
+            'selesai_upload',
+            'status',
+        ]);
 
         return Inertia::render('pengajuan-insentif/index', [
             'pengajuanProposal' => $proposal,
@@ -126,6 +137,8 @@ class PengajuanInsentifController extends Controller
                 'order' => $order,
                 'per_page' => $perPage,
             ],
+
+            'periodes' => $periodes,
         ]);
     }
 
@@ -381,5 +394,73 @@ class PengajuanInsentifController extends Controller
         });
 
         return back()->with('success', 'Pengajuan berhasil dikembalikan untuk revisi.');
+    }
+
+    public function rekapPreview(Request $request)
+    {
+        $request->validate([
+            'periode_id' => ['required', 'exists:periode,id'],
+        ]);
+
+        $periodeId = $request->periode_id;
+
+        $baseQuery = Pengajar::whereHas(
+            'pengajuanInsentif.proposal',
+            function ($query) use ($periodeId) {
+                $query->where('periode_id', $periodeId);
+            }
+        );
+
+        $totalPengajar = (clone $baseQuery)->count();
+
+        $menerima = (clone $baseQuery)
+            ->whereHas('pengajuanInsentif', function ($query) use ($periodeId) {
+                $query->where('status', 'verified')
+                    ->whereHas('proposal', function ($q) use ($periodeId) {
+                        $q->where('periode_id', $periodeId);
+                    });
+            })
+            ->count();
+
+        $pending = (clone $baseQuery)
+            ->whereHas('pengajuanInsentif', function ($query) use ($periodeId) {
+                $query->whereIn('status', ['pending', 'revision'])
+                    ->whereHas('proposal', function ($q) use ($periodeId) {
+                        $q->where('periode_id', $periodeId);
+                    });
+            })
+            ->count();
+
+        $tidakMenerima = (clone $baseQuery)
+            ->whereHas('pengajuanInsentif', function ($query) use ($periodeId) {
+                $query->where('status', 'rejected')
+                    ->whereHas('proposal', function ($q) use ($periodeId) {
+                        $q->where('periode_id', $periodeId);
+                    });
+            })
+            ->count();
+
+        return response()->json([
+            'total_pengajar' => $totalPengajar,
+            'menerima' => $menerima,
+            'pending' => $pending,
+            'tidak_menerima' => $tidakMenerima,
+        ]);
+    }
+
+    public function rekapExport(Request $request)
+    {
+        $request->validate([
+            'periode_id' => ['required', 'exists:periode,id'],
+        ]);
+
+        $periode = Periode::findOrFail($request->periode_id);
+
+        $filename = "Rekap_Insentif_Pengajar_{$periode->tahun}.xlsx";
+
+        return Excel::download(
+            new RekapInsentifExport($periode->id),
+            $filename
+        );
     }
 }

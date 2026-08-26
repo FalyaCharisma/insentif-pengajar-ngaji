@@ -5,9 +5,7 @@ import InputLabel from "../ui/InputLabel";
 
 type Props = {
     label: string;
-
     error?: string;
-
     required?: boolean;
 
     onChange: (
@@ -15,8 +13,9 @@ type Props = {
     ) => void;
 
     fileName?: string;
-
     currentFile?: string;
+
+    hint?: string;
 };
 
 export default function FormFile({
@@ -26,11 +25,10 @@ export default function FormFile({
     onChange,
     fileName,
     currentFile,
+    hint,
 }: Props) {
-
     return (
         <div>
-
             <InputLabel
                 value={label}
                 required={required}
@@ -47,6 +45,13 @@ export default function FormFile({
                 "
             />
 
+            {/* Keterangan file */}
+            {hint && (
+                <p className="mt-1.5 text-xs text-slate-400">
+                    {hint}
+                </p>
+            )}
+
             {/* File dipilih */}
             {fileName && (
                 <p className="mt-2 text-sm text-slate-600">
@@ -60,7 +65,6 @@ export default function FormFile({
             {/* File lama */}
             {!fileName && currentFile && (
                 <div className="mt-2 text-sm">
-
                     <span className="text-slate-500">
                         File saat ini:
                     </span>

@@ -15,8 +15,9 @@ import FormModal from "./form-modal";
 import { columns } from "./columns";
 
 import { IndexProps, Proposal } from "@/types/pengajuan-insentif";
+import RekapModal from "./rekap-modal";
 
-export default function Index({ pengajuanProposal, filters }: IndexProps) {
+export default function Index({ pengajuanProposal, filters, periodes }: IndexProps) {
     const { auth } = usePage().props as any;
 
     const { setParams } = useQueryParams(
@@ -25,8 +26,11 @@ export default function Index({ pengajuanProposal, filters }: IndexProps) {
     );
 
     const isLembaga = auth.user.role === "lembaga";
+    const isDindik = auth.user.role === "dindik";
 
     const [openModal, setOpenModal] = useState(false);
+    const [openRekapModal, setOpenRekapModal] = useState(false);
+
     const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(
         null,
     );
@@ -58,6 +62,7 @@ export default function Index({ pengajuanProposal, filters }: IndexProps) {
                                 : "Monitoring pengajuan insentif."
                         }
                     />
+                    
                     <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5">
@@ -131,6 +136,9 @@ export default function Index({ pengajuanProposal, filters }: IndexProps) {
                                 value: "id",
                             },
                         ]}
+                        actionButtonLabel="Rekap"
+                        onAction={() => setOpenRekapModal(true)}
+                        hideActionButton={!isDindik}
                     />
 
                     <DataTable
@@ -149,6 +157,12 @@ export default function Index({ pengajuanProposal, filters }: IndexProps) {
                             setOpenModal(false);
                             setSelectedProposal(null);
                         }}
+                    />
+
+                    <RekapModal
+                        open={openRekapModal}
+                        periode={periodes}
+                        onClose={() => setOpenRekapModal(false)}
                     />
                 </div>
             </AdminLayout>

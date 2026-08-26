@@ -14,47 +14,92 @@ use Illuminate\Support\Facades\DB;
 
 class DindikDashboardService
 {
-    public function index(): array
+    public function index(int $periodeId): array
     {
         $data = [
-            'statistics' => $this->getStatistics(),
-            'proposalSummary' => $this->getProposalSummary(),
+            'statistics' => $this->getStatistics($periodeId),
+            'proposalSummary' => $this->getProposalSummary($periodeId),
             'chart' => $this->getProposalChart(),
             
             'kategoriChart'    => $this->getKategoriChart(),
             'kecamatanChart'   => $this->getKecamatanChart(),
+            'pengajarKecamatanChart' => $this->getPengajarKecamatanChart($periodeId),
+            'pengajarWilayahChart' => $this->getPengajarWilayahChart(),
         ];
 
         return $data;
     }
 
-    private function getStatistics(): array
+    private function getStatistics(int $periodeId): array
     {
         return [
-            'total_forum'            => Forum::count(),
-            'total_lembaga'          => Lembaga::count(),
-            'verified_lembaga'       => ProfilLembaga::where('status_verifikasi', 'disetujui')->count(),
-            'pending_lembaga'        => ProfilLembaga::where('status_verifikasi', 'pending')->count(),
-            'total_pengajar'         => Pengajar::count(),
-            'verified_pengajar'      => Pengajar::where('status_verifikasi', 'disetujui')->count(),
-            'pending_pengajar'       => Pengajar::where('status_verifikasi', 'pending')->count(),
-            'total_siswa'            => Siswa::count(),
-            'total_proposal'         => PengajuanProposal::count(),
-            'total_pengajuan'        => PengajuanInsentif::count(),
+            // MASTER
+            'total_forum'       => Forum::count(),
+
+            'total_lembaga'     => Lembaga::count(),
+
+            'verified_lembaga'  => ProfilLembaga::where(
+                'status_verifikasi',
+                'disetujui'
+            )->count(),
+
+            'pending_lembaga'   => ProfilLembaga::where(
+                'status_verifikasi',
+                'pending'
+            )->count(),
+
+            'total_pengajar'    => Pengajar::count(),
+
+            'verified_pengajar' => Pengajar::where(
+                'status_verifikasi',
+                'disetujui'
+            )->count(),
+
+            'pending_pengajar'  => Pengajar::where(
+                'status_verifikasi',
+                'pending'
+            )->count(),
+
+            // TRANSAKSI
+            'total_siswa' => Siswa::where(
+                'periode_id',
+                $periodeId
+            )->sum('jumlah_siswa'),
+
+            'total_proposal' => PengajuanProposal::where(
+                'periode_id',
+                $periodeId
+            )->count(),
+
+            'total_pengajuan' => PengajuanInsentif::whereHas(
+                'proposal',
+                fn ($q) => $q->where('periode_id', $periodeId)
+            )->count(),
         ];
     }
 
-    private function getProposalSummary(): array
+    private function getProposalSummary(int $periodeId): array
     {
-        $proposal = PengajuanProposal::count();
+        $proposal = PengajuanProposal::where(
+            'periode_id',
+            $periodeId
+        )->count();
 
-        $verified = PengajuanProposal::where('status', 'verified')->count();
+        $verified = PengajuanProposal::where(
+            'periode_id',
+            $periodeId
+        )->where('status', 'verified')->count();
 
-        $pending = PengajuanProposal::where('status', 'pending')->count();
+        $pending = PengajuanProposal::where(
+            'periode_id',
+            $periodeId
+        )->where('status', 'pending')->count();
 
-        $revision = PengajuanProposal::where('status', 'revision')->count();
+        $revision = PengajuanProposal::where(
+            'periode_id',
+            $periodeId
+        )->where('status', 'revision')->count();
 
-        // dd($proposal, $verified, $pending, $revision);
         return [
             'proposal' => $proposal,
             'verified' => $verified,
@@ -142,6 +187,106 @@ class DindikDashboardService
                     'name' => 'Jumlah Lembaga',
                     'data' => $data->pluck('total')->toArray(),
                 ],
+            ],
+        ];
+    }
+
+    private function getPengajarKecamatanChart(int $periodeId): array
+    {
+        // 1. Ambil semua profil lembaga dan kelompokkan berdasarkan kecamatan
+        $profilLembaga = ProfilLembaga::select(
+            'lembaga_id',
+            'kecamatan'
+        )
+            ->whereNotNull('kecamatan')
+            ->get()
+            ->groupBy('kecamatan');
+
+        $categories = [];
+        $menerima = [];
+        $tidakMenerima = [];
+
+        // 2. Loop setiap kecamatan
+        foreach ($profilLembaga as $kecamatan => $profils) {
+
+            // Semua lembaga yang berada di kecamatan tersebut
+            $lembagaIds = $profils
+                ->pluck('lembaga_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            // 3. Ambil semua pengajar dari lembaga-lembaga tersebut
+            $pengajarIds = Pengajar::whereIn(
+                'lembaga_id',
+                $lembagaIds
+            )
+                ->pluck('id');
+
+            $totalPengajar = $pengajarIds->count();
+
+            // 4. Hitung pengajar yang menerima insentif
+            // pada periode yang dipilih
+            $jumlahMenerima = PengajuanInsentif::whereIn(
+                'pengajar_id',
+                $pengajarIds
+            )
+                ->where('status', 'verified')
+                ->whereHas('proposal', function ($query) use ($periodeId) {
+                    $query->where('periode_id', $periodeId);
+                })
+                ->distinct('pengajar_id')
+                ->count('pengajar_id');
+
+            // 5. Yang tidak menerima = total pengajar - penerima
+            $jumlahTidakMenerima =
+                $totalPengajar - $jumlahMenerima;
+
+            $categories[] = $kecamatan;
+            $menerima[] = $jumlahMenerima;
+            $tidakMenerima[] = $jumlahTidakMenerima;
+        }
+
+        return [
+            'categories' => $categories,
+
+            'series' => [
+                [
+                    'name' => 'Menerima',
+                    'data' => $menerima,
+                ],
+                [
+                    'name' => 'Tidak Menerima',
+                    'data' => $tidakMenerima,
+                ],
+            ],
+        ];
+    }
+
+    private function getPengajarWilayahChart(): array
+    {
+        $kotaKediri = Pengajar::where(
+            'id_kabkota',
+            '35.71'
+        )->count();
+
+        $luarKotaKediri = Pengajar::where(
+            'id_kabkota',
+            '!=',
+            '35.71'
+        )
+            ->orWhereNull('id_kabkota')
+            ->count();
+
+        return [
+            'labels' => [
+                'Kota Kediri',
+                'Luar Kota Kediri',
+            ],
+
+            'series' => [
+                $kotaKediri,
+                $luarKotaKediri,
             ],
         ];
     }
