@@ -136,9 +136,13 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('kuota/periode/{periode}', [KuotaController::class, 'destroyPeriode'])->name('kuota.destroyPeriode');
     Route::resource('periode', PeriodeController::class);
+    
+    // Pengajuan Proposal
     Route::resource('pengajuan-proposal', PengajuanProposalController::class);
     Route::patch('/pengajuan-proposal/{pengajuanProposal}/verify', [PengajuanProposalController::class, 'verify'])->name('pengajuan-proposal.verify');
     Route::patch('/pengajuan-proposal/{pengajuanProposal}/unverify', [PengajuanProposalController::class, 'unverify'])->name('pengajuan-proposal.unverify');
+     
+    // Pengajuan Insentif
     Route::prefix('pengajuan-insentif')
         ->name('pengajuan-insentif.')
         ->controller(PengajuanInsentifController::class)
@@ -148,7 +152,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/{proposal}', 'show')->name('show');
             Route::patch('/{pengajuan}/verify', 'verify')->name('verify');
             Route::patch('/{pengajuan}/reject', 'reject')->name('reject');
-            Route::get('pengajuan-insentif/{proposal}/usulan', 'usulan')->name('usulan');
+            Route::get('/{proposal}/usulan', 'usulan')->name('usulan');
+            Route::get('/rekap/preview', 'rekapPreview')->name('rekap.preview');
+            Route::get('/rekap/export', 'rekapExport')->name('rekap.export');
         });
 
     Route::patch('verify-selected', [PengajuanInsentifController::class, 'verifySelected'])->name('pengajuan-insentif.verify-selected');

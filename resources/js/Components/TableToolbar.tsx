@@ -1,4 +1,4 @@
-import { Plus, Filter } from "lucide-react";
+import { Plus, Filter, FileSpreadsheet  } from "lucide-react";
 
 type Props = {
     filters: any;
@@ -17,6 +17,12 @@ type Props = {
     onAdd?: () => void;
 
     hideAddButton?: boolean;
+
+    actionButtonLabel?: string;
+    actionButtonIcon?: React.ReactNode;
+    onAction?: () => void;
+    hideActionButton?: boolean;
+
     hideSearch?: boolean;
     hideSort?: boolean;
     hidePerPage?: boolean;
@@ -43,6 +49,12 @@ export default function TableToolbar({
     onAdd,
 
     hideAddButton = false,
+
+    actionButtonLabel = "Rekap",
+    actionButtonIcon,
+    onAction,
+    hideActionButton = true,
+
     hideSearch = false,
     hideSort = false,
     hidePerPage = false,
@@ -149,6 +161,7 @@ export default function TableToolbar({
             {/* RIGHT */}
             <div className="flex items-center gap-2">
 
+                {/* FILTER */}
                 {!hideFilterButton && onFilter && (
                     <button
                         onClick={onFilter}
@@ -189,6 +202,31 @@ export default function TableToolbar({
                     </button>
                 )}
 
+                {/* REKAP */}
+                {!hideActionButton && onAction && (
+                    <button
+                        onClick={onAction}
+                        className="
+                            h-11
+                            px-5
+                            rounded-2xl
+                            bg-emerald-600
+                            hover:bg-emerald-700
+                            text-white
+                            text-sm
+                            font-medium
+                            inline-flex
+                            items-center
+                            gap-2
+                            transition
+                        "
+                    >
+                        {actionButtonIcon ?? <FileSpreadsheet size={18} />}
+                        {actionButtonLabel}
+                    </button>
+                )}
+
+                {/* TAMBAH */}
                 {!hideAddButton && onAdd && addButtonLabel && (
                     <button
                         onClick={onAdd}

@@ -1,4 +1,5 @@
 import { QueryParams } from "@/hooks/use-query-params";
+import { Periode } from "./periode";
 
 export interface PaginationLink {
     url: string | null;
@@ -20,11 +21,6 @@ export interface PaginationMeta<T> {
     prev_page_url: string | null;
     to: number | null;
     total: number;
-}
-
-export interface Periode {
-    id: number;
-    tahun: string;
 }
 
 export interface Lembaga {
@@ -77,4 +73,5 @@ export interface Filters  extends QueryParams{
 export interface IndexProps {
     pengajuanProposal: PaginationMeta<Proposal>;
     filters: Filters;
+    periodes: Periode[];
 }
