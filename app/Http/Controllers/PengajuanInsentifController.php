@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pengajar;
 use App\Models\PengajuanInsentif;
 use App\Models\PengajuanProposal;
+use App\Models\Kuota;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -66,7 +67,7 @@ class PengajuanInsentifController extends Controller
 
         /* Sorting */
 
-        $allowedSort = ['id', 'jumlah_guru', 'created_at'];
+        $allowedSort = ['id', 'created_at'];
 
         $sort = in_array($request->sort, $allowedSort) ? $request->sort : 'id';
 
@@ -82,24 +83,39 @@ class PengajuanInsentifController extends Controller
             $perPage = 10;
         }
 
-        $proposal = $query
-            ->paginate($perPage)
-            ->through(function ($item) {
-                if ($item->diajukan_count == 0) {
-                    $item->status_pengajuan = 'belum';
-                } elseif ($item->revision_count > 0) {
-                    $item->status_pengajuan = 'revision';
-                } elseif ($item->pending_count > 0) {
-                    $item->status_pengajuan = 'pending';
-                } elseif ($item->verified_count == $item->diajukan_count && $item->diajukan_count > 0) {
-                    $item->status_pengajuan = 'verified';
-                } else {
-                    $item->status_pengajuan = 'pending';
-                }
+        $proposal = $query->paginate($perPage);
 
-                return $item;
-            })
-            ->withQueryString();
+        $lembagaIds = $proposal->getCollection()->pluck('lembaga_id')->unique();
+        $periodeIds = $proposal->getCollection()->pluck('periode_id')->unique();
+
+        $kuota = Kuota::whereIn('lembaga_id', $lembagaIds)
+            ->whereIn('periode_id', $periodeIds)
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->lembaga_id . '-' . $item->periode_id;
+            });
+
+        $proposal->getCollection()->transform(function ($item) use ($kuota) {
+            $key = $item->lembaga_id . '-' . $item->periode_id;
+
+            $item->kuota_final = $kuota->get($key)?->kuota_final ?? 0;
+
+            if ($item->diajukan_count == 0) {
+                $item->status_pengajuan = 'belum';
+            } elseif ($item->revision_count > 0) {
+                $item->status_pengajuan = 'revision';
+            } elseif ($item->pending_count > 0) {
+                $item->status_pengajuan = 'pending';
+            } elseif ($item->verified_count == $item->diajukan_count && $item->diajukan_count > 0) {
+                $item->status_pengajuan = 'verified';
+            } else {
+                $item->status_pengajuan = 'pending';
+            }
+
+            return $item;
+        });
+
+        $proposal->withQueryString();
 
         return Inertia::render('pengajuan-insentif/index', [
             'pengajuanProposal' => $proposal,
@@ -117,6 +133,8 @@ class PengajuanInsentifController extends Controller
     {
         $proposal->load(['periode', 'lembaga']);
 
+        $proposal->kuota_final = Kuota::where('lembaga_id', $proposal->lembaga_id)->where('periode_id', $proposal->periode_id)->value('kuota_final') ?? 0;
+
         $usulan = PengajuanInsentif::where('proposal_id', $proposal->id)->get()->keyBy('pengajar_id');
 
         $pengajar = Pengajar::where('lembaga_id', $proposal->lembaga_id)
@@ -133,13 +151,9 @@ class PengajuanInsentifController extends Controller
                     'tempat_lahir' => $item->tempat_lahir,
                     'tgl_lahir' => $item->tgl_lahir,
                     'pendidikan_terakhir' => $item->pendidikan_terakhir,
-
-                    // status usulan
                     'selected' => $pengajuan !== null,
                     'status_pengajuan' => $pengajuan?->status,
                     'catatan' => $pengajuan?->catatan,
-
-                    // dipakai forum nanti
                     'pengajuan_insentif_id' => $pengajuan?->id,
                     'verified_by' => $pengajuan?->verified_by,
                     'verified_at' => $pengajuan?->verified_at,
@@ -174,9 +188,11 @@ class PengajuanInsentifController extends Controller
             ]);
         }
 
-        if (count($request->pengajar) > $proposal->jumlah_guru) {
+        $kuotaFinal = Kuota::where('lembaga_id', $proposal->lembaga_id)->where('periode_id', $proposal->periode_id)->value('kuota_final') ?? 0;
+
+        if (count($request->pengajar) > $kuotaFinal) {
             return back()->withErrors([
-                'pengajar' => 'Jumlah pengajar melebihi kuota yang diajukan.',
+                'pengajar' => "Jumlah pengajar yang dipilih melebihi kuota final ({$kuotaFinal} pengajar).",
             ]);
         }
 

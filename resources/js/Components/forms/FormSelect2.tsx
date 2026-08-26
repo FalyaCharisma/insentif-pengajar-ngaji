@@ -9,7 +9,7 @@ type Option = {
 };
 
 type Props = {
-    label: string;
+    label?: string;
     value: any;
     options: Option[];
 
@@ -32,20 +32,13 @@ export default function FormSelect2({
     disabled = false,
     onChange,
 }: Props) {
-
     return (
         <div>
-
-            <InputLabel
-                value={label}
-                required={required}
-            />
+            {label && <InputLabel value={label} required={required} />}
 
             <Select
                 options={options}
-                
                 isDisabled={disabled}
-                
                 styles={{
                     control: (base, state) => ({
                         ...base,
@@ -54,25 +47,13 @@ export default function FormSelect2({
                         backgroundColor: state.isDisabled
                             ? "#f8fafc"
                             : "#ffffff",
-                        cursor: state.isDisabled
-                            ? "not-allowed"
-                            : "pointer",
+                        cursor: state.isDisabled ? "not-allowed" : "pointer",
                     }),
                 }}
-                
-                value={
-                    options.find(
-                        (opt) => opt.value == value,
-                    ) || null
-                }
-
-                onChange={(opt: any) =>
-                    onChange(opt?.value || "")
-                }
-
+                value={options.find((opt) => opt.value == value) || null}
+                onChange={(opt: any) => onChange(opt?.value ?? undefined)}
                 placeholder={placeholder}
                 isClearable
-
                 classNames={{
                     control: ({ isFocused }) =>
                         `
@@ -97,10 +78,7 @@ export default function FormSelect2({
                             !shadow-xl
                         `,
 
-                    option: ({
-                        isFocused,
-                        isSelected,
-                    }) =>
+                    option: ({ isFocused, isSelected }) =>
                         `
                             !text-sm
                             ${
@@ -115,7 +93,6 @@ export default function FormSelect2({
             />
 
             <InputError message={error} />
-
         </div>
     );
 }

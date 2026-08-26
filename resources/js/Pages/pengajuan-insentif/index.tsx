@@ -130,10 +130,6 @@ export default function Index({ pengajuanProposal, filters }: IndexProps) {
                                 label: "Terbaru",
                                 value: "id",
                             },
-                            {
-                                label: "Kuota",
-                                value: "jumlah_guru",
-                            },
                         ]}
                     />
 

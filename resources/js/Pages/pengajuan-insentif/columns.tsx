@@ -19,10 +19,10 @@ export const columns = ({ onDetail }: Props) => [
         header: "Lembaga",
         cell: ({ row }: any) => row.original.lembaga?.nama ?? "-",
     },
-
     {
-        accessorKey: "jumlah_guru",
-        header: "Kuota",
+        accessorKey: "kuota_final",
+        header: "Kuota Final",
+        cell: ({ row }: any) => row.original.kuota_final ?? 0,
     },
 
     {
