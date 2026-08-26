@@ -266,7 +266,7 @@ class KuotaController extends Controller
     public function update(Request $request, Kuota $kuota)
     {
         $validated = $request->validate([
-            'kuota_final' => ['required', 'integer', 'min:0'],
+            'kuota_final' => ['required', 'integer', 'min:0',  'max:' . $kuota->estimasi_kuota,],
 
             'keterangan' => ['nullable', 'string'],
         ]);

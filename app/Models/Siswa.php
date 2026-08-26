@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Siswa extends Model
 {
@@ -11,15 +12,9 @@ class Siswa extends Model
 
     protected $table = 'siswa';
 
-    protected $fillable = [
-        'periode_id',
-        'lembaga_id',
-        'jumlah_siswa',
-    ];
+    protected $fillable = ['periode_id', 'lembaga_id', 'jumlah_siswa', 'bukti_dukung'];
 
-    protected $appends = [
-        'estimasi_kuota',
-    ];
+    protected $appends = ['estimasi_kuota', 'bukti_dukung_url'];
 
     public function periode()
     {
@@ -37,5 +32,14 @@ class Siswa extends Model
     public function getEstimasiKuotaAttribute()
     {
         return max(1, floor($this->jumlah_siswa / 10));
+    }
+
+    public function getBuktiDukungUrlAttribute()
+    {
+        return $this->bukti_dukung ? Storage::url($this->bukti_dukung) : null;
+    }
+    public function pengajuanProposal()
+    {
+        return $this->hasOne(PengajuanProposal::class, 'lembaga_id', 'lembaga_id')->whereColumn('pengajuan_proposal.periode_id', 'siswa.periode_id');
     }
 }

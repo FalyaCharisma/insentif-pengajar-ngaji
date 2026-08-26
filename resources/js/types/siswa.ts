@@ -6,6 +6,7 @@ export type Siswa = {
     periode_id: number;
     lembaga_id: number;
     jumlah_siswa: number;
+    bukti_dukung: string | null;
 
     periode: Periode;
     lembaga: Lembaga;

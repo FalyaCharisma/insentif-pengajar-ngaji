@@ -14,7 +14,6 @@ type Props = {
 };
 
 export default function FormModal({ open, onClose, dataSiswa }: Props) {
-    
     const isEdit = !!dataSiswa;
     const { auth }: any = usePage().props;
 
@@ -37,6 +36,8 @@ export default function FormModal({ open, onClose, dataSiswa }: Props) {
         periode_id: "",
         lembaga_id: "",
         jumlah_siswa: "",
+        bukti_dukung: null as File | null,
+        _method: "",
     });
 
     const clearForm = () => {
@@ -46,6 +47,7 @@ export default function FormModal({ open, onClose, dataSiswa }: Props) {
             periode_id: "",
             lembaga_id: "",
             jumlah_siswa: "",
+            bukti_dukung: null,
         });
     };
 
@@ -57,6 +59,7 @@ export default function FormModal({ open, onClose, dataSiswa }: Props) {
                 periode_id: String(dataSiswa.periode_id),
                 lembaga_id: String(dataSiswa.lembaga_id),
                 jumlah_siswa: String(dataSiswa.jumlah_siswa),
+                bukti_dukung: null,
             });
         } else {
             clearForm();
@@ -67,8 +70,11 @@ export default function FormModal({ open, onClose, dataSiswa }: Props) {
         e.preventDefault();
 
         if (isEdit) {
-            put(route("data-siswa.update", dataSiswa.id), {
+            setData("_method", "put");
+
+            post(route("data-siswa.update", dataSiswa.id), {
                 preserveScroll: true,
+                forceFormData: true,
 
                 onSuccess: () => {
                     clearForm();
@@ -79,8 +85,11 @@ export default function FormModal({ open, onClose, dataSiswa }: Props) {
             return;
         }
 
+        setData("_method", "");
+
         post(route("data-siswa.store"), {
             preserveScroll: true,
+            forceFormData: true,
 
             onSuccess: () => {
                 clearForm();
@@ -126,15 +135,16 @@ export default function FormModal({ open, onClose, dataSiswa }: Props) {
                     <div>
                         {!auth.user.role.includes("lembaga") && (
                             <FormSelect2
-                            label="Lembaga"
-                            value={data.lembaga_id}
-                            options={lembagaOptions}
-                            onChange={(value) => setData("lembaga_id", value)}
-                            placeholder="Pilih Lembaga"
-                            error={errors.lembaga_id}
-                        />
+                                label="Lembaga"
+                                value={data.lembaga_id}
+                                options={lembagaOptions}
+                                onChange={(value) =>
+                                    setData("lembaga_id", value)
+                                }
+                                placeholder="Pilih Lembaga"
+                                error={errors.lembaga_id}
+                            />
                         )}
-                        
                     </div>
 
                     {/* JUMLAH SISWA */}
@@ -149,6 +159,44 @@ export default function FormModal({ open, onClose, dataSiswa }: Props) {
                         placeholder="Masukkan jumlah siswa"
                         error={errors.jumlah_siswa}
                     />
+                    {/* BUKTI DUKUNG */}
+
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-slate-700">
+                            Bukti Dukung Jumlah Siswa
+                        </label>
+
+                        <input
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0] || null;
+                                setData("bukti_dukung", file);
+                            }}
+                            className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-600 hover:file:bg-indigo-100"
+                        />
+
+                        <p className="mt-1 text-xs text-slate-500">
+                            Format: PDF, XLS, atau XLSX. Maksimal 2 MB.
+                        </p>
+
+                        {errors.bukti_dukung && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.bukti_dukung}
+                            </p>
+                        )}
+
+                        {isEdit && dataSiswa?.bukti_dukung_url && (
+                            <a
+                                href={dataSiswa.bukti_dukung_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-2 inline-block text-xs font-medium text-indigo-600 hover:underline"
+                            >
+                                Lihat bukti dukung saat ini
+                            </a>
+                        )}
+                    </div>
 
                     {/* ESTIMASI */}
 
