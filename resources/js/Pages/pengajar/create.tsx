@@ -458,11 +458,11 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     options={[
                                         {
                                             label: "Laki-laki",
-                                            value: "laki-laki",
+                                            value: "L",
                                         },
                                         {
                                             label: "Perempuan",
-                                            value: "perempuan",
+                                            value: "P",
                                         },
                                     ]}
                                 />

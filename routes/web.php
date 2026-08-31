@@ -20,6 +20,7 @@ use App\Http\Controllers\ProfilLembagaController;
 use App\Http\Controllers\DokumenLembagaController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanKegiatanController;
 
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
@@ -160,6 +161,25 @@ Route::middleware('auth')->group(function () {
     Route::patch('verify-selected', [PengajuanInsentifController::class, 'verifySelected'])->name('pengajuan-insentif.verify-selected');
 
     Route::patch('reject-selected', [PengajuanInsentifController::class, 'rejectSelected'])->name('pengajuan-insentif.reject-selected');
+
+    // Laporan Kegiatan
+    Route::controller(LaporanKegiatanController::class)
+    ->prefix('laporan-kegiatan')
+    ->name('laporan-kegiatan.')
+    ->group(function () {
+
+        Route::get('/', 'index')->name('index');
+
+        Route::post('/jadwal', 'uploadJadwal')->name('jadwal.upload');
+        Route::get('/jadwal', 'showJadwal')->name('jadwal.show');
+        Route::put('/jadwal', 'updateJadwal')->name('jadwal.update');
+
+        Route::post('/', 'store')->name('store');
+        Route::get('/{laporanKegiatan}', 'show')->name('show');
+        Route::put('/{laporanKegiatan}', 'update')->name('update');
+        Route::delete('/{laporanKegiatan}', 'destroy')->name('destroy');
+        Route::put('/{laporanKegiatan}/verifikasi', 'verifikasi')->name('verifikasi');
+    });
 });
 
 require __DIR__ . '/auth.php';

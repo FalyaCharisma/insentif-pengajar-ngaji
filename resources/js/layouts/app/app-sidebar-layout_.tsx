@@ -92,7 +92,7 @@ export default function AppSidebarLayout({ collapsed, setCollapsed }: Props) {
                     {!collapsed && (
                         <div>
                             <h1 className="font-bold text-white text-lg">
-                                Insentif Pengajar
+                                SIMAPAN - Dindik
                             </h1>
 
                             <p className="text-xs text-slate-400">

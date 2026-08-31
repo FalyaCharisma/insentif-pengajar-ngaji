@@ -34,7 +34,7 @@ export default function Navbar() {
                         </div>
 
                         <div className="lh-sm">
-                            <div className="fw-black text-success fs-5">SI-INSENTIF</div>
+                            <div className="fw-black text-success fs-5">SIMAPAN</div>
                             <small className="text-muted fw-semibold">Dinas Pendidikan Kota Kediri</small>
                         </div>
                     </Link>

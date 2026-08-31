@@ -71,4 +71,14 @@ class Lembaga extends Model
     {
         return $this->hasMany(Pengajar::class);
     }
+
+    public function jadwalKegiatan()
+    {
+        return $this->hasOne(JadwalKegiatan::class);
+    }
+
+    public function laporanKegiatan()
+    {
+        return $this->hasMany(LaporanKegiatan::class);
+    }
 }
