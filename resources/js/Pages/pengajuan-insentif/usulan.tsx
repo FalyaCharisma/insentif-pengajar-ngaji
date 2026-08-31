@@ -1,5 +1,6 @@
 import { Head, router, usePage } from "@inertiajs/react";
 import { useState, useEffect } from "react";
+import { errorAlert } from "@/lib/alert";
 
 import AdminLayout from "@/layouts/app-layout";
 import PageHeader from "@/Components/PageHeader";
@@ -36,6 +37,12 @@ type Props = {
 };
 
 export default function Index({ proposal, pengajar }: Props) {
+    const { errors } = usePage().props as any;
+    useEffect(() => {
+        if (errors.pengajar) {
+            errorAlert(errors.pengajar);
+        }
+    }, [errors.pengajar]);
     const { auth } = usePage().props as any;
 
     const pageProps: any = usePage().props;
@@ -60,7 +67,7 @@ export default function Index({ proposal, pengajar }: Props) {
 
             if (prev.length >= proposal.jumlah_guru) {
                 warningAlert(
-                    `Kuota penerima maksimal ${proposal.jumlah_guru} pengajar.`,
+                    `Kuota penerima maksimal ${proposal.kuota_final} pengajar.`,
                 );
                 return prev;
             }
@@ -276,7 +283,7 @@ export default function Index({ proposal, pengajar }: Props) {
                                 </p>
 
                                 <p className="font-semibold">
-                                    {proposal.jumlah_guru} Pengajar
+                                    {proposal.kuota_final} Pengajar
                                 </p>
                             </div>
                         </div>
@@ -496,7 +503,7 @@ export default function Index({ proposal, pengajar }: Props) {
                             <p>
                                 Kuota :
                                 <span className="ml-2 font-semibold">
-                                    {proposal.jumlah_guru}
+                                    {proposal.kuota_final}
                                 </span>
                             </p>
 

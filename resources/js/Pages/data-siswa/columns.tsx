@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, FileText } from "lucide-react";
 
 export const columns = (
     onEdit: (dataSiswa: any) => void,
@@ -24,9 +24,7 @@ export const columns = (
         accessorKey: "lembaga",
         header: "Lembaga",
 
-        cell: ({ row }: any) => (
-            <span>{row.original.lembaga?.nama}</span>
-        ),
+        cell: ({ row }: any) => <span>{row.original.lembaga?.nama}</span>,
     },
 
     {
@@ -38,6 +36,34 @@ export const columns = (
                 {row.original.jumlah_siswa}
             </div>
         ),
+    },
+    {
+        accessorKey: "bukti_dukung",
+        header: () => <div className="w-full text-center">Bukti Dukung</div>,
+
+        cell: ({ row }: any) => {
+            const url = row.original.bukti_dukung_url;
+
+            if (!url) {
+                return (
+                    <div className="text-center text-xs text-slate-400">-</div>
+                );
+            }
+
+            return (
+                <div className="flex justify-center">
+                    <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 rounded-lg bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-600 transition hover:bg-sky-100"
+                    >
+                        <FileText className="h-3.5 w-3.5" />
+                        Lihat
+                    </a>
+                </div>
+            );
+        },
     },
 
     {
@@ -65,29 +91,26 @@ export const columns = (
 
     {
         id: "aksi",
-
         header: () => <div className="w-full text-center">Aksi</div>,
-
         cell: ({ row }: any) => {
             const dataSiswa = row.original;
+            const locked = dataSiswa.proposal_verified;
+
+            if (locked) {
+                return (
+                    <div className="text-center">
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
+                            Terkunci
+                        </span>
+                    </div>
+                );
+            }
 
             return (
                 <div className="flex items-center justify-center gap-2">
                     <button
                         onClick={() => onEdit(dataSiswa)}
-                        className="
-                            flex
-                            items-center
-                            gap-1
-                            rounded-lg
-                            bg-amber-500
-                            px-3
-                            py-1.5
-                            text-xs
-                            text-white
-                            transition
-                            hover:bg-amber-600
-                        "
+                        className="flex items-center gap-1 rounded-lg bg-amber-500 px-3 py-1.5 text-xs text-white transition hover:bg-amber-600"
                     >
                         <Pencil className="h-3.5 w-3.5" />
                         Edit
@@ -95,19 +118,7 @@ export const columns = (
 
                     <button
                         onClick={() => onDelete(dataSiswa)}
-                        className="
-                            flex
-                            items-center
-                            gap-1
-                            rounded-lg
-                            bg-red-500
-                            px-3
-                            py-1.5
-                            text-xs
-                            text-white
-                            transition
-                            hover:bg-red-600
-                        "
+                        className="flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs text-white transition hover:bg-red-600"
                     >
                         <Trash2 className="h-3.5 w-3.5" />
                         Hapus

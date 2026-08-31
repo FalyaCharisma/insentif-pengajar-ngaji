@@ -20,6 +20,7 @@ use App\Http\Controllers\ProfilLembagaController;
 use App\Http\Controllers\DokumenLembagaController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MasterKuotaController;
 use App\Http\Controllers\LaporanKegiatanController;
 
 Route::get('/', function () {
@@ -132,8 +133,10 @@ Route::middleware('auth')->group(function () {
         });
 
     // Setting Kuota
+    Route::post('/kuota/generate', [KuotaController::class, 'generate'])
+    ->name('kuota.generate');
     Route::resource('kuota', KuotaController::class)->parameters(['kuota' => 'kuota']);
-    Route::post('kuota/generate', [KuotaController::class, 'generate'])->name('kuota.generate');
+    Route::resource('master-kuota', MasterKuotaController::class)->except(['show']);
 
     Route::delete('kuota/periode/{periode}', [KuotaController::class, 'destroyPeriode'])->name('kuota.destroyPeriode');
     Route::resource('periode', PeriodeController::class);

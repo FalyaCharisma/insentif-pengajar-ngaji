@@ -1,32 +1,53 @@
 import { Head, router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
+import { AlertTriangle, CheckCircle2, Users } from "lucide-react";
 
 import AdminLayout from "@/layouts/app-layout";
-
 import PageHeader from "@/Components/PageHeader";
 import Pagination from "@/Components/pagination";
 import DataTable from "@/Components/DataTable";
-import FormSelect2 from "@/Components/forms/FormSelect2";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { useQueryParams } from "@/hooks/use-query-params";
 
 import { columns } from "./columns";
 import FormModal from "./form-modal";
 
-import { deleteConfirm, successAlert, verifyConfirm } from "@/lib/alert";
+import { successAlert, verifyConfirm } from "@/lib/alert";
 import TableToolbar from "@/Components/TableToolbar";
+import FormSelect2 from "@/Components/forms/FormSelect2";
 
 type Props = {
     kuota: any;
     filters: any;
     periodes: any[];
+    forums: any[];
+    masterKuotaStats: any[];
 };
 
-export default function Index({ kuota, filters, periodes }: Props) {
+export default function Index({
+    kuota,
+    filters,
+    periodes,
+    forums,
+    masterKuotaStats,
+}: Props) {
     const { setParams } = useQueryParams(route("kuota.index"), filters);
     const [selectedKuota, setSelectedKuota] = useState<any>(null);
-
     const [open, setOpen] = useState(false);
+
+    const selectedForum = filters.forum_id ?? "";
+    const handleForumChange = (value: string) => {
+        setParams({
+            forum_id: value || undefined,
+            page: 1,
+        });
+    };
+
+    const filteredMasterKuotaStats = selectedForum
+        ? masterKuotaStats.filter(
+              (item) => String(item.forum_id) === String(selectedForum),
+          )
+        : masterKuotaStats;
 
     const pageProps: any = usePage().props;
     const flash = pageProps.flash || {};
@@ -40,7 +61,7 @@ export default function Index({ kuota, filters, periodes }: Props) {
     const generate = () => {
         verifyConfirm(
             "Generate Kuota",
-            "Sistem akan membuat data kuota untuk lembaga pada periode aktif yang belum memiliki data kuota. Data kuota yang sudah ada tidak akan diubah.",
+            "Sistem akan membuat kuota berdasarkan jumlah siswa dengan ketentuan 10 siswa = 1 pengajar. Data kuota yang sudah ada tidak akan diubah.",
             "Ya, Generate",
             "info",
         ).then((result) => {
@@ -60,22 +81,12 @@ export default function Index({ kuota, filters, periodes }: Props) {
                         title="Kuota Pengusulan"
                         subtitle="Kelola kuota penerima insentif"
                     />
+
+                    {/* Keterangan */}
                     <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5">
-                                <svg
-                                    className="h-5 w-5 text-sky-600"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
-                                    />
-                                </svg>
+                                <Users className="h-5 w-5 text-sky-600" />
                             </div>
 
                             <div>
@@ -85,29 +96,164 @@ export default function Index({ kuota, filters, periodes }: Props) {
 
                                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-sky-700">
                                     <li>
-                                        Sistem akan membuat data kuota untuk setiap lembaga pada periode aktif yang belum memiliki data kuota.
+                                        Kuota dibuat berdasarkan jumlah siswa
+                                        dengan ketentuan 10 siswa = 1 pengajar.
                                     </li>
-
                                     <li>
-                                        Data kuota yang sudah pernah dibuat tidak akan dibuat ulang maupun diubah.
+                                        Sistem membuat data kuota untuk lembaga
+                                        pada periode aktif yang belum memiliki
+                                        data kuota.
                                     </li>
-
                                     <li>
-                                        Estimasi kuota dihitung secara otomatis berdasarkan jumlah siswa.
+                                        Kuota Final awal akan mengikuti Estimasi
+                                        Kuota dan dapat disesuaikan oleh Admin
+                                        Dinas Pendidikan.
                                     </li>
-
                                     <li>
-                                       Kuota Final akan diisi sama dengan Estimasi Kuota sebagai nilai awal dan dapat disesuaikan oleh Admin Dinas Pendidikan.
+                                        Total Kuota Final seluruh lembaga harus
+                                        memperhatikan batas Master Kuota yang
+                                        telah ditentukan.
                                     </li>
-
                                     <li>
-                                        Apabila terdapat lembaga baru pada periode aktif, Admin dapat menjalankan Generate Kuota kembali tanpa memengaruhi data kuota yang sudah ada.
+                                        Generate ulang tidak akan mengubah data
+                                        kuota lembaga yang sudah ada.
                                     </li>
                                 </ul>
                             </div>
                         </div>
                     </div>
 
+                    {/* Monitoring Master Kuota */}
+                    {masterKuotaStats?.length > 0 && (
+                        <div>
+                            <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+                                <div>
+                                    <h3 className="text-base font-semibold text-slate-800">
+                                        Monitoring Master Kuota
+                                    </h3>
+
+                                    <p className="mt-1 text-sm text-slate-500">
+                                        Ringkasan penggunaan kuota berdasarkan
+                                        Forum dan Kategori.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                                {filteredMasterKuotaStats.map((master) => {
+                                    const persentaseTampil = Math.min(
+                                        master.persentase,
+                                        100,
+                                    );
+
+                                    return (
+                                        <div
+                                            key={master.id}
+                                            className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+                                        >
+                                            <div className="flex items-center justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-semibold text-slate-800">
+                                                        {master.forum}
+                                                    </p>
+                                                    <p className="truncate text-xs text-slate-500">
+                                                        {master.kategori}
+                                                    </p>
+                                                </div>
+
+                                                {master.melebihi ? (
+                                                    <div className="rounded-full bg-red-100 p-1.5">
+                                                        <AlertTriangle className="h-3.5 w-3.5 text-red-600" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="rounded-full bg-emerald-100 p-1.5">
+                                                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="mt-3 grid grid-cols-3 gap-2">
+                                                <div>
+                                                    <p className="text-[10px] text-slate-500">
+                                                        Master
+                                                    </p>
+                                                    <p className="text-sm font-bold text-slate-800">
+                                                        {master.jumlah_kuota}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-[10px] text-slate-500">
+                                                        Terpakai
+                                                    </p>
+                                                    <p className="text-sm font-bold text-sky-600">
+                                                        {master.total_terpakai}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-[10px] text-slate-500">
+                                                        {master.melebihi
+                                                            ? "Lebih"
+                                                            : "Sisa"}
+                                                    </p>
+                                                    <p
+                                                        className={`text-sm font-bold ${
+                                                            master.melebihi
+                                                                ? "text-red-600"
+                                                                : "text-emerald-600"
+                                                        }`}
+                                                    >
+                                                        {master.melebihi
+                                                            ? Math.abs(
+                                                                  master.sisa,
+                                                              )
+                                                            : master.sisa}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-2.5">
+                                                <div className="mb-1 flex justify-between text-[10px]">
+                                                    <span className="text-slate-500">
+                                                        Penggunaan
+                                                    </span>
+                                                    <span
+                                                        className={`font-semibold ${
+                                                            master.melebihi
+                                                                ? "text-red-600"
+                                                                : "text-slate-600"
+                                                        }`}
+                                                    >
+                                                        {master.total_terpakai}/
+                                                        {master.jumlah_kuota} ·{" "}
+                                                        {master.persentase}%
+                                                    </span>
+                                                </div>
+
+                                                <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+                                                    <div
+                                                        className={`h-full rounded-full ${
+                                                            master.melebihi
+                                                                ? "bg-red-500"
+                                                                : master.persentase >=
+                                                                    80
+                                                                  ? "bg-amber-500"
+                                                                  : "bg-emerald-500"
+                                                        }`}
+                                                        style={{
+                                                            width: `${persentaseTampil}%`,
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Toolbar */}
                     <div className="flex items-center justify-between gap-3">
                         <TableToolbar
                             filters={filters}
@@ -120,43 +266,34 @@ export default function Index({ kuota, filters, periodes }: Props) {
                                     value: "id",
                                 },
                             ]}
-                        ></TableToolbar>
-                        <PrimaryButton
-                            onClick={generate}
-                            className="h-11 min-w-[180px] justify-center text-sm font-semibold
-        "
-                        >
-                            Generate Kuota
-                        </PrimaryButton>
+                        />
+
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() =>
+                                    router.visit(route("master-kuota.index"))
+                                }
+                                className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                            >
+                                Master Kuota
+                            </button>
+
+                            <PrimaryButton
+                                onClick={generate}
+                                className="h-11 min-w-[160px] justify-center text-sm font-semibold"
+                            >
+                                Generate Kuota
+                            </PrimaryButton>
+                        </div>
                     </div>
-                    <div
-                        className="
-                            overflow-x-auto
-                            rounded-2xl
-                            border
-                            border-slate-200
-                        "
-                    >
+
+                    {/* Tabel */}
+                    <div className="overflow-x-auto rounded-2xl border border-slate-200">
                         <DataTable
-                            columns={columns(
-                                (item) => {
-                                    setSelectedKuota(item);
-
-                                    setOpen(true);
-                                },
-
-                                (item) => {
-                                    deleteConfirm(
-                                        `Kuota lembaga "${item.lembaga.nama}" akan dihapus.`,
-                                    ).then((result) => {
-                                        if (result.isConfirmed) {
-                                            router.delete(
-                                                route("kuota.destroy", item.id),
-                                            );
-                                        }
-                                    });
-                                },
-                            )}
+                            columns={columns((item) => {
+                                setSelectedKuota(item);
+                                setOpen(true);
+                            })}
                             data={kuota.data}
                         />
                     </div>
@@ -167,7 +304,6 @@ export default function Index({ kuota, filters, periodes }: Props) {
                         open={open}
                         onClose={() => {
                             setOpen(false);
-
                             setSelectedKuota(null);
                         }}
                         kuota={selectedKuota}

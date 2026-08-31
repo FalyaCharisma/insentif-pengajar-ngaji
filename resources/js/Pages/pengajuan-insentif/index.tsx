@@ -135,10 +135,6 @@ export default function Index({ pengajuanProposal, filters, periodes }: IndexPro
                                 label: "Terbaru",
                                 value: "id",
                             },
-                            {
-                                label: "Kuota",
-                                value: "jumlah_guru",
-                            },
                         ]}
                         actionButtonLabel="Rekap"
                         onAction={() => setOpenRekapModal(true)}
