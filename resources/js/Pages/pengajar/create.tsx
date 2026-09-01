@@ -65,6 +65,7 @@ const initialValues = {
     pas_foto: null as File | null,
     ktp: null as File | null,
     ijazah: null as File | null,
+    sk_penetapan: null as File | null,
 
     status: "aktif",
 };
@@ -92,6 +93,12 @@ export default function CreatePengajar({ pengajar }: Props) {
     const [previewIjazah, setPreviewIjazah] = useState(
         pengajar?.ijazah
             ? `/storage/pengajar/ijazah/${pengajar.ijazah}`
+            : null,
+    );
+
+    const [previewSkPenetapan, setPreviewSkPenetapan] = useState(
+        pengajar?.sk_penetapan
+            ? `/storage/pengajar/sk-penetapan/${pengajar.sk_penetapan}`
             : null,
     );
 
@@ -146,6 +153,9 @@ export default function CreatePengajar({ pengajar }: Props) {
             no_rekening: pengajar?.no_rekening ?? "",
             no_bpjs: pengajar?.no_bpjs ?? "",
             pas_foto: null,
+            ktp: null,
+            ijazah: null,
+            sk_penetapan: null,
         });
 
     const normalize = (text?: string) => (text ?? "").trim().toLowerCase();
@@ -939,6 +949,54 @@ export default function CreatePengajar({ pengajar }: Props) {
                                                 "
                                             >
                                                 Lihat Dokumen Ijazah
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* SK PENETAPAN PENGAJAR */}
+                                <div>
+                                    <FormFile
+                                        label="SK Penetapan Pengajar"
+                                        hint="Maks. 1 MB (PDF, JPG, PNG)"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0] || null;
+
+                                            if (!file) {
+                                                setData("sk_penetapan", null);
+                                                setPreviewSkPenetapan(null);
+                                                return;
+                                            }
+
+                                            if (file.size > 1 * 1024 * 1024) {
+                                                alert("Ukuran file SK Penetapan maksimal 1 MB.");
+                                                e.target.value = "";
+                                                setData("sk_penetapan", null);
+                                                setPreviewSkPenetapan(null);
+                                                return;
+                                            }
+
+                                            setData("sk_penetapan", file);
+                                            setPreviewSkPenetapan(URL.createObjectURL(file));
+                                        }}
+                                        error={errors.sk_penetapan}
+                                    />
+
+                                    {previewSkPenetapan && (
+                                        <div className="mt-3">
+                                            <a
+                                                href={previewSkPenetapan}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="
+                                                    inline-flex items-center gap-2
+                                                    rounded-lg border border-slate-200
+                                                    bg-slate-50 px-4 py-2.5
+                                                    text-sm font-medium text-indigo-600
+                                                    transition hover:bg-slate-100
+                                                "
+                                            >
+                                                Lihat SK Penetapan Pengajar
                                             </a>
                                         </div>
                                     )}
