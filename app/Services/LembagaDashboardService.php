@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LembagaDashboardService
 {
-    public function index(int $periodeId): array
+    public function index(?int $periodeId): array
     {
         $data = [
             'statistics' => $this->getStatistics($periodeId),
@@ -28,7 +28,7 @@ class LembagaDashboardService
         return $data;
     }
 
-    private function getStatistics(int $periodeId): array
+    private function getStatistics(?int $periodeId): array
     {
         $user = Auth::user()->load([
             'lembaga.profil',
@@ -137,7 +137,7 @@ class LembagaDashboardService
         ];
     }
 
-    private function getCurrentPeriode(int $periodeId): array
+    private function getCurrentPeriode(?int $periodeId): array
     {
         $periode = Periode::find($periodeId);
 
