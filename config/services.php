@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'alamat_api' => [
+        'url' => env(
+            'ALAMAT_API_URL',
+            'http://103.78.106.192/api'
+        ),
+    ],
 ];
