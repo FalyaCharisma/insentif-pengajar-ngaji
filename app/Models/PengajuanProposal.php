@@ -18,7 +18,6 @@ class PengajuanProposal extends Model
         'lembaga_id',
         'periode_id',
         'bukti_dukung',
-        'jumlah_guru',
         'status',
         'catatan',
     ];

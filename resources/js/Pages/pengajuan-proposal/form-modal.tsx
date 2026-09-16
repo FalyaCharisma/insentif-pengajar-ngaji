@@ -159,18 +159,6 @@ export default function FormModal({
                                 disabled
                             />
 
-                            {/* Guru Diajukan */}
-                            <FormInput
-                                label="Jumlah Guru Diajukan"
-                                type="number"
-                                value={data.jumlah_guru}
-                                onChange={(e) =>
-                                    setData("jumlah_guru", e.target.value)
-                                }
-                                placeholder="Masukkan jumlah guru"
-                                error={errors.jumlah_guru}
-                            />
-
                             {/* Bukti Dukung */}
                             <FormFile
                                 label="Bukti Dukung"
@@ -192,9 +180,10 @@ export default function FormModal({
 
                         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
                             <p className="text-sm text-amber-700">
-                                <strong>Catatan:</strong> Jumlah guru yang
-                                diajukan tidak boleh melebihi estimasi kuota
-                                yang telah dihitung oleh sistem.
+                                <strong>Catatan:</strong> Pengajuan disesuaikan
+                                dengan estimasi kuota penerima insentif yang
+                                telah dihitung oleh sistem. Kuota final akan
+                                ditentukan oleh Forum yang menaungi.
                             </p>
                         </div>
 
