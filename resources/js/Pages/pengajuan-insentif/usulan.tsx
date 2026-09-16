@@ -12,6 +12,7 @@ import {
 } from "@/lib/alert";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { Check, RotateCcw } from "lucide-react";
+import DetailPengajarModal from "./detail-pengajar-modal";
 
 type Pengajar = {
     id: number;
@@ -19,7 +20,27 @@ type Pengajar = {
     nik: string;
     tempat_lahir: string;
     tgl_lahir: string;
-    pendidikan_terakhir: string;
+    jk: string | null;
+    jabatan: string | null;
+    pendidikan_terakhir: string | null;
+    jurusan: string | null;
+    sekolah_universitas: string | null;
+    tahun_lulus: number | null;
+    agama: string | null;
+    alamat: string | null;
+    kelurahan: string | null;
+    kecamatan: string | null;
+    kabkota: string | null;
+    provinsi: string | null;
+    no_hp: string | null;
+    bank: string | null;
+    no_rekening: string | null;
+    no_bpjs: string | null;
+    pas_foto: string | null;
+    ktp: string | null;
+    ijazah: string | null;
+    status_insentif: string | null;
+    status: string | null;
 
     selected: boolean;
     status_pengajuan: "pending" | "verified" | "revision" | null;
@@ -38,6 +59,8 @@ type Props = {
 
 export default function Index({ proposal, pengajar }: Props) {
     const { errors } = usePage().props as any;
+    const [selectedPengajarDetail, setSelectedPengajarDetail] =
+        useState<Pengajar | null>(null);
     useEffect(() => {
         if (errors.pengajar) {
             errorAlert(errors.pengajar);
@@ -346,7 +369,17 @@ export default function Index({ proposal, pengajar }: Props) {
                                     pengajar.map((item) => (
                                         <tr key={item.id} className="border-t">
                                             <td className="px-5 py-4">
-                                                {item.nama}
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setSelectedPengajarDetail(
+                                                            item,
+                                                        )
+                                                    }
+                                                    className="font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+                                                >
+                                                    {item.nama}
+                                                </button>
                                             </td>
 
                                             <td className="px-5 py-4 text-center">
@@ -562,6 +595,10 @@ export default function Index({ proposal, pengajar }: Props) {
                     </div>
                 </div>
             </AdminLayout>
+            <DetailPengajarModal
+                pengajar={selectedPengajarDetail}
+                onClose={() => setSelectedPengajarDetail(null)}
+            />
         </>
     );
 }
