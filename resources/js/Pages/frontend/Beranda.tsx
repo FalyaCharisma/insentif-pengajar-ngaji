@@ -513,18 +513,18 @@ function Beranda() {
                     <div className="row align-items-center g-5 py-lg-5">
                         <div className="col-lg-7">
                             <SectionBadge variant="success">
-                                <Bell size={14} className="me-2" /> Portal
-                                Pemerintah Kota Kediri
+                                <Bell size={14} className="me-2" /> Portal Pemerintah Kota Kediri
                             </SectionBadge>
 
                             <h1 className="display-4 fw-black text-dark mt-4 mb-4 portal-title">
-                                Portal Data Insentif Pengajar Sekolah Non Formal
+                                SIMAPAN
                             </h1>
+
                             <p className="lead text-muted mb-4 portal-lead">
-                                Satu pintu informasi untuk pendataan lembaga
-                                pendidikan non formal, validasi pendidik,
-                                pengajuan insentif, berita resmi, dan layanan
-                                Dinas Pendidikan Kota Kediri.
+                                Sistem Informasi Manajemen Pengelolaan Bantuan Pendidikan yang
+                                mendukung proses pendataan, pengajuan, verifikasi, dan pengelolaan
+                                bantuan pendidikan bagi lembaga dan pengajar sekolah nonformal
+                                di Kota Kediri.
                             </p>
 
                             <div className="d-flex flex-column flex-sm-row gap-3 mb-4">

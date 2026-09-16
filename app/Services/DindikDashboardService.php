@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class DindikDashboardService
 {
-    public function index(int $periodeId): array
+    public function index(?int $periodeId = null): array
     {
         $data = [
             'statistics' => $this->getStatistics($periodeId),
@@ -30,7 +30,7 @@ class DindikDashboardService
         return $data;
     }
 
-    private function getStatistics(int $periodeId): array
+    private function getStatistics(?int $periodeId): array
     {
         return [
             // MASTER
@@ -78,7 +78,7 @@ class DindikDashboardService
         ];
     }
 
-    private function getProposalSummary(int $periodeId): array
+    private function getProposalSummary(?int $periodeId): array
     {
         $proposal = PengajuanProposal::where(
             'periode_id',
@@ -191,7 +191,7 @@ class DindikDashboardService
         ];
     }
 
-    private function getPengajarKecamatanChart(int $periodeId): array
+    private function getPengajarKecamatanChart(?int $periodeId): array
     {
         // 1. Ambil semua profil lembaga dan kelompokkan berdasarkan kecamatan
         $profilLembaga = ProfilLembaga::select(

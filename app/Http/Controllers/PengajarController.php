@@ -132,6 +132,7 @@ class PengajarController extends Controller
             'pas_foto' => 'required|image|mimes:jpg,jpeg,png|max:1024',
             'ktp' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
             'ijazah' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
+            'sk_penetapan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
         ]);
 
         $foto = null;
@@ -170,6 +171,18 @@ class PengajarController extends Controller
             $ijazah = $filename;
         }
 
+        $sk_penetapan = null;
+
+        if ($request->hasFile('sk_penetapan')) {
+            $extension = $request->file('sk_penetapan')->getClientOriginalExtension();
+
+            $filename = time() . '_sk_penetapan.' . $extension;
+
+            $request->file('sk_penetapan')->storeAs('pengajar/sk_penetapan', $filename, 'public');
+
+            $sk_penetapan = $filename;
+        }
+
         $user = auth()->user();
 
         if ($user->hasRole('lembaga')) {
@@ -206,6 +219,9 @@ class PengajarController extends Controller
                 'no_rekening' => $request->no_rekening,
                 'no_bpjs' => $request->no_bpjs,
                 'pas_foto' => $foto,
+                'ktp' => $ktp,
+                'ijazah' => $ijazah,
+                'sk_penetapan' => $sk_penetapan
             ]);
         });
 
@@ -270,6 +286,7 @@ class PengajarController extends Controller
             'pas_foto' => 'nullable|image|mimes:jpg,jpeg,png|max:1048',
             'ktp' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
             'ijazah' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
+            'sk_penetapan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
         ]);
 
         DB::transaction(function () use ($request, $pengajar) {
@@ -323,6 +340,22 @@ class PengajarController extends Controller
                 $ijazah = $filename;
             }
 
+            $sk_penetapan = $pengajar->sk_penetapan;
+
+            if ($request->hasFile('sk_penetapan')) {
+                if ($sk_penetapan) {
+                    Storage::disk('sk_penetapan')->delete('pengajar/sk_penetapan' . $sk_penetapan);
+                }
+
+                $extension = $request->file('sk_penetapan')->getClientOriginalExtension();
+
+                $filename = time() . '_sk_penetapan.' . $extension;
+
+                $request->file('sk_penetapan')->storeAs('pengajar/sk_penetapan', $filename, 'public');
+
+                $sk_penetapan = $filename;
+            }
+
             $user = auth()->user();
 
             if ($user->hasRole('lembaga')) {
@@ -371,7 +404,8 @@ class PengajarController extends Controller
 
                 'pas_foto' => $foto,
                 'ktp' => $ktp,
-                'ijazah' => $ijazah
+                'ijazah' => $ijazah,
+                'sk_penetapan' => $sk_penetapan
             ]);
         });
 

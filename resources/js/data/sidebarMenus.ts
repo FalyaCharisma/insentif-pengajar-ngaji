@@ -17,6 +17,7 @@ import {
     ChevronRight,
     Menu,
     X,
+    ClipboardList
 } from "lucide-react";
 import { usePage } from "@inertiajs/react";
 
@@ -138,6 +139,14 @@ export const sidebarMenus = (
         href: "/data-siswa",
         roles: ["superadmin", "lembaga"],
     },
+
+    {
+        title: "Laporan Kegiatan",
+        icon: ClipboardList,
+        href: "/laporan-kegiatan",
+        roles: ["dindik", "lembaga", "superadmin"],
+    },
+
     {
         title: "Pengajuan Proposal",
         icon: FileText,

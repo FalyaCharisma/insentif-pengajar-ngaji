@@ -13,14 +13,14 @@ export default function Footer() {
                                 <Landmark size={24} />
                             </div>
                             <div>
-                                <div className="fs-5 fw-black">SI-INSENTIF</div>
+                                <div className="fs-5 fw-black">SIMAPAN</div>
                                 <small className="text-white-50">Dinas Pendidikan Kota Kediri</small>
                             </div>
                         </div>
                         <p className="text-white-50 mb-0 portal-footer-text">
-                            Portal penghimpunan data penerima insentif pengajar sekolah non formal Kota Kediri.
+                            Sistem Informasi Manajemen Pengelolaan Bantuan Pendidikan
                             <br />
-                            program ini bertujuan untuk memudahkan proses pendataan, validasi, dan penyaluran insentif bagi para pengajar sekolah non formal di Kota Kediri.
+                            Mendukung proses pendataan, pengajuan, verifikasi, dan pengelolaan bantuan pendidikan bagi lembaga dan pengajar sekolah nonformal di Kota Kediri.
                         </p>
                     </div>
 

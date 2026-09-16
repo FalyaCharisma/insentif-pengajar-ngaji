@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\KecamatanController;
 use App\Http\Controllers\Api\PortalController;
 use App\Http\Controllers\Api\BeritaController;
+use App\Http\Controllers\Api\AlamatController;
 
 // Kecamatan Routes
 Route::prefix('kecamatan')->group(function () {
@@ -26,4 +27,13 @@ Route::prefix('berita')->group(function () {
     Route::get('/', [BeritaController::class, 'index']); // GET /api/berita
     Route::get('/{id}', [BeritaController::class, 'show']); // GET /api/berita/{id}
 });
+
+// GET API ALAMAT
+Route::prefix('alamat')->group(function () {
+    Route::get('/provinsi', [AlamatController::class, 'provinsi'])->name('api.alamat.provinsi');
+    Route::get('/kabko', [AlamatController::class, 'kabko'])->name('api.alamat.kabko');
+    Route::get('/kecamatan', [AlamatController::class, 'kecamatan'])->name('api.alamat.kecamatan');
+    Route::get('/kelurahan', [AlamatController::class, 'kelurahan'])->name('api.alamat.kelurahan');
+});
+
 
