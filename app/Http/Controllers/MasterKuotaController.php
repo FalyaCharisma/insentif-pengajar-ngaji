@@ -3,18 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Forum;
-use App\Models\KategoriLembaga as Kategori;
 use App\Models\MasterKuota;
 use App\Models\Periode;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class MasterKuotaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = MasterKuota::with(['periode', 'forum', 'kategori']);
+        $query = MasterKuota::with(['periode', 'forum.kategori', 'kategori']);
 
         /*
         |--------------------------------------------------------------------------
@@ -88,16 +86,15 @@ class MasterKuotaController extends Controller
             ->orderByDesc('tahun')
             ->get(['id', 'tahun']);
 
-        $forums = Forum::query()
+        // Forum sekaligus mengambil kategori
+        $forums = Forum::with('kategori')
+            ->where('status', 'aktif')
             ->orderBy('nama')
-            ->get(['id', 'nama']);
-
-        $kategoris = Kategori::query()
-            ->orderBy('nama')
-            ->get(['id', 'nama']);
+            ->get(['id', 'nama', 'kategori_id']);
 
         return Inertia::render('master-kuota/index', [
             'masterKuota' => $masterKuota,
+
             'filters' => [
                 'search' => $request->input('search'),
                 'periode_id' => $request->input('periode_id'),
@@ -107,9 +104,10 @@ class MasterKuotaController extends Controller
                 'direction' => $direction,
                 'per_page' => $request->input('per_page', 10),
             ],
+
             'periodes' => $periodes,
+
             'forums' => $forums,
-            'kategoris' => $kategoris,
         ]);
     }
 
@@ -120,8 +118,6 @@ class MasterKuotaController extends Controller
 
             'forum_id' => ['required', 'integer', 'exists:forum,id'],
 
-            'kategori_id' => ['required', 'integer', 'exists:kategori_lembaga,id'],
-
             'jumlah_kuota' => ['required', 'integer', 'min:0'],
 
             'keterangan' => ['nullable', 'string', 'max:1000'],
@@ -129,21 +125,66 @@ class MasterKuotaController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Cek kombinasi sudah ada
+        | Ambil Forum
         |--------------------------------------------------------------------------
         */
 
-        $exists = MasterKuota::where('periode_id', $validated['periode_id'])->where('forum_id', $validated['forum_id'])->where('kategori_id', $validated['kategori_id'])->exists();
+        $forum = Forum::findOrFail($validated['forum_id']);
 
-        if ($exists) {
+        /*
+        |--------------------------------------------------------------------------
+        | Forum wajib memiliki kategori
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$forum->kategori_id) {
             return back()
                 ->withErrors([
-                    'periode_id' => 'Master kuota untuk periode, forum, dan kategori tersebut sudah tersedia.',
+                    'forum_id' => 'Forum yang dipilih belum memiliki kategori.',
                 ])
                 ->withInput();
         }
 
-        MasterKuota::create($validated);
+        /*
+        |--------------------------------------------------------------------------
+        | Kategori otomatis mengikuti Forum
+        |--------------------------------------------------------------------------
+        */
+
+        $kategoriId = $forum->kategori_id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Cek kombinasi
+        |--------------------------------------------------------------------------
+        */
+
+        $exists = MasterKuota::where('periode_id', $validated['periode_id'])->where('forum_id', $validated['forum_id'])->where('kategori_id', $kategoriId)->exists();
+
+        if ($exists) {
+            return back()
+                ->withErrors([
+                    'forum_id' => 'Master kuota untuk periode dan forum tersebut sudah tersedia.',
+                ])
+                ->withInput();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Simpan
+        |--------------------------------------------------------------------------
+        */
+
+        MasterKuota::create([
+            'periode_id' => $validated['periode_id'],
+            'forum_id' => $forum->id,
+
+            // OTOMATIS DARI FORUM
+            'kategori_id' => $kategoriId,
+
+            'jumlah_kuota' => $validated['jumlah_kuota'],
+            'keterangan' => $validated['keterangan'] ?? null,
+        ]);
 
         return redirect()->route('master-kuota.index')->with('success', 'Master kuota berhasil ditambahkan.');
     }
@@ -157,23 +198,77 @@ class MasterKuotaController extends Controller
 
             'forum_id' => ['required', 'integer', 'exists:forum,id'],
 
-            'kategori_id' => ['required', 'integer', 'exists:kategori_lembaga,id'],
-
             'jumlah_kuota' => ['required', 'integer', 'min:0'],
 
             'keterangan' => ['nullable', 'string', 'max:1000'],
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil Forum
+        |--------------------------------------------------------------------------
+        */
+
+        $forum = Forum::findOrFail($validated['forum_id']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Forum wajib memiliki kategori
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$forum->kategori_id) {
+            return back()
+                ->withErrors([
+                    'forum_id' => 'Forum yang dipilih belum memiliki kategori.',
+                ])
+                ->withInput();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kategori otomatis mengikuti Forum
+        |--------------------------------------------------------------------------
+        */
+
+        $kategoriId = $forum->kategori_id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Cek duplikasi
+        |--------------------------------------------------------------------------
+        */
+
+        $exists = MasterKuota::where('periode_id', $validated['periode_id'])->where('forum_id', $validated['forum_id'])->where('kategori_id', $kategoriId)->where('id', '!=', $masterKuota->id)->exists();
+
+        if ($exists) {
+            return back()
+                ->withErrors([
+                    'forum_id' => 'Master kuota untuk periode dan forum tersebut sudah tersedia.',
+                ])
+                ->withInput();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update
+        |--------------------------------------------------------------------------
+        */
+
         $masterKuota->update([
             'periode_id' => $validated['periode_id'],
-            'forum_id' => $validated['forum_id'],
-            'kategori_id' => $validated['kategori_id'],
+            'forum_id' => $forum->id,
+
+            // OTOMATIS DARI FORUM
+            'kategori_id' => $kategoriId,
+
             'jumlah_kuota' => $validated['jumlah_kuota'],
             'keterangan' => $validated['keterangan'] ?? null,
         ]);
 
         return redirect()->route('master-kuota.index')->with('success', 'Master kuota berhasil diperbarui.');
     }
+
     public function destroy($id)
     {
         $masterKuota = MasterKuota::findOrFail($id);

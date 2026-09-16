@@ -1,6 +1,8 @@
 export type Forum = {
     id: number;
     nama: string;
+    kategori_id: number | null;
+    kategori?: Kategori | null;
 };
 
 export type Kategori = {
@@ -12,9 +14,10 @@ export type Lembaga = {
     id: number;
     kode: string;
     nama: string;
+
     forum_id: number | null;
+    kategori_id: number | null;
 
-    kategori: Kategori;
-
+    kategori?: Kategori | null;
     forum?: Forum | null;
 };

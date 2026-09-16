@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Lembaga;
+use App\Models\Forum;
 use App\Models\KategoriLembaga;
 use App\Models\ProfilLembaga;
 use App\Models\JenisDokumen;
@@ -33,11 +34,7 @@ class LembagaController extends Controller
     {
         $user = auth()->user();
 
-        $query = Lembaga::with([
-            'kategori',
-            'user',
-            'profil',
-        ]);
+        $query = Lembaga::with(['kategori', 'forum.kategori', 'user', 'profil']);
 
         // Forum hanya melihat lembaga yang dikelolanya
         if ($user->hasRole('forum')) {
@@ -62,49 +59,29 @@ class LembagaController extends Controller
             });
         }
 
-        $lembaga = $this->datatable(
-            query: $query,
-            request: $request,
-            searchable: [
-                'nama',
-                'kode',
-            ],
-            sortable: [
-                'id',
-                'nama',
-            ],
-            filters: [
-                'kategori_id',
-                'status',
-            ]
-        );
+        $lembaga = $this->datatable(query: $query, request: $request, searchable: ['nama', 'kode'], sortable: ['id', 'nama'], filters: ['kategori_id', 'forum_id', 'status']);
 
         return Inertia::render('lembaga/index', [
             'lembaga' => $lembaga,
 
-            'filters' => $this->filters(
-                $request,
-                [
-                    'kategori_id',
-                    'status',
-                    'status_verifikasi',
-                    'kecamatan',
-                    'kelurahan',
-                ]
-            ),
+            'filters' => $this->filters($request, ['kategori_id', 'forum_id', 'status', 'status_verifikasi', 'kecamatan', 'kelurahan']),
 
             'kategori' => KategoriLembaga::orderBy('nama')->get(),
+            'forum' => Forum::with('kategori')->where('status', 'aktif')->orderBy('nama')->get(),
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'kategori_id' => 'required',
-            'nama' => 'required|string|max:255',
+            'forum_id' => ['required', 'exists:forum,id'],
+
+            'nama' => ['required', 'string', 'max:255'],
         ]);
 
         DB::transaction(function () use ($validated) {
+            // Ambil forum
+            $forum = Forum::findOrFail($validated['forum_id']);
 
             // Generate kode lembaga
             $kode = Lembaga::generateKode();
@@ -124,51 +101,57 @@ class LembagaController extends Controller
             // Simpan lembaga
             $lembaga = Lembaga::create([
                 'user_id' => $user->id,
-                'kategori_id' => $validated['kategori_id'],
+
+                // Otomatis mengikuti kategori forum
+                'kategori_id' => $forum->kategori_id,
+
+                'forum_id' => $forum->id,
                 'kode' => $kode,
                 'nama' => $validated['nama'],
             ]);
 
+            // Buat profil awal
             ProfilLembaga::create([
                 'lembaga_id' => $lembaga->id,
                 'status_verifikasi' => 'pending',
             ]);
-
         });
 
-        return back()->with(
-            'success',
-            'Data lembaga berhasil ditambahkan'
-        );
+        return back()->with('success', 'Data lembaga berhasil ditambahkan');
     }
 
     public function update(Request $request, Lembaga $lembaga)
     {
         $validated = $request->validate([
-            'kategori_id' => 'required|exists:kategori_lembaga,id',
-            'nama' => 'required|string|max:255',
-            'status' => 'required|in:aktif,nonaktif',
+            'forum_id' => ['required', 'exists:forum,id'],
+
+            'nama' => ['required', 'string', 'max:255'],
+
+            'status' => ['required', 'in:aktif,nonaktif'],
         ]);
 
         DB::transaction(function () use ($validated, $lembaga) {
+            // Ambil forum
+            $forum = Forum::findOrFail($validated['forum_id']);
 
             // Update data lembaga
             $lembaga->update([
-                'kategori_id' => $validated['kategori_id'],
+                'forum_id' => $forum->id,
+
+                // Kategori otomatis mengikuti forum
+                'kategori_id' => $forum->kategori_id,
+
                 'nama' => $validated['nama'],
             ]);
 
-            // Update nama user
+            // Update user
             $lembaga->user()->update([
                 'name' => $validated['nama'],
                 'status' => $validated['status'],
             ]);
         });
 
-        return back()->with(
-            'success',
-            'Data lembaga berhasil diperbarui'
-        );
+        return back()->with('success', 'Data lembaga berhasil diperbarui');
     }
 
     public function destroy(Lembaga $lembaga)
@@ -181,10 +164,7 @@ class LembagaController extends Controller
 
         $lembaga->delete();
 
-        return back()->with(
-            'success',
-            'Data lembaga berhasil dihapus dan akun dinonaktifkan.'
-        );
+        return back()->with('success', 'Data lembaga berhasil dihapus dan akun dinonaktifkan.');
     }
 
     public function resetPassword(Lembaga $lembaga)
@@ -196,9 +176,6 @@ class LembagaController extends Controller
             'force_change_password' => true,
         ]);
 
-        return back()->with(
-            'success',
-            'Password berhasil direset.'
-        );
+        return back()->with('success', 'Password berhasil direset.');
     }
 }

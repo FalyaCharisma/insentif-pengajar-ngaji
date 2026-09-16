@@ -45,6 +45,4 @@ export type MasterKuotaProps = {
     periodes: Periode[];
 
     forums: Forum[];
-
-    kategoris: Kategori[];
 };

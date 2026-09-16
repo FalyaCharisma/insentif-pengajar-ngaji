@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Forum;
 use App\Models\KategoriLembaga;
+use App\Models\Lembaga;
+use App\Models\MasterKuota;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -14,33 +16,23 @@ use App\Models\User;
 
 class ForumController extends Controller
 {
-
     public function index(Request $request)
     {
-        $query = Forum::with('user');
+        $query = Forum::with(['user', 'kategori']);
 
         // SEARCH
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('kode', 'like', '%' . $request->search . '%')
-                ->orWhere('nama', 'like', '%' . $request->search . '%')
-                ->orWhere('telepon', 'like', '%' . $request->search . '%');
+                    ->orWhere('nama', 'like', '%' . $request->search . '%')
+                    ->orWhere('telepon', 'like', '%' . $request->search . '%');
             });
         }
 
         // SORTING
-        $allowedSorts = [
-            'id',
-            'kode',
-            'nama',
-            'telepon',
-            'status',
-            'created_at'
-        ];
+        $allowedSorts = ['id', 'kode', 'nama', 'telepon', 'status', 'created_at'];
 
-        $sort = in_array($request->sort, $allowedSorts)
-            ? $request->sort
-            : 'id';
+        $sort = in_array($request->sort, $allowedSorts) ? $request->sort : 'id';
 
         $order = $request->order === 'asc' ? 'asc' : 'desc';
 
@@ -56,8 +48,13 @@ class ForumController extends Controller
         // PAGINATION
         $forum = $query->paginate($perPage)->withQueryString();
 
+        // KATEGORI
+        $kategori = KategoriLembaga::orderBy('nama')->get(['id', 'nama']);
+
         return Inertia::render('forum/index', [
             'forum' => $forum,
+
+            'kategori' => $kategori,
 
             'filters' => [
                 'search' => $request->search ?? '',
@@ -70,22 +67,19 @@ class ForumController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nama' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('forum', 'nama')->whereNull('deleted_at'),
+        $validated = $request->validate(
+            [
+                'kategori_id' => ['required', 'exists:kategori_lembaga,id'],
+                'nama' => ['required', 'string', 'max:255', Rule::unique('forum', 'nama')->whereNull('deleted_at')],
+                'telepon' => ['nullable', 'regex:/^[0-9]{10,12}$/'],
+                'status' => 'required|in:aktif,nonaktif',
             ],
-            'telepon' => ['nullable', 'regex:/^[0-9]{10,12}$/'],
-            'status' => 'required|in:aktif,nonaktif',
-        ],
-        [
-            'nama.unique' => 'Nama forum sudah digunakan.',
-        ]);
+            [
+                'nama.unique' => 'Nama forum sudah digunakan.',
+            ],
+        );
 
         DB::transaction(function () use ($validated) {
-
             // Generate kode forum
             $kode = Forum::generateKode();
 
@@ -104,6 +98,7 @@ class ForumController extends Controller
             // Simpan forum
             Forum::create([
                 'user_id' => $user->id,
+                'kategori_id' => $validated['kategori_id'],
                 'kode' => $kode,
                 'nama' => $validated['nama'],
                 'telepon' => $validated['telepon'],
@@ -111,32 +106,29 @@ class ForumController extends Controller
             ]);
         });
 
-        return back()->with(
-            'success',
-            'Data forum berhasil ditambahkan'
-        );
+        return back()->with('success', 'Data forum berhasil ditambahkan');
     }
 
     public function update(Request $request, Forum $forum)
     {
-        $validated = $request->validate([
-            'nama' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('forum', 'nama')
-                    ->whereNull('deleted_at')
-                    ->ignore($forum->id),
+        $validated = $request->validate(
+            [
+                'kategori_id' => ['required', 'exists:kategori_lembaga,id'],
+
+                'nama' => ['required', 'string', 'max:255', Rule::unique('forum', 'nama')->whereNull('deleted_at')->ignore($forum->id)],
+
+                'telepon' => ['nullable', 'regex:/^[0-9]{10,12}$/'],
+
+                'status' => 'required|in:aktif,nonaktif',
             ],
-            'telepon' => ['nullable', 'regex:/^[0-9]{10,12}$/'],
-            'status' => 'required|in:aktif,nonaktif',
-        ],
-        [
-            'nama.unique' => 'Nama forum sudah digunakan.',
-        ]);
+            [
+                'nama.unique' => 'Nama forum sudah digunakan.',
+                'kategori_id.required' => 'Kategori forum wajib dipilih.',
+                'kategori_id.exists' => 'Kategori forum tidak valid.',
+            ],
+        );
 
         DB::transaction(function () use ($forum, $validated) {
-
             // Update user
             $forum->user->update([
                 'name' => $validated['nama'],
@@ -145,16 +137,21 @@ class ForumController extends Controller
 
             // Update forum
             $forum->update([
+                'kategori_id' => $validated['kategori_id'],
                 'nama' => $validated['nama'],
                 'telepon' => $validated['telepon'],
                 'status' => $validated['status'],
             ]);
+
+            Lembaga::where('forum_id', $forum->id)->update([
+                'kategori_id' => $forum->kategori_id,
+            ]);
+            MasterKuota::where('forum_id', $forum->id)->update([
+                'kategori_id' => $forum->kategori_id,
+            ]);
         });
 
-        return back()->with(
-            'success',
-            'Data forum berhasil diperbarui'
-        );
+        return back()->with('success', 'Data forum berhasil diperbarui');
     }
 
     public function destroy(Forum $forum)
@@ -173,9 +170,6 @@ class ForumController extends Controller
             'force_change_password' => true,
         ]);
 
-        return back()->with(
-            'success',
-            'Password berhasil direset.'
-        );
+        return back()->with('success', 'Password berhasil direset.');
     }
 }
