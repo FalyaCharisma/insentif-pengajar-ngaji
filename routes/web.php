@@ -94,7 +94,7 @@ Route::middleware('auth')->group(function () {
         });
 
     // Jenis Dokumen
-    Route::resource('jenis-dokumen', JenisDokumenController::class);
+    Route::resource('jenis-dokumen', JenisDokumenController::class)->parameters(['jenis-dokumen' => 'jenis_dokumen']);
 
     // Dokumen Lembaga
     Route::controller(DokumenLembagaController::class)
