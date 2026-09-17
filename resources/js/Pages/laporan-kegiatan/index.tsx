@@ -24,6 +24,7 @@ import { deleteConfirm, successAlert } from "@/lib/alert";
 
 type Props = {
     laporanKegiatan: any;
+    lembagaRekap: any;
     periode: Periode[];
     selectedPeriode: number;
     rekap: {
@@ -39,6 +40,7 @@ type Props = {
 
 export default function Index({
     laporanKegiatan,
+    lembagaRekap,
     periode,
     selectedPeriode,
     rekap,
@@ -70,6 +72,30 @@ export default function Index({
     const [openVerifikasiModal, setOpenVerifikasiModal] = useState(false);
 
     const [selectedLaporan, setSelectedLaporan] = useState<any>(null);
+    const [selectedLembaga, setSelectedLembaga] = useState<any>(null);
+
+    const jadwalUntukLembaga = Array.isArray(jadwal)
+        ? jadwal.filter(
+            (item: any) =>
+                Number(item.lembaga_id) ===
+                    Number(selectedLembaga?.id) &&
+                Number(item.periode_id) ===
+                    Number(selectedPeriode),
+        )
+        : [];
+
+    const hasJadwal = isLembaga
+        ? Array.isArray(jadwal)
+            ? jadwal.length > 0
+            : Boolean(jadwal)
+        : jadwalUntukLembaga.length > 0;
+
+    const handleLihatKegiatan = (row: any) => {
+        router.get(route("laporan-kegiatan.lembaga"), {
+            periode_id: selectedPeriode,
+            lembaga_id: row.id,
+        });
+    };
 
     const selectedPeriodeData = periode.find(
         (item) => item.id === Number(selectedPeriode),
@@ -201,7 +227,7 @@ export default function Index({
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        if (jadwal) {
+                                        if (hasJadwal) {
                                             setOpenPreviewJadwal(true);
                                         } else {
                                             setOpenJadwalModal(true);
@@ -224,13 +250,13 @@ export default function Index({
                                 >
                                     <CalendarDays size={17} />
 
-                                    {jadwal ? "Lihat Jadwal" : "Upload Jadwal"}
+                                    {hasJadwal ? "Lihat Jadwal" : "Upload Jadwal"}
                                 </button>
                             </div>
 
                             {/* STATUS JADWAL */}
                             <div className="mt-4">
-                                {jadwal ? (
+                                {hasJadwal ? (
                                     <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
                                         <p className="text-sm font-medium text-emerald-700">
                                             Jadwal kegiatan sudah diupload
@@ -287,8 +313,13 @@ export default function Index({
                         columns={columns(
                             role,
 
-                            // Detail
+                            // Detail / Lihat Kegiatan
                             (row) => {
+                                if (isDindik) {
+                                    handleLihatKegiatan(row);
+                                    return;
+                                }
+
                                 setSelectedLaporan(row);
                                 setOpenDetailModal(true);
                             },
@@ -316,18 +347,27 @@ export default function Index({
                             },
 
                             // Verifikasi
-                            // Verifikasi
                             (row) => {
                                 setSelectedLaporan(row);
                                 setOpenVerifikasiModal(true);
                             },
+
+                            // Jadwal Dindik
+                            (row) => {
+                                setSelectedLembaga(row);
+                                setOpenPreviewJadwal(true);
+                            },
                         )}
-                        data={laporanKegiatan.data}
+                        data={isDindik ? lembagaRekap.data : laporanKegiatan.data}
                     />
 
                     {/* PAGINATION */}
                     <Pagination
-                        links={laporanKegiatan.links}
+                        links={
+                            isDindik
+                                ? lembagaRekap.links
+                                : laporanKegiatan.links
+                        }
                     />
 
                 </div>
@@ -343,23 +383,27 @@ export default function Index({
                     }}
                 />
 
-                <JadwalPreviewModal
-                    open={openPreviewJadwal}
-                    jadwal={jadwal}
-                    periodeTahun={periodeTahun}
-                    onClose={() => setOpenPreviewJadwal(false)}
-                    onEdit={() => {
-                        setOpenPreviewJadwal(false);
-                        setOpenJadwalModal(true);
-                    }}
-                />
-
                 <JadwalModal
                     open={openJadwalModal}
                     periodeId={Number(selectedPeriode)}
                     periodeTahun={periodeTahun}
                     jadwal={jadwal}
                     onClose={() => setOpenJadwalModal(false)}
+                />
+
+                <JadwalPreviewModal
+                    open={openPreviewJadwal}
+                    jadwal={isDindik ? jadwalUntukLembaga : jadwal}
+                    periodeTahun={periodeTahun}
+                    canEdit={isLembaga}
+                    onClose={() => {
+                        setOpenPreviewJadwal(false);
+                        setSelectedLembaga(null);
+                    }}
+                    onEdit={() => {
+                        setOpenPreviewJadwal(false);
+                        setOpenJadwalModal(true);
+                    }}
                 />
 
                 <LaporanDetailModal

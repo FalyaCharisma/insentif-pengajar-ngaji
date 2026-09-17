@@ -8,6 +8,7 @@ use App\Models\Periode;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Lembaga;
 
 class LaporanKegiatanController extends Controller
 {
@@ -80,24 +81,83 @@ class LaporanKegiatanController extends Controller
                 ->count(),
         ];
 
-        // Jadwal
-        $jadwal = null;
+        $lembagaRekap = collect();
 
-        if (
-            $user->hasRole('lembaga')
-            && $user->lembaga
-            && $periodeId
-        ) {
-            $jadwal = JadwalKegiatan::where(
-                'lembaga_id',
-                $user->lembaga->id
-            )
-                ->where('periode_id', $periodeId)
-                ->first();
+        if ($user->hasRole('dindik')) {
+            $lembagaRekap = Lembaga::with('profil')
+                ->withCount([
+                    'laporanKegiatan as jumlah_kegiatan' => function ($query) use ($periodeId) {
+                        if ($periodeId) {
+                            $query->where('periode_id', $periodeId);
+                        }
+                    },
+
+                    'laporanKegiatan as jumlah_disetujui' => function ($query) use ($periodeId) {
+                        if ($periodeId) {
+                            $query->where('periode_id', $periodeId);
+                        }
+
+                        $query->where('status', 'verified');
+                    },
+
+                    'laporanKegiatan as jumlah_pending' => function ($query) use ($periodeId) {
+                        if ($periodeId) {
+                            $query->where('periode_id', $periodeId);
+                        }
+
+                        $query->where('status', 'pending');
+                    },
+
+                    'laporanKegiatan as jumlah_revisi' => function ($query) use ($periodeId) {
+                        if ($periodeId) {
+                            $query->where('periode_id', $periodeId);
+                        }
+
+                        $query->where('status', 'revision');
+                    },
+
+                    'laporanKegiatan as jumlah_ditolak' => function ($query) use ($periodeId) {
+                        if ($periodeId) {
+                            $query->where('periode_id', $periodeId);
+                        }
+
+                        $query->where('status', 'rejected');
+                    },
+                ])
+                ->whereHas('laporanKegiatan', function ($query) use ($periodeId) {
+                    if ($periodeId) {
+                        $query->where('periode_id', $periodeId);
+                    }
+                })
+                ->orderBy('nama')
+                ->paginate(10)
+                ->withQueryString();
+        }
+
+        // Jadwal
+        $jadwal = collect();
+
+        if ($periodeId) {
+            $jadwalQuery = JadwalKegiatan::query()
+                ->where('periode_id', $periodeId);
+
+            // Lembaga hanya melihat jadwal miliknya
+            if ($user->hasRole('lembaga') && $user->lembaga) {
+                $jadwalQuery->where(
+                    'lembaga_id',
+                    $user->lembaga->id
+                );
+            }
+
+            // Dindik melihat jadwal seluruh lembaga
+            $jadwal = $jadwalQuery
+                ->orderByDesc('id')
+                ->get();
         }
 
         return Inertia::render('laporan-kegiatan/index', [
             'laporanKegiatan' => $laporanKegiatan,
+            'lembagaRekap' => $lembagaRekap,
             'periode' => $periode,
             'selectedPeriode' => $periodeId,
             'rekap' => $rekap,
@@ -115,13 +175,6 @@ class LaporanKegiatanController extends Controller
         // Hanya lembaga yang boleh upload
         if (!$user->hasRole('lembaga')) {
             abort(403, 'Anda tidak memiliki akses untuk mengupload jadwal.');
-        }
-
-        if (in_array($laporanKegiatan->status, ['verified', 'rejected'])) {
-            return back()->with(
-                'error',
-                'Laporan dengan status tersebut tidak dapat diubah.'
-            );
         }
 
         $request->validate([
@@ -242,6 +295,8 @@ class LaporanKegiatanController extends Controller
 
     public function show(LaporanKegiatan $laporanKegiatan)
     {
+        dd($laporanKegiatan);
+        
         $user = auth()->user();
 
         $laporanKegiatan->load([
@@ -463,5 +518,79 @@ class LaporanKegiatanController extends Controller
             'success',
             $message
         );
+    }
+
+    public function lihatJadwal(JadwalKegiatan $jadwal)
+    {
+        dd($jadwal);
+        $user = auth()->user();
+
+        if ($user->hasRole('dindik')) {
+            // Diizinkan
+        }
+
+        // Lembaga hanya dapat melihat jadwal miliknya sendiri
+        elseif ($user->hasRole('lembaga')) {
+            if (!$user->lembaga) {
+                abort(403, 'Akun belum terhubung dengan lembaga.');
+            }
+
+            if ((int) $jadwal->lembaga_id !== (int) $user->lembaga->id) {
+                abort(403, 'Anda tidak memiliki akses ke jadwal ini.');
+            }
+        }
+
+        // Role lain tidak diizinkan
+        else {
+            abort(403, 'Anda tidak memiliki akses.');
+        }
+
+        // Cek File
+        if (!$jadwal->file_jadwal) {
+            abort(404, 'File jadwal belum tersedia.');
+        }
+
+        $disk = Storage::disk('public');
+
+        if (!$disk->exists($jadwal->file_jadwal)) {
+            abort(404, 'File jadwal tidak ditemukan.');
+        }
+
+        return response()->file(
+            $disk->path($jadwal->file_jadwal)
+        );
+    }
+
+    public function lihatKegiatanLembaga(Request $request)
+    {
+        $user = auth()->user();
+
+        abort_unless($user->hasRole('dindik'), 403);
+
+        $request->validate([
+            'lembaga_id' => ['required', 'integer'],
+            'periode_id' => ['required', 'integer'],
+        ]);
+
+        $lembaga = Lembaga::with('profil')
+            ->findOrFail($request->lembaga_id);
+
+        $periode = Periode::findOrFail($request->periode_id);
+
+        $laporanKegiatan = LaporanKegiatan::with([
+            'lembaga.profil',
+            'periode',
+        ])
+            ->where('lembaga_id', $lembaga->id)
+            ->where('periode_id', $periode->id)
+            ->latest('id')
+            ->paginate(10)
+            ->withQueryString();
+
+        return Inertia::render('laporan-kegiatan/detail-laporan', [
+            'lembaga' => $lembaga,
+            'periode' => $periode,
+            'laporanKegiatan' => $laporanKegiatan,
+        ]);
     }
 }
