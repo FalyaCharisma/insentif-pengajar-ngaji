@@ -38,11 +38,6 @@ export const columns = (
     },
 
     {
-        accessorKey: "jumlah_guru",
-        header: "Guru Diajukan",
-    },
-
-    {
         accessorKey: "bukti_dukung",
         header: "Bukti Dukung",
 

@@ -3,24 +3,20 @@ import { useEffect, useState } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 
 import AdminLayout from "@/layouts/app-layout";
-
 import PageHeader from "@/Components/PageHeader";
 import PrimaryButton from "@/Components/PrimaryButton";
-import TableToolbar from "@/Components/TableToolbar";
-
 import { successAlert } from "@/lib/alert";
-import { useQueryParams } from "@/hooks/use-query-params";
+
+import type { Forum, Kategori, Lembaga } from "@/types/mapping-forum";
 
 type Props = {
-    forums: any[];
-    kategori: any[];
-    lembagas: any[];
+    forums: Forum[];
+    kategori: Kategori[];
+    lembagas: Lembaga[];
     filters: any;
 };
 
 export default function Index({ forums, kategori, lembagas, filters }: Props) {
-    const { setParams } = useQueryParams(route("mapping-forum.index"), filters);
-
     const pageProps: any = usePage().props;
     const flash = pageProps.flash || {};
 
@@ -32,8 +28,8 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
         Number(filters.target_forum) || forums[0]?.id,
     );
 
-    const [leftItems, setLeftItems] = useState<any[]>([]);
-    const [rightItems, setRightItems] = useState<any[]>([]);
+    const [leftItems, setLeftItems] = useState<Lembaga[]>([]);
+    const [rightItems, setRightItems] = useState<Lembaga[]>([]);
 
     const [leftSelected, setLeftSelected] = useState<number[]>([]);
     const [rightSelected, setRightSelected] = useState<number[]>([]);
@@ -44,26 +40,59 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
     const [leftKategori, setLeftKategori] = useState("");
     const [rightKategori, setRightKategori] = useState("");
 
+    const [changedItems, setChangedItems] = useState<
+        {
+            id: number;
+            forum_id: number | null;
+        }[]
+    >([]);
+
+    /**
+     * Cari Forum berdasarkan ID
+     */
+    const getForum = (forumId: number | null) => {
+        if (!forumId) return null;
+
+        return forums.find((forum) => Number(forum.id) === Number(forumId));
+    };
+
+    /**
+     * Pindahkan lembaga dari Forum Asal
+     * ke Forum Tujuan
+     */
     const moveToRight = () => {
         if (leftSelected.length === 0) return;
+        if (!targetForum) return;
+
+        const target = getForum(targetForum);
+
+        if (!target) return;
 
         const moved = leftItems
-            .filter((item: any) => leftSelected.includes(item.id))
-            .map((item: any) => ({
+            .filter((item) => leftSelected.includes(item.id))
+            .map((item) => ({
                 ...item,
-                forum_id: targetForum,
+
+                // Forum berubah
+                forum_id: target.id,
+
+                // Kategori mengikuti kategori Forum tujuan
+                kategori_id: target.kategori_id,
+
+                forum: target,
+                kategori: target.kategori ?? null,
             }));
 
         setLeftItems(
-            leftItems.filter((item: any) => !leftSelected.includes(item.id)),
+            leftItems.filter((item) => !leftSelected.includes(item.id)),
         );
 
         setRightItems([...rightItems, ...moved]);
 
         setChangedItems((prev) => {
-            const changes = moved.map((item: any) => ({
+            const changes = moved.map((item) => ({
                 id: item.id,
-                forum_id: targetForum,
+                forum_id: target.id,
             }));
 
             const merged = [...prev];
@@ -83,25 +112,43 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
 
         setLeftSelected([]);
     };
+
+    /**
+     * Pindahkan lembaga dari Forum Tujuan
+     * kembali ke Forum Asal
+     */
     const moveToLeft = () => {
         if (rightSelected.length === 0) return;
 
+        const sourceId = sourceForum === "null" ? null : Number(sourceForum);
+
+        const source = sourceId ? getForum(sourceId) : null;
+
         const moved = rightItems
-            .filter((item: any) => rightSelected.includes(item.id))
-            .map((item: any) => ({
+            .filter((item) => rightSelected.includes(item.id))
+            .map((item) => ({
                 ...item,
-                forum_id: sourceForum === "null" ? null : Number(sourceForum),
+
+                forum_id: sourceId,
+
+                // Kalau kembali ke Forum, kategori mengikuti Forum.
+                // Kalau kembali ke Belum Mapping, kategori dikosongkan.
+                kategori_id: source?.kategori_id ?? null,
+
+                forum: source,
+                kategori: source?.kategori ?? null,
             }));
 
         setRightItems(
-            rightItems.filter((item: any) => !rightSelected.includes(item.id)),
+            rightItems.filter((item) => !rightSelected.includes(item.id)),
         );
 
         setLeftItems([...leftItems, ...moved]);
+
         setChangedItems((prev) => {
-            const changes = moved.map((item: any) => ({
+            const changes = moved.map((item) => ({
                 id: item.id,
-                forum_id: sourceForum === "null" ? null : Number(sourceForum),
+                forum_id: sourceId,
             }));
 
             const merged = [...prev];
@@ -122,60 +169,63 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
         setRightSelected([]);
     };
 
-    const [changedItems, setChangedItems] = useState<any[]>([]);
-
+    /**
+     * Simpan seluruh perubahan
+     */
     const saveMapping = () => {
-        router.post(route("mapping-forum.store"), {
-            mappings: changedItems,
-        });
+        if (changedItems.length === 0) return;
+
+        router.post(
+            route("mapping-forum.store"),
+            {
+                mappings: changedItems,
+            },
+            {
+                onSuccess: () => {
+                    setChangedItems([]);
+                },
+            },
+        );
     };
 
+    /**
+     * Flash message
+     */
     useEffect(() => {
         if (flash.success) {
             successAlert(flash.success);
         }
     }, [flash]);
 
+    /**
+     * Isi Forum Asal dan Forum Tujuan
+     *
+     * CUKUP SATU useEffect.
+     */
     useEffect(() => {
-        let left = [];
+        let left: Lembaga[] = [];
 
         if (sourceForum === "null") {
-            left = lembagas.filter((item: any) => item.forum_id === null);
+            left = lembagas.filter((item) => item.forum_id === null);
         } else {
             left = lembagas.filter(
-                (item: any) => item.forum_id === Number(sourceForum),
+                (item) => item.forum_id === Number(sourceForum),
             );
         }
 
-        const right = lembagas.filter(
-            (item: any) => item.forum_id === targetForum,
-        );
+        const right = lembagas.filter((item) => item.forum_id === targetForum);
 
         setLeftItems(left);
         setRightItems(right);
+
+        setLeftSelected([]);
+        setRightSelected([]);
     }, [sourceForum, targetForum, lembagas]);
-    useEffect(() => {
-        if (!targetForum) return;
 
-        let left = [];
-
-        if (sourceForum === "null") {
-            left = lembagas.filter((item: any) => item.forum_id === null);
-        } else {
-            left = lembagas.filter(
-                (item: any) => item.forum_id === Number(sourceForum),
-            );
-        }
-
-        const right = lembagas.filter(
-            (item: any) => item.forum_id === targetForum,
-        );
-
-        setLeftItems(left);
-
-        setRightItems(right);
-    }, [sourceForum, targetForum, lembagas]);
-    const filteredLeft = leftItems.filter((item: any) => {
+    /**
+     * Filter kiri
+     */
+    const filteredLeft = leftItems.filter((item) => {
         const keyword =
             item.nama.toLowerCase().includes(searchLeft.toLowerCase()) ||
             item.kode.toLowerCase().includes(searchLeft.toLowerCase());
@@ -187,7 +237,10 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
         return keyword && kategoriMatch;
     });
 
-    const filteredRight = rightItems.filter((item: any) => {
+    /**
+     * Filter kanan
+     */
+    const filteredRight = rightItems.filter((item) => {
         const keyword =
             item.nama.toLowerCase().includes(searchRight.toLowerCase()) ||
             item.kode.toLowerCase().includes(searchRight.toLowerCase());
@@ -198,10 +251,6 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
 
         return keyword && kategoriMatch;
     });
-
-    useEffect(() => {
-        console.log(changedItems);
-    }, [changedItems]);
 
     return (
         <>
@@ -214,6 +263,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                         subtitle="Pemetaan forum ke lembaga"
                     />
 
+                    {/* INFORMASI */}
                     <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5">
@@ -242,13 +292,21 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                         Pilih <b>Forum Asal</b> dan{" "}
                                         <b>Forum Tujuan</b>.
                                     </li>
+
                                     <li>
                                         Centang lembaga yang akan dipindahkan.
                                     </li>
+
                                     <li>
                                         Gunakan tombol <b>Tambahkan</b> atau{" "}
                                         <b>Pindahkan</b> sesuai kebutuhan.
                                     </li>
+
+                                    <li>
+                                        Kategori lembaga otomatis mengikuti
+                                        kategori Forum tujuan.
+                                    </li>
+
                                     <li>
                                         Klik <b>Simpan Mapping</b> untuk
                                         menyimpan seluruh perubahan.
@@ -258,7 +316,9 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                         </div>
                     </div>
 
+                    {/* CONTENT */}
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        {/* ================= FORUM ASAL ================= */}
                         <div className="rounded-2xl border border-slate-200 bg-white">
                             <div className="border-b p-4">
                                 <div className="mb-3 flex items-center justify-between">
@@ -283,12 +343,15 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                             Belum Mapping
                                         </option>
 
-                                        {forums.map((forum: any) => (
+                                        {forums.map((forum) => (
                                             <option
                                                 key={forum.id}
                                                 value={forum.id}
                                             >
                                                 {forum.nama}
+                                                {forum.kategori?.nama
+                                                    ? ` — ${forum.kategori.nama}`
+                                                    : ""}
                                             </option>
                                         ))}
                                     </select>
@@ -302,7 +365,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                     >
                                         <option value="">Semua Kategori</option>
 
-                                        {kategori.map((item: any) => (
+                                        {kategori.map((item) => (
                                             <option
                                                 key={item.id}
                                                 value={item.id}
@@ -325,7 +388,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
 
                             <div className="max-h-[500px] overflow-y-auto">
                                 {filteredLeft.length > 0 ? (
-                                    filteredLeft.map((item: any) => {
+                                    filteredLeft.map((item) => {
                                         const checked = leftSelected.includes(
                                             item.id,
                                         );
@@ -376,7 +439,8 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                                 </div>
 
                                                 <span className="rounded-full bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700">
-                                                    {item.kategori.nama}
+                                                    {item.kategori?.nama ??
+                                                        "Belum Ada Kategori"}
                                                 </span>
                                             </label>
                                         );
@@ -387,6 +451,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                     </div>
                                 )}
                             </div>
+
                             <div className="border-t bg-slate-50 p-3">
                                 <div className="flex justify-end">
                                     <PrimaryButton
@@ -404,6 +469,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                             </div>
                         </div>
 
+                        {/* ================= FORUM TUJUAN ================= */}
                         <div className="rounded-2xl border border-slate-200 bg-white">
                             <div className="border-b p-4">
                                 <div className="mb-3 flex items-center justify-between">
@@ -426,15 +492,19 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                         }
                                         className="w-56 rounded-lg border border-slate-300 px-3 py-2 text-sm"
                                     >
-                                        {forums.map((forum: any) => (
+                                        {forums.map((forum) => (
                                             <option
                                                 key={forum.id}
                                                 value={forum.id}
                                             >
                                                 {forum.nama}
+                                                {forum.kategori?.nama
+                                                    ? ` — ${forum.kategori.nama}`
+                                                    : ""}
                                             </option>
                                         ))}
                                     </select>
+
                                     <select
                                         value={rightKategori}
                                         onChange={(e) =>
@@ -444,7 +514,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                     >
                                         <option value="">Semua Kategori</option>
 
-                                        {kategori.map((item: any) => (
+                                        {kategori.map((item) => (
                                             <option
                                                 key={item.id}
                                                 value={item.id}
@@ -453,6 +523,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                             </option>
                                         ))}
                                     </select>
+
                                     <input
                                         value={searchRight}
                                         onChange={(e) =>
@@ -466,7 +537,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
 
                             <div className="max-h-[500px] overflow-y-auto">
                                 {filteredRight.length > 0 ? (
-                                    filteredRight.map((item: any) => {
+                                    filteredRight.map((item) => {
                                         const checked = rightSelected.includes(
                                             item.id,
                                         );
@@ -517,7 +588,8 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                                 </div>
 
                                                 <span className="rounded-full bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700">
-                                                    {item.kategori.nama}
+                                                    {item.kategori?.nama ??
+                                                        "Belum Ada Kategori"}
                                                 </span>
                                             </label>
                                         );
@@ -528,6 +600,7 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                                     </div>
                                 )}
                             </div>
+
                             <div className="border-t bg-slate-50 p-3">
                                 <div className="flex justify-end">
                                     <PrimaryButton
@@ -542,6 +615,8 @@ export default function Index({ forums, kategori, lembagas, filters }: Props) {
                             </div>
                         </div>
                     </div>
+
+                    {/* SIMPAN */}
                     <div className="flex justify-end">
                         <PrimaryButton
                             onClick={saveMapping}

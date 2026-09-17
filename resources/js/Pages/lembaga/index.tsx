@@ -25,24 +25,20 @@ type Props = {
     lembaga: any;
     filters: any;
     kategori: Kategori[];
+    forum: any[];
     hasFilter?: boolean;
     activeFilterCount?: number;
 };
 
-export default function Index({ lembaga, filters, kategori }: Props) {
+export default function Index({ lembaga, filters, kategori, forum }: Props) {
+    const { searchKecamatanKotaKediri, searchKelurahan } = useAlamat();
 
-    const {
-        searchKecamatanKotaKediri,
-        searchKelurahan,
-    } = useAlamat();
-
-    const { setParams } = useQueryParams(
-        route("lembaga.index"),
-        filters,
-    );
+    const { setParams } = useQueryParams(route("lembaga.index"), filters);
 
     const [open, setOpen] = useState(false);
-    const [selectedLembaga, setSelectedLembaga] = useState<Lembaga | null>(null);
+    const [selectedLembaga, setSelectedLembaga] = useState<Lembaga | null>(
+        null,
+    );
 
     const [openDetailAkun, setOpenDetailAkun] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
@@ -81,7 +77,6 @@ export default function Index({ lembaga, filters, kategori }: Props) {
             <Head title="Lembaga" />
             <AdminLayout>
                 <div className="space-y-5 w-full overflow-hidden">
-
                     {/* Header */}
                     <PageHeader
                         title="Lembaga"
@@ -108,7 +103,6 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                                     value: "nama",
                                 },
                             ]}
-
                             hideFilterButton={false}
                             onFilter={() => setShowFilter(!showFilter)}
                             hasFilter={hasFilter}
@@ -230,11 +224,10 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                                     loadOptions={(inputValue) =>
                                         searchKelurahan(
                                             kecamatan?.value ?? "",
-                                            inputValue
+                                            inputValue,
                                         )
                                     }
                                 />
-
                             </div>
                         </div>
                     )}
@@ -247,9 +240,8 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                             border border-slate-200
                         "
                     >
-                    <DataTable
-                        columns={
-                            columns(
+                        <DataTable
+                            columns={columns(
                                 canEdit,
                                 canDelete,
                                 canViewAccount,
@@ -264,7 +256,12 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                                         `Lembaga "${lembaga.nama}" akan dihapus`,
                                     ).then((result) => {
                                         if (result.isConfirmed) {
-                                            router.delete(route("lembaga.destroy", lembaga.id));
+                                            router.delete(
+                                                route(
+                                                    "lembaga.destroy",
+                                                    lembaga.id,
+                                                ),
+                                            );
                                         }
                                     });
                                 },
@@ -273,10 +270,9 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                                     setSelectedLembaga(lembaga);
                                     setOpenDetailAkun(true);
                                 },
-                            )
-                        }
-                        data={lembaga.data}
-                    />
+                            )}
+                            data={lembaga.data}
+                        />
                     </div>
 
                     {/* Pagination */}
@@ -284,15 +280,15 @@ export default function Index({ lembaga, filters, kategori }: Props) {
                         <Pagination links={lembaga.links} />
                     </div>
 
-                {/* Modal */}
-                <FormModal
+                    {/* Modal */}
+                    <FormModal
                         open={open}
                         onClose={() => {
                             setOpen(false);
                             setSelectedLembaga(null);
                         }}
                         lembaga={selectedLembaga}
-                        kategori={kategori}
+                        forum={forum}
                     />
                 </div>
 

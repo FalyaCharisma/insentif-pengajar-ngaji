@@ -14,6 +14,10 @@ export const columns = (
             </div>
         ),
     },
+    {
+        accessorKey: "kategori.nama",
+        header: "Kategori",
+    },
 
     {
         accessorKey: "kode",

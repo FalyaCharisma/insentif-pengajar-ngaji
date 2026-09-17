@@ -19,11 +19,7 @@ type Props = {
 };
 
 export default function Index({ forum, kategori, filters }: Props) {
-
-    const { setParams } = useQueryParams(
-        route("forum.index"),
-        filters,
-    );
+    const { setParams } = useQueryParams(route("forum.index"), filters);
 
     const [open, setOpen] = useState(false);
     const [selectedForum, setSelectedForum] = useState<any>(null);
@@ -40,16 +36,12 @@ export default function Index({ forum, kategori, filters }: Props) {
     }, [flash]);
 
     return (
-        <> 
+        <>
             <Head title="Data Forum" />
             <AdminLayout>
                 <div className="space-y-5 w-full overflow-hidden">
-
                     {/* HEADER */}
-                    <PageHeader
-                        title="Forum"
-                        subtitle="Kelola data forum"
-                    />
+                    <PageHeader title="Forum" subtitle="Kelola data forum" />
 
                     {/* TOOLBAR */}
                     <div className="w-full overflow-hidden">
@@ -114,6 +106,7 @@ export default function Index({ forum, kategori, filters }: Props) {
                             setSelectedForum(null);
                         }}
                         forum={selectedForum}
+                        kategori={kategori}
                     />
 
                     <DetailAkunModal

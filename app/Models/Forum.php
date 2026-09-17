@@ -13,6 +13,7 @@ class Forum extends Model
 
     protected $fillable = [
         'user_id',
+        'kategori_id',
         'kode',
         'nama',
         'telepon',
@@ -22,6 +23,11 @@ class Forum extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function kategori()
+    {
+        return $this->belongsTo(KategoriLembaga::class, 'kategori_id');
     }
 
     public function lembaga()

@@ -146,25 +146,10 @@ class PengajuanProposalController extends Controller
 
         $validated = $request->validate([
             'periode_id' => ['required', 'exists:periode,id'],
-            'jumlah_guru' => 'required|integer|min:1',
             'bukti_dukung' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:2048'],
         ]);
 
         $lembaga = auth()->user()->lembaga;
-
-        $kuota = Kuota::where('lembaga_id', $lembaga->id)->where('periode_id', $validated['periode_id'])->first();
-
-        if (!$kuota) {
-            return back()->withErrors([
-                'jumlah_guru' => 'Kuota lembaga belum tersedia.',
-            ]);
-        }
-
-        if ($validated['jumlah_guru'] > $kuota->estimasi_kuota) {
-            return back()->withErrors([
-                'jumlah_guru' => "Jumlah guru yang diajukan tidak boleh melebihi estimasi kuota ({$kuota->estimasi_kuota}).",
-            ]);
-        }
 
         // Cek apakah sudah pernah mengajukan proposal pada periode yang sama
         $exists = PengajuanProposal::where('lembaga_id', $lembaga->id)->where('periode_id', $validated['periode_id'])->exists();
@@ -201,25 +186,10 @@ class PengajuanProposalController extends Controller
 
         $validated = $request->validate([
             'periode_id' => ['required', 'exists:periode,id'],
-            'jumlah_guru' => ['required', 'integer', 'min:1'],
             'bukti_dukung' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:2048'],
         ]);
 
         $lembaga = auth()->user()->lembaga;
-
-        $kuota = Kuota::where('lembaga_id', $lembaga->id)->where('periode_id', $validated['periode_id'])->first();
-
-        if (!$kuota) {
-            return back()->withErrors([
-                'jumlah_guru' => 'Kuota lembaga belum tersedia.',
-            ]);
-        }
-
-        if ($validated['jumlah_guru'] > $kuota->estimasi_kuota) {
-            return back()->withErrors([
-                'jumlah_guru' => "Jumlah guru yang diajukan tidak boleh melebihi estimasi kuota ({$kuota->estimasi_kuota}).",
-            ]);
-        }
 
         // Pastikan tidak ada proposal lain pada periode yang sama
         $exists = PengajuanProposal::where('lembaga_id', $lembaga->id)->where('periode_id', $validated['periode_id'])->where('id', '!=', $pengajuanProposal->id)->exists();

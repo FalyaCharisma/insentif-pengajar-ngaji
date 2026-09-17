@@ -119,14 +119,8 @@ class PengajuanInsentifController extends Controller
         });
 
         $proposal->withQueryString();
-        
-        $periodes = Periode::orderByDesc('tahun')->get([
-            'id',
-            'tahun',
-            'mulai_upload',
-            'selesai_upload',
-            'status',
-        ]);
+
+        $periodes = Periode::orderByDesc('tahun')->get(['id', 'tahun', 'mulai_upload', 'selesai_upload', 'status']);
 
         return Inertia::render('pengajuan-insentif/index', [
             'pengajuanProposal' => $proposal,
@@ -158,12 +152,43 @@ class PengajuanInsentifController extends Controller
                 $pengajuan = $usulan->get($item->id);
 
                 return [
+                    // Identitas
                     'id' => $item->id,
                     'nama' => $item->nama,
                     'nik' => $item->nik,
                     'tempat_lahir' => $item->tempat_lahir,
                     'tgl_lahir' => $item->tgl_lahir,
+                    'jk' => $item->jk,
+                    'agama' => $item->agama,
+
+                    // Pendidikan & Pekerjaan
+                    'jabatan' => $item->jabatan,
                     'pendidikan_terakhir' => $item->pendidikan_terakhir,
+                    'jurusan' => $item->jurusan,
+                    'sekolah_universitas' => $item->sekolah_universitas,
+                    'tahun_lulus' => $item->tahun_lulus,
+
+                    // Alamat
+                    'alamat' => $item->alamat,
+                    'kelurahan' => $item->kelurahan,
+                    'kecamatan' => $item->kecamatan,
+                    'kabkota' => $item->kabkota,
+                    'provinsi' => $item->provinsi,
+
+                    // Kontak
+                    'no_hp' => $item->no_hp,
+
+                    // Data Insentif
+                    'bank' => $item->bank,
+                    'no_rekening' => $item->no_rekening,
+                    'no_bpjs' => $item->no_bpjs,
+                    'status_insentif' => $item->status_insentif,
+                    'status' => $item->status,
+
+                    // Foto
+                    'pas_foto' => $item->pas_foto,
+
+                    // Data pengajuan
                     'selected' => $pengajuan !== null,
                     'status_pengajuan' => $pengajuan?->status,
                     'catatan' => $pengajuan?->catatan,
@@ -404,39 +429,33 @@ class PengajuanInsentifController extends Controller
 
         $periodeId = $request->periode_id;
 
-        $baseQuery = Pengajar::whereHas(
-            'pengajuanInsentif.proposal',
-            function ($query) use ($periodeId) {
-                $query->where('periode_id', $periodeId);
-            }
-        );
+        $baseQuery = Pengajar::whereHas('pengajuanInsentif.proposal', function ($query) use ($periodeId) {
+            $query->where('periode_id', $periodeId);
+        });
 
         $totalPengajar = (clone $baseQuery)->count();
 
         $menerima = (clone $baseQuery)
             ->whereHas('pengajuanInsentif', function ($query) use ($periodeId) {
-                $query->where('status', 'verified')
-                    ->whereHas('proposal', function ($q) use ($periodeId) {
-                        $q->where('periode_id', $periodeId);
-                    });
+                $query->where('status', 'verified')->whereHas('proposal', function ($q) use ($periodeId) {
+                    $q->where('periode_id', $periodeId);
+                });
             })
             ->count();
 
         $pending = (clone $baseQuery)
             ->whereHas('pengajuanInsentif', function ($query) use ($periodeId) {
-                $query->whereIn('status', ['pending', 'revision'])
-                    ->whereHas('proposal', function ($q) use ($periodeId) {
-                        $q->where('periode_id', $periodeId);
-                    });
+                $query->whereIn('status', ['pending', 'revision'])->whereHas('proposal', function ($q) use ($periodeId) {
+                    $q->where('periode_id', $periodeId);
+                });
             })
             ->count();
 
         $tidakMenerima = (clone $baseQuery)
             ->whereHas('pengajuanInsentif', function ($query) use ($periodeId) {
-                $query->where('status', 'rejected')
-                    ->whereHas('proposal', function ($q) use ($periodeId) {
-                        $q->where('periode_id', $periodeId);
-                    });
+                $query->where('status', 'rejected')->whereHas('proposal', function ($q) use ($periodeId) {
+                    $q->where('periode_id', $periodeId);
+                });
             })
             ->count();
 
@@ -458,9 +477,6 @@ class PengajuanInsentifController extends Controller
 
         $filename = "Rekap_Insentif_Pengajar_{$periode->tahun}.xlsx";
 
-        return Excel::download(
-            new RekapInsentifExport($periode->id),
-            $filename
-        );
+        return Excel::download(new RekapInsentifExport($periode->id), $filename);
     }
 }

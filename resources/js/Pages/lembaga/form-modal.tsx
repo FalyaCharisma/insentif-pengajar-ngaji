@@ -1,43 +1,53 @@
 import { useEffect } from "react";
-import { router, useForm } from "@inertiajs/react";
+import { useForm } from "@inertiajs/react";
+
 import FormInput from "@/Components/forms/FormInput";
 import PrimaryButton from "@/Components/PrimaryButton";
 import SecondaryButton from "@/Components/SecondaryButton";
 import Modal from "@/Components/Modal";
 import FormSelect2 from "@/Components/forms/FormSelect2";
 
-
 type Props = {
     open: boolean;
     onClose: () => void;
     lembaga?: any;
-    kategori: any[];
+    forum: any[];
 };
 
-export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
-
+export default function FormModal({ open, onClose, lembaga, forum }: Props) {
     const isEdit = !!lembaga;
 
-    const { data, setData, post, processing, errors, reset } = useForm({
-        _method: "",
-        kategori_id: "",
-        nama: "",
-        status: "aktif",
-    });
+    const { data, setData, post, processing, errors, reset, clearErrors } =
+        useForm({
+            _method: "",
+            forum_id: "",
+            nama: "",
+            status: "aktif",
+        });
 
     useEffect(() => {
         if (lembaga) {
             setData({
-                kategori_id: lembaga.kategori_id?.toString() || "",
+                _method: "",
+                forum_id: lembaga.forum_id ? String(lembaga.forum_id) : "",
                 nama: lembaga.nama || "",
                 status: lembaga.user?.status || "aktif",
             });
         } else {
+            clearErrors();
+
             reset();
+
+            setData({
+                _method: "",
+                forum_id: "",
+                nama: "",
+                status: "aktif",
+            });
         }
     }, [lembaga, open]);
 
-    const submit = (e: any) => {
+    const submit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (isEdit) {
@@ -47,6 +57,7 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
                 forceFormData: true,
 
                 onSuccess: () => {
+                    clearErrors();
                     reset();
                     onClose();
                 },
@@ -59,64 +70,55 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
             forceFormData: true,
 
             onSuccess: () => {
+                clearErrors();
                 reset();
                 onClose();
             },
         });
     };
-    
+
     if (!open) return null;
 
     return (
-        <Modal
-            show={open}
-            onClose={onClose}
-            maxWidth="lg"
-        >
+        <Modal show={open} onClose={onClose} maxWidth="lg">
             <div className="p-6">
                 {/* HEADER */}
                 <div className="mb-6">
-
                     <h2 className="text-xl font-semibold text-slate-800">
-                        {isEdit
-                            ? "Edit Lembaga"
-                            : "Tambah Lembaga"}
+                        {isEdit ? "Edit Lembaga" : "Tambah Lembaga"}
                     </h2>
 
                     <p className="mt-1 text-sm text-slate-500">
-                        Isi form di bawah ini
+                        {isEdit
+                            ? "Perbarui data lembaga"
+                            : "Isi form di bawah ini"}
                     </p>
                 </div>
+
                 {/* FORM */}
-                <form
-                    onSubmit={submit}
-                    className="space-y-5"
-                >
-                    {/* Kategori */}
+                <form onSubmit={submit} className="space-y-5">
+                    {/* FORUM */}
                     <FormSelect2
-                        label="Kategori"
-                        value={data.kategori_id}
-                        options={kategori.map((item) => ({
-                            value: item.id,
+                        label="Forum"
+                        value={data.forum_id}
+                        options={forum.map((item: any) => ({
+                            value: String(item.id),
                             label: item.nama,
                         }))}
-                        onChange={(value) =>
-                            setData("kategori_id", value)
-                        }
-                        error={errors.kategori_id}
+                        onChange={(value) => setData("forum_id", value)}
+                        error={errors.forum_id}
                     />
 
-                     {/* Nama */}
-                     <FormInput
+                    {/* NAMA */}
+                    <FormInput
                         label="Nama Lembaga"
                         value={data.nama}
-                        onChange={(e) =>
-                            setData("nama", e.target.value)
-                        }
+                        onChange={(e) => setData("nama", e.target.value)}
                         placeholder="Masukkan nama lembaga"
                         error={errors.nama}
                     />
 
+                    {/* STATUS */}
                     {isEdit && (
                         <FormSelect2
                             label="Status"
@@ -138,18 +140,6 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
 
                     {/* FOOTER */}
                     <div className="flex items-center justify-end gap-3 pt-4">
-
-                        <PrimaryButton
-                            type="submit"
-                            disabled={processing}
-                        >
-                            {processing
-                                ? "Menyimpan..."
-                                : isEdit
-                                    ? "Update"
-                                    : "Simpan"}
-                        </PrimaryButton>
-
                         <SecondaryButton
                             type="button"
                             onClick={onClose}
@@ -157,7 +147,14 @@ export default function FormModal({ open, onClose, lembaga, kategori }: Props) {
                         >
                             Batal
                         </SecondaryButton>
-                        
+
+                        <PrimaryButton type="submit" disabled={processing}>
+                            {processing
+                                ? "Menyimpan..."
+                                : isEdit
+                                  ? "Update"
+                                  : "Simpan"}
+                        </PrimaryButton>
                     </div>
                 </form>
             </div>

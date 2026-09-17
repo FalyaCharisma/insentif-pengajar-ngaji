@@ -89,11 +89,11 @@ export const sidebarMenus = (
                 href: "/mapping-forum",
                 roles: ["superadmin", "dindik"],
             },
-            {
-                title: "Mapping Kategori",
-                href: "/mapping-kategori",
-                roles: ["superadmin", "dindik"],
-            },
+            // {
+            //     title: "Mapping Kategori",
+            //     href: "/mapping-kategori",
+            //     roles: ["superadmin", "dindik"],
+            // },
         ],
     },
 

@@ -8,11 +8,10 @@ import Pagination from "@/Components/pagination";
 import DataTable from "@/Components/DataTable";
 import FormSelect2 from "@/Components/forms/FormSelect2";
 import PrimaryButton from "@/Components/PrimaryButton";
-import TableToolbar from "@/Components/TableToolbar";
-
-import { useQueryParams } from "@/hooks/use-query-params";
 
 import { deleteConfirm, successAlert } from "@/lib/alert";
+
+import { useQueryParams } from "@/hooks/use-query-params";
 
 import { columns } from "./columns";
 import FormModal from "./form-modal";
@@ -23,12 +22,18 @@ import {
     MasterKuotaProps,
 } from "@/types/master-kuota";
 
+type ForumOption = {
+    value: string | number;
+    label: string;
+    kategori_id?: number | null;
+    kategori_nama?: string | null;
+};
+
 export default function Index({
     masterKuota,
     filters,
     periodes,
     forums,
-    kategoris,
 }: MasterKuotaProps) {
     const { setParams } = useQueryParams(route("master-kuota.index"), filters);
 
@@ -38,8 +43,13 @@ export default function Index({
     const [open, setOpen] = useState(false);
 
     const pageProps: any = usePage().props;
-
     const flash = pageProps.flash || {};
+
+    /*
+    |--------------------------------------------------------------------------
+    | Flash Message
+    |--------------------------------------------------------------------------
+    */
 
     useEffect(() => {
         if (flash.success) {
@@ -49,7 +59,7 @@ export default function Index({
 
     /*
     |--------------------------------------------------------------------------
-    | Options
+    | Periode Options
     |--------------------------------------------------------------------------
     */
 
@@ -62,22 +72,23 @@ export default function Index({
         [periodes],
     );
 
-    const forumOptions = useMemo(
+    /*
+    |--------------------------------------------------------------------------
+    | Forum Options
+    |
+    | Kategori diambil dari Forum
+    |--------------------------------------------------------------------------
+    */
+
+    const forumOptions: ForumOption[] = useMemo(
         () =>
-            forums.map((item) => ({
+            forums.map((item: any) => ({
                 value: item.id,
                 label: item.nama,
+                kategori_id: item.kategori_id ?? null,
+                kategori_nama: item.kategori?.nama ?? null,
             })),
         [forums],
-    );
-
-    const kategoriOptions = useMemo(
-        () =>
-            kategoris.map((item) => ({
-                value: item.id,
-                label: item.nama,
-            })),
-        [kategoris],
     );
 
     /*
@@ -119,7 +130,6 @@ export default function Index({
 
     const handleEdit = (item: MasterKuota) => {
         setSelectedMasterKuota(item);
-
         setOpen(true);
     };
 
@@ -151,12 +161,12 @@ export default function Index({
                 <div className="space-y-5">
                     <PageHeader
                         title="Master Kuota"
-                        subtitle="Kelola kuota berdasarkan forum dan kategori"
+                        subtitle="Kelola kuota berdasarkan forum"
                     />
 
                     {/* =====================================================
-                INFORMATION
-                ====================================================== */}
+                        INFORMATION
+                    ====================================================== */}
 
                     <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
                         <div className="flex items-start gap-3">
@@ -182,22 +192,27 @@ export default function Index({
                                 </h3>
 
                                 <p className="mt-1 text-sm text-sky-700">
-                                    Tentukan jumlah kuota penerima berdasarkan
-                                    periode, forum, dan kategori lembaga. Satu
-                                    kombinasi periode, forum, dan kategori hanya
-                                    dapat memiliki satu master kuota.
+                                    Tentukan jumlah kuota berdasarkan periode
+                                    dan forum. Kategori lembaga otomatis
+                                    mengikuti kategori forum yang dipilih.
                                 </p>
                             </div>
                         </div>
                     </div>
 
+                    {/* =====================================================
+                        FILTER
+                    ====================================================== */}
+
                     <div className="flex flex-wrap items-end gap-3">
-                        <div className="min-w-[180px] flex-1">
+                        {/* FORUM */}
+                        <div className="min-w-[220px] flex-1">
                             <FormSelect2
-                             
                                 value={filters.forum_id}
-                                options={forums.map((forum) => ({
-                                    label: forum.nama,
+                                options={forums.map((forum: any) => ({
+                                    label: forum.kategori?.nama
+                                        ? `${forum.nama} — ${forum.kategori.nama}`
+                                        : forum.nama,
                                     value: forum.id,
                                 }))}
                                 placeholder="Semua Forum"
@@ -210,24 +225,8 @@ export default function Index({
                             />
                         </div>
 
+                        {/* PERIODE */}
                         <div className="min-w-[180px] flex-1">
-                            <FormSelect2
-                                value={filters.kategori_id}
-                                options={kategoris.map((kategori) => ({
-                                    label: kategori.nama,
-                                    value: kategori.id,
-                                }))}
-                                placeholder="Semua Kategori"
-                                onChange={(value) =>
-                                    setParams({
-                                        kategori_id: value || undefined,
-                                        page: 1,
-                                    })
-                                }
-                            />
-                        </div>
-
-                        <div className="min-w-[150px] flex-1">
                             <FormSelect2
                                 value={filters.periode_id}
                                 options={periodes.map((periode) => ({
@@ -244,22 +243,7 @@ export default function Index({
                             />
                         </div>
 
-                        <div className="flex-1">
-                            {/* <TableToolbar
-                                filters={filters}
-                                setParams={setParams}
-                                searchPlaceholder="Cari forum atau kategori..."
-                                hideAddButton
-                                sortOptions={[
-                                    { label: "Terbaru", value: "id" },
-                                    {
-                                        label: "Jumlah Kuota",
-                                        value: "jumlah_kuota",
-                                    },
-                                ]}
-                            /> */}
-                        </div>
-
+                        {/* TAMBAH */}
                         <PrimaryButton
                             onClick={() => {
                                 setSelectedMasterKuota(null);
@@ -271,6 +255,10 @@ export default function Index({
                         </PrimaryButton>
                     </div>
 
+                    {/* =====================================================
+                        TABLE
+                    ====================================================== */}
+
                     <div className="overflow-x-auto rounded-2xl border border-slate-200">
                         <DataTable
                             columns={columns(handleEdit, handleDelete)}
@@ -281,20 +269,18 @@ export default function Index({
                     <Pagination links={masterKuota.links} />
 
                     {/* =====================================================
-                MODAL
-                ====================================================== */}
+                        MODAL
+                    ====================================================== */}
 
                     <FormModal
                         open={open}
                         onClose={() => {
                             setOpen(false);
-
                             setSelectedMasterKuota(null);
                         }}
                         masterKuota={selectedMasterKuota}
                         periodeOptions={periodeOptions}
                         forumOptions={forumOptions}
-                        kategoriOptions={kategoriOptions}
                     />
                 </div>
             </AdminLayout>
