@@ -168,16 +168,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('reject-selected', [PengajuanInsentifController::class, 'rejectSelected'])->name('pengajuan-insentif.reject-selected');
     // Laporan Kegiatan
     Route::controller(LaporanKegiatanController::class)
-        ->prefix('laporan-kegiatan')
-        ->name('laporan-kegiatan.')
-        ->group(function () {
-            Route::get('/', 'index')->name('index');
-
-            Route::post('/jadwal', 'uploadJadwal')->name('jadwal.upload');
-            Route::get('/jadwal', 'showJadwal')->name('jadwal.show');
-            Route::put('/jadwal', 'updateJadwal')->name('jadwal.update');
+    ->prefix('laporan-kegiatan')
+    ->name('laporan-kegiatan.')
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/jadwal', 'uploadJadwal')->name('jadwal.upload');
+        Route::get('/jadwal/{jadwal}/lihat', 'lihatJadwal')->name('jadwal.lihat');
 
             Route::post('/', 'store')->name('store');
+        Route::get('/lembaga', 'lihatKegiatanLembaga')->name('lembaga');
             Route::get('/{laporanKegiatan}', 'show')->name('show');
             Route::put('/{laporanKegiatan}', 'update')->name('update');
             Route::delete('/{laporanKegiatan}', 'destroy')->name('destroy');

@@ -2,22 +2,26 @@ import { FileText, Pencil, X } from "lucide-react";
 
 type Props = {
     open: boolean;
-    onClose: () => void;
     jadwal: any;
     periodeTahun: number | null;
+    canEdit?: boolean;
+    onClose: () => void;
     onEdit: () => void;
 };
 
 export default function JadwalPreviewModal({
     open,
-    onClose,
     jadwal,
     periodeTahun,
+    canEdit = false,
+    onClose,
     onEdit,
 }: Props) {
     if (!open || !jadwal) return null;
 
-    const fileUrl = `/storage/${jadwal.file_jadwal}`;
+    const jadwalList = Array.isArray(jadwal) ? jadwal : [jadwal];
+
+    if (jadwalList.length === 0) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -51,17 +55,35 @@ export default function JadwalPreviewModal({
                 </div>
 
                 {/* PDF PREVIEW */}
-                <div className="min-h-0 flex-1 bg-slate-100 p-4">
-                    <iframe
-                        src={fileUrl}
-                        title="Preview Jadwal Kegiatan"
-                        className="h-full w-full rounded-xl border border-slate-200 bg-white"
-                    />
+                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-slate-100 p-4">
+                    {jadwalList.map((item: any) => {
+                        const fileUrl = item.file_jadwal
+                            ? `/storage/${item.file_jadwal}`
+                            : null;
+
+                        return (
+                            <div
+                                key={item.id}
+                                className="rounded-xl bg-white p-3 shadow-sm"
+                            >
+                                {fileUrl ? (
+                                    <iframe
+                                        src={fileUrl}
+                                        title={`Preview Jadwal Kegiatan ${item.id}`}
+                                        className="h-[600px] w-full rounded-xl border border-slate-200 bg-white"
+                                    />
+                                ) : (
+                                    <div className="flex h-40 items-center justify-center rounded-xl border border-dashed border-slate-300 text-sm text-slate-500">
+                                        File jadwal tidak tersedia.
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* FOOTER */}
                 <div className="flex justify-end gap-3 border-t border-slate-200 px-6 py-4">
-
                     <button
                         type="button"
                         onClick={onClose}
@@ -80,28 +102,28 @@ export default function JadwalPreviewModal({
                         Tutup
                     </button>
 
-                    <button
-                        type="button"
-                        onClick={onEdit}
-                        className="
-                            inline-flex
-                            h-10
-                            items-center
-                            gap-2
-                            rounded-xl
-                            bg-cyan-600
-                            px-5
-                            text-sm
-                            font-medium
-                            text-white
-                            transition
-                            hover:bg-cyan-700
-                        "
-                    >
-                        <Pencil size={17} />
-                        Ganti Jadwal
-                    </button>
-
+                    {canEdit && (
+                        <button
+                            type="button"
+                            onClick={onEdit}
+                            className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-xl
+                                bg-cyan-600
+                                px-4
+                                py-2
+                                text-sm
+                                font-medium
+                                text-white
+                                hover:bg-cyan-700
+                            "
+                        >
+                            <Pencil size={16} />
+                            Ganti Jadwal
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
