@@ -22,6 +22,7 @@ use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterKuotaController;
 use App\Http\Controllers\LaporanKegiatanController;
+use App\Http\Controllers\BeritaController;
 
 Route::get('/', function () {
     return Inertia::render('frontend/Beranda');
@@ -35,9 +36,11 @@ Route::get('/layanan', function () {
     return Inertia::render('frontend/Layanan');
 })->name('portal.layanan');
 
-Route::get('/berita', function () {
-    return Inertia::render('frontend/Berita');
-})->name('portal.berita');
+Route::get('/portal-berita', [BeritaController::class, 'frontend'])
+    ->name('portal.berita');
+
+Route::get('/portal-berita/{slug}', [BeritaController::class, 'frontendShow'])
+    ->name('portal.berita.show');
 
 Route::get('/kontak', function () {
     return Inertia::render('frontend/Kontak');
@@ -133,19 +136,18 @@ Route::middleware('auth')->group(function () {
         });
 
     // Setting Kuota
-    Route::post('/kuota/generate', [KuotaController::class, 'generate'])
-    ->name('kuota.generate');
+    Route::post('/kuota/generate', [KuotaController::class, 'generate'])->name('kuota.generate');
     Route::resource('kuota', KuotaController::class)->parameters(['kuota' => 'kuota']);
     Route::resource('master-kuota', MasterKuotaController::class)->except(['show']);
 
     Route::delete('kuota/periode/{periode}', [KuotaController::class, 'destroyPeriode'])->name('kuota.destroyPeriode');
     Route::resource('periode', PeriodeController::class);
-    
+
     // Pengajuan Proposal
     Route::resource('pengajuan-proposal', PengajuanProposalController::class);
     Route::patch('/pengajuan-proposal/{pengajuanProposal}/verify', [PengajuanProposalController::class, 'verify'])->name('pengajuan-proposal.verify');
     Route::patch('/pengajuan-proposal/{pengajuanProposal}/unverify', [PengajuanProposalController::class, 'unverify'])->name('pengajuan-proposal.unverify');
-     
+
     // Pengajuan Insentif
     Route::prefix('pengajuan-insentif')
         ->name('pengajuan-insentif.')
@@ -164,25 +166,25 @@ Route::middleware('auth')->group(function () {
     Route::patch('verify-selected', [PengajuanInsentifController::class, 'verifySelected'])->name('pengajuan-insentif.verify-selected');
 
     Route::patch('reject-selected', [PengajuanInsentifController::class, 'rejectSelected'])->name('pengajuan-insentif.reject-selected');
-
     // Laporan Kegiatan
     Route::controller(LaporanKegiatanController::class)
-    ->prefix('laporan-kegiatan')
-    ->name('laporan-kegiatan.')
-    ->group(function () {
+        ->prefix('laporan-kegiatan')
+        ->name('laporan-kegiatan.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
 
-        Route::get('/', 'index')->name('index');
+            Route::post('/jadwal', 'uploadJadwal')->name('jadwal.upload');
+            Route::get('/jadwal', 'showJadwal')->name('jadwal.show');
+            Route::put('/jadwal', 'updateJadwal')->name('jadwal.update');
 
-        Route::post('/jadwal', 'uploadJadwal')->name('jadwal.upload');
-        Route::get('/jadwal', 'showJadwal')->name('jadwal.show');
-        Route::put('/jadwal', 'updateJadwal')->name('jadwal.update');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{laporanKegiatan}', 'show')->name('show');
+            Route::put('/{laporanKegiatan}', 'update')->name('update');
+            Route::delete('/{laporanKegiatan}', 'destroy')->name('destroy');
+            Route::put('/{laporanKegiatan}/verifikasi', 'verifikasi')->name('verifikasi');
+        });
 
-        Route::post('/', 'store')->name('store');
-        Route::get('/{laporanKegiatan}', 'show')->name('show');
-        Route::put('/{laporanKegiatan}', 'update')->name('update');
-        Route::delete('/{laporanKegiatan}', 'destroy')->name('destroy');
-        Route::put('/{laporanKegiatan}/verifikasi', 'verifikasi')->name('verifikasi');
-    });
+        Route::resource('berita', BeritaController::class);
 });
 
 require __DIR__ . '/auth.php';

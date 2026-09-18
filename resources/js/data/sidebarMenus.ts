@@ -17,7 +17,8 @@ import {
     ChevronRight,
     Menu,
     X,
-    ClipboardList
+    ClipboardList,
+    Newspaper,
 } from "lucide-react";
 import { usePage } from "@inertiajs/react";
 
@@ -31,6 +32,12 @@ export const sidebarMenus = (
         icon: LayoutDashboard,
         href: "/dashboard",
         roles: ["superadmin", "dindik", "lembaga", "forum"],
+    },
+    {
+        title: "Berita",
+        icon: Newspaper,
+        href: "/berita",
+        roles: ["dindik"],
     },
 
     {

@@ -29,6 +29,11 @@
     },
     "dependencies": {
         "@tanstack/react-table": "^8.21.3",
+        "@tiptap/extension-image": "^3.31.3",
+        "@tiptap/extension-link": "^3.31.3",
+        "@tiptap/extension-placeholder": "^3.31.3",
+        "@tiptap/react": "^3.31.3",
+        "@tiptap/starter-kit": "^3.31.3",
         "apexcharts": "^6.7.0",
         "axios": "^1.16.1",
         "bootstrap": "^5.3.8",

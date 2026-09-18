@@ -6,7 +6,7 @@ const menus = [
     { label: 'Beranda', href: '/' },
     { label: 'Peta Sebaran', href: '/peta-sebaran' },
     { label: 'Layanan', href: '/layanan' },
-    { label: 'Berita', href: '/berita' },
+    { label: 'Berita', href: '/portal-berita' },
 ];
 
 export default function Navbar() {
