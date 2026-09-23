@@ -50,7 +50,7 @@ class PengajarSeeder extends Seeder
 
                     'tempat_lahir' => 'Kota Kediri',
                     'tgl_lahir' => now()->subYears(rand(22, 55))->subDays(rand(1, 365)),
-                    'jk' => fake()->randomElement(['laki-laki', 'perempuan']),
+                    'jk' => random_int(0, 1) === 0 ? 'laki-laki' : 'perempuan',
 
                     'jabatan' => $this->jabatan[array_rand($this->jabatan)],
                     'pendidikan_terakhir' => $this->pendidikanTerakhir[array_rand($this->pendidikanTerakhir)],
