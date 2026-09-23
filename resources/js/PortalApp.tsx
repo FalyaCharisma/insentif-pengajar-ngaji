@@ -15,7 +15,7 @@ export default function PortalApp() {
                     <Route path="/" element={<Beranda />} />
                     <Route path="/peta-sebaran" element={<PetaSebaran />} />
                     <Route path="/layanan" element={<Layanan />} />
-                    <Route path="/berita" element={<Berita />} />
+                    {/* <Route path="/berita" element={<Berita />} /> */}
                     <Route path="/kontak" element={<Kontak />} />
                 </Routes>
             </AppLayout>
