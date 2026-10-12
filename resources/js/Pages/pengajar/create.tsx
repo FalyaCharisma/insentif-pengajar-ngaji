@@ -1,4 +1,11 @@
 import { Head, useForm, router, usePage } from "@inertiajs/react";
+import { useEffect, useState } from "react";
+import type {
+    ChangeEvent,
+    Dispatch,
+    FormEvent,
+    SetStateAction,
+} from "react";
 
 import AdminLayout from "@/layouts/app-layout";
 import PageHeader from "@/Components/PageHeader";
@@ -14,16 +21,7 @@ import SecondaryButton from "@/Components/SecondaryButton";
 
 import { useAlamat } from "@/hooks/useAlamat";
 import { useLembaga } from "@/hooks/useLembaga";
-import { useEffect, useState } from "react";
-
-import {
-    Save,
-    User,
-    GraduationCap,
-    Landmark,
-    ImagePlus,
-    ArrowLeft,
-} from "lucide-react";
+import { Save, User, GraduationCap, Landmark, ImagePlus, ArrowLeft } from "lucide-react";
 import axios from "axios";
 
 type SelectOption = {
@@ -75,6 +73,15 @@ type FormData = typeof initialValues;
 type Props = {
     pengajar?: any;
 };
+
+const RequiredStar = () => <span className="ml-1 text-red-500">*</span>;
+
+const requiredLabel = (label: string) => (
+    <span className="inline-flex items-center">
+        {label}
+        <RequiredStar />
+    </span>
+);
 
 export default function CreatePengajar({ pengajar }: Props) {
 
@@ -128,8 +135,31 @@ export default function CreatePengajar({ pengajar }: Props) {
     const page: any = usePage().props;
 
     const lembagas = page.lembaga ?? [];
+    const pendidikanTerakhirOptions = (page.pendidikanTerakhir ?? []).map(
+        (item: any) => ({
+            label: item.nama,
+            value: item.nama,
+        }),
+    );
+
+    const bankOptions = (page.bank ?? []).map((item: any) => ({
+        label: item.nama,
+        value: item.nama,
+    }));
 
     const isLembaga = page.auth.user.role === "lembaga";
+
+    const toOption = (
+        label?: string | null,
+        value?: string | number | null,
+    ): SelectOption | null => {
+        if (!label) return null;
+
+        return {
+            label: String(label),
+            value: value !== undefined && value !== null ? String(value) : String(label),
+        };
+    };
 
     const { data, setData, post, processing, errors, reset } =
         useForm<FormData>({
@@ -137,7 +167,12 @@ export default function CreatePengajar({ pengajar }: Props) {
 
             nik: pengajar?.nik ?? "",
             nama: pengajar?.nama ?? "",
-            tempat_lahir: null,
+            tempat_lahir: pengajar?.tempat_lahir
+                ? toOption(
+                      pengajar.tempat_lahir,
+                      pengajar.id_tempat_lahir ?? pengajar.tempat_lahir,
+                  )
+                : null,
             tgl_lahir: pengajar?.tgl_lahir ?? "",
             jk: pengajar?.jk ?? "",
             agama: pengajar?.agama ?? "",
@@ -152,6 +187,30 @@ export default function CreatePengajar({ pengajar }: Props) {
             bank: pengajar?.bank ?? "",
             no_rekening: pengajar?.no_rekening ?? "",
             no_bpjs: pengajar?.no_bpjs ?? "",
+            provinsi: pengajar?.provinsi
+                ? toOption(
+                      pengajar.provinsi,
+                      pengajar.id_provinsi ?? pengajar.provinsi,
+                  )
+                : null,
+            kabkota: pengajar?.kabkota
+                ? toOption(
+                      pengajar.kabkota,
+                      pengajar.id_kabkota ?? pengajar.kabkota,
+                  )
+                : null,
+            kecamatan: pengajar?.kecamatan
+                ? toOption(
+                      pengajar.kecamatan,
+                      pengajar.id_kecamatan ?? pengajar.kecamatan,
+                  )
+                : null,
+            kelurahan: pengajar?.kelurahan
+                ? toOption(
+                      pengajar.kelurahan,
+                      pengajar.id_kelurahan ?? pengajar.kelurahan,
+                  )
+                : null,
             pas_foto: null,
             ktp: null,
             ijazah: null,
@@ -159,6 +218,50 @@ export default function CreatePengajar({ pengajar }: Props) {
         });
 
     const normalize = (text?: string) => (text ?? "").trim().toLowerCase();
+
+    const getOptionText = (value: any) => {
+        if (!value) return "";
+        return typeof value === "string" ? value : value.label ?? value.nama ?? "";
+    };
+
+    const getOptionValue = (value: any) => {
+        if (!value) return "";
+        return typeof value === "string" ? value : value.value ?? value.id ?? "";
+    };
+
+    const revokePreview = (url?: string | null) => {
+        if (url?.startsWith("blob:")) {
+            URL.revokeObjectURL(url);
+        }
+    };
+
+    const validateFile = (file: File | null, maxMb = 1) => {
+        if (!file) return true;
+
+        if (file.size > maxMb * 1024 * 1024) {
+            alert(`Ukuran file maksimal ${maxMb} MB.`);
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleFilePreview = (
+        file: File | null,
+        setPreview: Dispatch<SetStateAction<string | null>>,
+        oldUrl?: string | null,
+    ) => {
+        if (oldUrl) revokePreview(oldUrl);
+
+        if (!file) {
+            setPreview(null);
+            return;
+        }
+
+        const nextUrl = URL.createObjectURL(file);
+        setPreview(nextUrl);
+    };
+
     const resetDataNik = () => {
         setData((data) => ({
             ...data,
@@ -173,7 +276,8 @@ export default function CreatePengajar({ pengajar }: Props) {
             kelurahan: null,
         }));
     };
-    const handleNikChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    const handleNikChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/\D/g, "").slice(0, 16);
 
         setData("nik", value);
@@ -185,6 +289,7 @@ export default function CreatePengajar({ pengajar }: Props) {
 
         await ambilDataNik(value);
     };
+
     const ambilDataNik = async (nik: string) => {
         try {
             const res = await axios.get(route("pengajar.cekNik"), {
@@ -212,7 +317,8 @@ export default function CreatePengajar({ pengajar }: Props) {
             if (provinsi) {
                 setData("provinsi", provinsi);
             }
-            const kabOptions = await searchKabkota(kodeProvinsi, "Kota Kediri");
+
+            const kabOptions = await searchKabkota(kodeProvinsi, "");
 
             const kab = kabOptions.find((x: any) => x.value === kodeKabkota);
 
@@ -229,6 +335,7 @@ export default function CreatePengajar({ pengajar }: Props) {
             if (kecamatan) {
                 setData("kecamatan", kecamatan);
             }
+
             const kelurahanOptions = await searchKelurahan(
                 api.kode_kecamatan_ktp,
                 "",
@@ -242,26 +349,26 @@ export default function CreatePengajar({ pengajar }: Props) {
                 setData("kelurahan", kelurahan);
             }
 
-            // Field biasa
             setData("nama", api.nama ?? "");
             setData("alamat", alamat);
-
             setData("tgl_lahir", api.tgl_lahir ?? "");
 
-            // FormSelect2 -> STRING
             if (api.gender === "L") {
-                setData("jk", "laki-laki");
+                setData("jk", "L");
             } else if (api.gender === "P") {
-                setData("jk", "perempuan");
+                setData("jk", "P");
+            } else {
+                setData("jk", "");
             }
 
-            // FormAsyncSelect -> OBJECT
             if (api.tempat_lahir) {
                 const options = await searchAllKabkota(api.tempat_lahir);
 
                 const selected =
-                    options.find((x: any) =>
-                        x.label.toLowerCase().includes("kediri"),
+                    options.find(
+                        (x: any) =>
+                            normalize(getOptionText(x)) ===
+                            normalize(api.tempat_lahir),
                     ) ?? null;
 
                 if (selected) {
@@ -276,118 +383,152 @@ export default function CreatePengajar({ pengajar }: Props) {
     useEffect(() => {
         if (!pengajar?.tempat_lahir) return;
 
+        let active = true;
+
         searchAllKabkota(pengajar.tempat_lahir).then((options) => {
+            if (!active) return;
+
             const selected = options.find(
                 (x: any) =>
-                    normalize(x.label) === normalize(pengajar.tempat_lahir),
+                    normalize(getOptionText(x)) ===
+                    normalize(getOptionText(pengajar.tempat_lahir)),
             );
 
             if (selected) {
                 setData("tempat_lahir", selected);
             }
         });
-    }, []);
+
+        return () => {
+            active = false;
+        };
+    }, [pengajar?.tempat_lahir]);
+
     useEffect(() => {
-        if (!isEdit) return;
-        if (loadedAlamat) return;
-        if (!pengajar?.provinsi) return;
+        if (!isEdit || !pengajar?.provinsi) return;
 
         searchProvinsi("").then((options) => {
             const selected = options.find(
-                (x: any) => normalize(x.label) === normalize(pengajar.provinsi),
+                (x: any) =>
+                    normalize(getOptionText(x)) === normalize(String(pengajar.provinsi)),
             );
 
-            if (selected) {
-                setData("provinsi", selected);
-            }
+            if (selected) setData("provinsi", selected);
         });
-    }, [loadedAlamat]);
-    useEffect(() => {
-        if (!isEdit) return;
-        if (loadedAlamat) return;
-        if (!data.provinsi) return;
-        if (!pengajar?.kabkota) return;
+    }, [isEdit, pengajar?.provinsi]);
 
-        searchKabkota(data.provinsi.value, pengajar.kabkota).then((options) => {
+    useEffect(() => {
+        if (!isEdit || !pengajar?.kabkota || !data.provinsi?.value) return;
+
+        searchKabkota(String(data.provinsi.value), "").then((options) => {
             const selected = options.find(
-                (x: any) => normalize(x.label) === normalize(pengajar.kabkota),
+                (x: any) =>
+                    normalize(getOptionText(x)) === normalize(String(pengajar.kabkota)),
             );
 
-            if (selected) {
-                setData("kabkota", selected);
-            }
+            if (selected) setData("kabkota", selected);
         });
-    }, [data.provinsi, loadedAlamat]);
+    }, [isEdit, pengajar?.kabkota, data.provinsi?.value]);
+
     useEffect(() => {
-        if (!isEdit) return;
-        if (loadedAlamat) return;
-        if (!data.kabkota) return;
-        if (!pengajar?.kecamatan) return;
+        if (!isEdit || !pengajar?.kecamatan || !data.kabkota?.value) return;
 
-        searchKecamatan(data.kabkota.value, pengajar.kecamatan).then(
-            (options) => {
-                const selected = options.find(
-                    (x: any) =>
-                        normalize(x.label) === normalize(pengajar.kecamatan),
-                );
+        searchKecamatan(String(data.kabkota.value), "").then((options) => {
+            const selected = options.find(
+                (x: any) =>
+                    normalize(getOptionText(x)) === normalize(String(pengajar.kecamatan)),
+            );
 
-                if (selected) {
-                    setData("kecamatan", selected);
-                }
-            },
-        );
-    }, [data.kabkota, loadedAlamat]);
+            if (selected) setData("kecamatan", selected);
+        });
+    }, [isEdit, pengajar?.kecamatan, data.kabkota?.value]);
+
     useEffect(() => {
-        if (!isEdit) return;
-        if (loadedAlamat) return;
-        if (!data.kecamatan) return;
-        if (!pengajar?.kelurahan) return;
+        if (!isEdit || !pengajar?.kelurahan || !data.kecamatan?.value) return;
 
-        searchKelurahan(data.kecamatan.value, pengajar.kelurahan).then(
-            (options) => {
-                const selected = options.find(
-                    (x: any) =>
-                        normalize(x.label) === normalize(pengajar.kelurahan),
-                );
+        searchKelurahan(String(data.kecamatan.value), "").then((options) => {
+            const selected = options.find(
+                (x: any) =>
+                    normalize(getOptionText(x)) === normalize(String(pengajar.kelurahan)),
+            );
 
-                if (selected) {
-                    setData("kelurahan", selected);
-                }
+            if (selected) setData("kelurahan", selected);
+        });
+    }, [isEdit, pengajar?.kelurahan, data.kecamatan?.value]);
 
-                // preload selesai
-                setLoadedAlamat(true);
-            },
-        );
-    }, [data.kecamatan, loadedAlamat]);
-
-    // =========================
-    // SUBMIT
-    // =========================
-    const submit = (e: React.FormEvent) => {
+    
+    const submit = (e: FormEvent) => {
         e.preventDefault();
+
+        console.log("SUBMIT TERPANGGIL");
+        console.log("MODE EDIT:", isEdit);
+        console.log("ID PENGAJAR:", pengajar?.id);
+        console.log("DATA FORM:", data);
+
+        if (!isLembaga && !data.lembaga_id) {
+            alert("Lembaga wajib dipilih.");
+            return;
+        }
+
+        if (!data.nama) {
+            alert("Nama wajib diisi.");
+            return;
+        }
+
+        if (!data.nik || data.nik.length < 16) {
+            alert("NIK wajib diisi 16 digit.");
+            return;
+        }
+
+        
+        const payload = {
+            ...data,
+            tempat_lahir: data.tempat_lahir,
+            provinsi: data.provinsi,
+            kabkota: data.kabkota,
+            kecamatan: data.kecamatan,
+            kelurahan: data.kelurahan,
+        };
 
         if (isEdit) {
             router.post(
                 route("pengajar.update", pengajar.id),
                 {
-                    ...data,
+                    ...payload,
                     _method: "PUT",
                 },
                 {
                     forceFormData: true,
-
-                    onStart: () => console.log("START"),
-                    onSuccess: () => console.log("SUCCESS"),
-                    onError: (e) => console.log(e),
-                    onFinish: () => console.log("FINISH"),
+                    onStart: () => {
+                        console.log("REQUEST UPDATE DIMULAI");
+                    },
+                    onSuccess: () => {
+                        console.log("UPDATE BERHASIL");
+                    },
+                    onError: (errors) => {
+                        console.error("VALIDASI UPDATE GAGAL:", errors);
+                    },
+                    onFinish: () => {
+                        console.log("REQUEST UPDATE SELESAI");
+                    },
                 },
             );
-        } else {
-            post(route("pengajar.store"), {
-                forceFormData: true,
-            });
+
+            return;
         }
+
+        router.post(
+            route("pengajar.store"),
+            payload,
+            {
+                forceFormData: true,
+                onError: (errors) => {
+                    console.error("VALIDASI TAMBAH GAGAL:", errors);
+                },
+            },
+        );
     };
+
 
     return (
         <>
@@ -428,6 +569,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     value={data.nik}
                                     onChange={handleNikChange}
                                     error={errors.nik}
+                                    required
                                 />
 
                                 <FormInput
@@ -438,6 +580,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("nama", e.target.value)
                                     }
                                     error={errors.nama}
+                                    required
                                 />
 
                                 <FormAsyncSelect
@@ -448,6 +591,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     }
                                     loadOptions={searchAllKabkota}
                                     error={errors.tempat_lahir}
+                                    required
                                 />
 
                                 <FormInput
@@ -458,6 +602,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("tgl_lahir", e.target.value)
                                     }
                                     error={errors.tgl_lahir}
+                                    required
                                 />
 
                                 <FormSelect2
@@ -475,6 +620,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                             value: "P",
                                         },
                                     ]}
+                                    required
                                 />
 
                                 <FormSelect2
@@ -508,6 +654,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                             value: "Konghucu",
                                         },
                                     ]}
+                                    required
                                 />
 
                                 <FormInput
@@ -523,6 +670,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     }}
                                     placeholder="08xxxxxxxxxx"
                                     error={errors.no_hp}
+                                    required
                                 />
 
                                 {!isLembaga && (
@@ -532,11 +680,13 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         options={lembagas.map((item: any) => ({
                                             value: item.id,
                                             label: item.nama,
-                                        }))}
+                                        }))
+                                        }
                                         onChange={(value) =>
                                             setData("lembaga_id", value)
                                         }
                                         error={errors.lembaga_id}
+                                        required
                                     />
                                 )}
 
@@ -548,6 +698,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("jabatan", e.target.value)
                                     }
                                     error={errors.jabatan}
+                                    required
                                 />
                             </div>
                         </div>
@@ -578,32 +729,8 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("pendidikan_terakhir", v)
                                     }
                                     error={errors.pendidikan_terakhir}
-                                    options={[
-                                        {
-                                            label: "S2",
-                                            value: "S2",
-                                        },
-                                        {
-                                            label: "S1",
-                                            value: "S1",
-                                        },
-                                        {
-                                            label: "D4",
-                                            value: "D4",
-                                        },
-                                        {
-                                            label: "D3",
-                                            value: "D3",
-                                        },
-                                        {
-                                            label: "SMA",
-                                            value: "SMA",
-                                        },
-                                        {
-                                            label: "MA",
-                                            value: "MA",
-                                        },
-                                    ]}
+                                    options={pendidikanTerakhirOptions}
+                                    required
                                 />
 
                                 <FormInput
@@ -614,6 +741,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("jurusan", e.target.value)
                                     }
                                     error={errors.jurusan}
+                                    required
                                 />
 
                                 <FormInput
@@ -627,6 +755,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         )
                                     }
                                     error={errors.sekolah_universitas}
+                                    required
                                 />
 
                                 <FormSelect2
@@ -663,16 +792,16 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     value={data.provinsi}
                                     onChange={(value: any) => {
                                         setData("provinsi", value);
-
                                         setData("kabkota", null);
                                         setData("kecamatan", null);
                                         setData("kelurahan", null);
                                     }}
-                                    loadOptions={searchProvinsi}
+                                    loadOptions={(inputValue) => searchProvinsi(inputValue)}
+                                    required
                                 />
 
                                 <FormAsyncSelect
-                                    key={data.provinsi?.value}
+                                    key={data.provinsi?.value ?? "provinsi-empty"}
                                     label="Kabupaten / Kota"
                                     value={data.kabkota}
                                     onChange={(value: any) => {
@@ -681,50 +810,40 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("kelurahan", null);
                                     }}
                                     loadOptions={(inputValue) => {
-                                        if (!data.provinsi?.value) {
-                                            return Promise.resolve([]);
-                                        }
+                                        if (!data.provinsi?.value) return Promise.resolve([]);
 
-                                        return searchKabkota(
-                                            String(data.provinsi.value),
-                                            inputValue,
-                                        ).then((options) => {
-                                            console.log("HASIL KABKOTA:", options);
-                                            return options;
-                                        });
+                                        return searchKabkota(String(data.provinsi.value), inputValue);
                                     }}
+                                    required
                                 />
 
                                 <FormAsyncSelect
                                     label="Kecamatan"
-                                    key={data.kabkota?.value}
+                                    key={data.kabkota?.value ?? "kab-empty"}
                                     value={data.kecamatan}
                                     onChange={(value: any) => {
                                         setData("kecamatan", value);
-
                                         setData("kelurahan", null);
                                     }}
-                                    loadOptions={(inputValue) =>
-                                        searchKecamatan(
-                                            data.kabkota?.value ?? "",
-                                            inputValue,
-                                        )
-                                    }
+                                    loadOptions={(inputValue) => {
+                                        if (!data.kabkota?.value) return Promise.resolve([]);
+
+                                        return searchKecamatan(String(data.kabkota.value), inputValue);
+                                    }}
+                                    required
                                 />
 
                                 <FormAsyncSelect
                                     label="Kelurahan"
-                                    key={data.kecamatan?.value}
+                                    key={data.kecamatan?.value ?? "kec-empty"}
                                     value={data.kelurahan}
-                                    onChange={(value: any) =>
-                                        setData("kelurahan", value)
-                                    }
-                                    loadOptions={(inputValue) =>
-                                        searchKelurahan(
-                                            data.kecamatan?.value ?? "",
-                                            inputValue,
-                                        )
-                                    }
+                                    onChange={(value: any) => setData("kelurahan", value)}
+                                    loadOptions={(inputValue) => {
+                                        if (!data.kecamatan?.value) return Promise.resolve([]);
+
+                                        return searchKelurahan(String(data.kecamatan.value), inputValue);
+                                    }}
+                                    required
                                 />
 
                                 <div className="md:col-span-2">
@@ -736,6 +855,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                             setData("alamat", e.target.value)
                                         }
                                         error={errors.alamat}
+                                        required
                                     />
                                 </div>
                             </div>
@@ -765,40 +885,8 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     value={data.bank}
                                     onChange={(v) => setData("bank", v)}
                                     error={errors.bank}
-                                    options={[
-                                        {
-                                            label: "Bank Jatim",
-                                            value: "Bank Jatim",
-                                        },
-                                        { label: "BRI", value: "BRI" },
-                                        { label: "BNI", value: "BNI" },
-                                        { label: "Mandiri", value: "Mandiri" },
-                                        { label: "BCA", value: "BCA" },
-                                        { label: "BTN", value: "BTN" },
-                                        { label: "BSI", value: "BSI" },
-                                        {
-                                            label: "CIMB Niaga",
-                                            value: "CIMB Niaga",
-                                        },
-                                        { label: "Danamon", value: "Danamon" },
-                                        {
-                                            label: "Permata Bank",
-                                            value: "Permata Bank",
-                                        },
-                                        {
-                                            label: "Panin Bank",
-                                            value: "Panin Bank",
-                                        },
-                                        {
-                                            label: "Bank Mega",
-                                            value: "Bank Mega",
-                                        },
-                                        {
-                                            label: "Bank Syariah Jatim",
-                                            value: "Bank Syariah Jatim",
-                                        },
-                                        { label: "Lainnya", value: "Lainnya" },
-                                    ]}
+                                    options={bankOptions}
+                                    required
                                 />
 
                                 <FormInput
@@ -813,6 +901,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("no_rekening", value);
                                     }}
                                     error={errors.no_rekening}
+                                    required
                                 />
 
                                 <FormInput
@@ -826,6 +915,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("no_bpjs", value);
                                     }}
                                     error={errors.no_bpjs}
+                                    required
                                 />
 
                                 <div>
@@ -833,18 +923,20 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         label="Pas Foto"
                                         hint="Maks. 1 MB (JPG, PNG, PDF)"
                                         onChange={(e) => {
-                                            const file =
-                                                e.target.files?.[0] || null;
+                                            const file = e.target.files?.[0] ?? null;
+
+                                            if (!validateFile(file, 1)) {
+                                                e.target.value = "";
+                                                setData("pas_foto", null);
+                                                handleFilePreview(null, setPreviewFoto, previewFoto);
+                                                return;
+                                            }
 
                                             setData("pas_foto", file);
-
-                                            if (file) {
-                                                setPreviewFoto(
-                                                    URL.createObjectURL(file),
-                                                );
-                                            }
+                                            handleFilePreview(file, setPreviewFoto, previewFoto);
                                         }}
                                         error={errors.pas_foto}
+                                        required={!isEdit}
                                     />
 
                                     {previewFoto && (
@@ -873,24 +965,17 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         label="KTP"
                                         hint="Maks. 1 MB (JPG, PNG, PDF)"
                                         onChange={(e) => {
-                                            const file = e.target.files?.[0] || null;
+                                            const file = e.target.files?.[0] ?? null;
 
-                                            if (!file) {
-                                                setData("ktp", null);
-                                                setPreviewKtp(null);
-                                                return;
-                                            }
-
-                                            if (file.size > 1 * 1024 * 1024) {
-                                                alert("Ukuran file KTP maksimal 1 MB.");
+                                            if (!validateFile(file, 1)) {
                                                 e.target.value = "";
                                                 setData("ktp", null);
-                                                setPreviewKtp(null);
+                                                handleFilePreview(null, setPreviewKtp, previewKtp);
                                                 return;
                                             }
 
                                             setData("ktp", file);
-                                            setPreviewKtp(URL.createObjectURL(file));
+                                            handleFilePreview(file, setPreviewKtp, previewKtp);
                                         }}
                                         error={errors.ktp}
                                     />
@@ -921,15 +1006,17 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         label="Ijazah Terakhir"
                                         hint="Maks. 1 MB (JPG, PNG, PDF)"
                                         onChange={(e) => {
-                                            const file = e.target.files?.[0] || null;
+                                            const file = e.target.files?.[0] ?? null;
+
+                                            if (!validateFile(file, 1)) {
+                                                e.target.value = "";
+                                                setData("ijazah", null);
+                                                handleFilePreview(null, setPreviewIjazah, previewIjazah);
+                                                return;
+                                            }
 
                                             setData("ijazah", file);
-
-                                            if (file) {
-                                                setPreviewIjazah(URL.createObjectURL(file));
-                                            } else {
-                                                setPreviewIjazah(null);
-                                            }
+                                            handleFilePreview(file, setPreviewIjazah, previewIjazah);
                                         }}
                                         error={errors.ijazah}
                                     />
@@ -960,24 +1047,17 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         label="SK Penetapan Pengajar"
                                         hint="Maks. 1 MB (PDF, JPG, PNG)"
                                         onChange={(e) => {
-                                            const file = e.target.files?.[0] || null;
+                                            const file = e.target.files?.[0] ?? null;
 
-                                            if (!file) {
-                                                setData("sk_penetapan", null);
-                                                setPreviewSkPenetapan(null);
-                                                return;
-                                            }
-
-                                            if (file.size > 1 * 1024 * 1024) {
-                                                alert("Ukuran file SK Penetapan maksimal 1 MB.");
+                                            if (!validateFile(file, 1)) {
                                                 e.target.value = "";
                                                 setData("sk_penetapan", null);
-                                                setPreviewSkPenetapan(null);
+                                                handleFilePreview(null, setPreviewSkPenetapan, previewSkPenetapan);
                                                 return;
                                             }
 
                                             setData("sk_penetapan", file);
-                                            setPreviewSkPenetapan(URL.createObjectURL(file));
+                                            handleFilePreview(file, setPreviewSkPenetapan, previewSkPenetapan);
                                         }}
                                         error={errors.sk_penetapan}
                                     />

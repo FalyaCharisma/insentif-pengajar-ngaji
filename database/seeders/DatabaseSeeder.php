@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
             ProfilLembagaSeeder::class,
             PengajarSeeder::class,
             ForumSeeder::class,
+            PendidikanTerakhirSeeder::class,
+            BankSeeder::class,
         ]);
     }
 }

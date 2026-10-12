@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pengajar;
 use App\Models\Lembaga;
+use App\Models\PendidikanTerakhir;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Http;
+use App\Models\Bank;
 
 class PengajarController extends Controller
 {
@@ -95,10 +97,16 @@ class PengajarController extends Controller
      */
     public function create()
     {
-        $user = auth()->user();
-
         return Inertia::render('pengajar/create', [
-            'lembaga' => $user->hasRole(['superadmin', 'dindik']) ? Lembaga::orderBy('nama')->get() : [],
+            'lembaga' => Lembaga::orderBy('nama')->get(),
+            'pendidikanTerakhir' => PendidikanTerakhir::orderBy('urutan')->get([
+                'id',
+                'nama',
+            ]),
+            'bank' => Bank::orderBy('urutan')->get([
+                'id',
+                'nama',
+            ]),
         ]);
     }
 
@@ -107,13 +115,12 @@ class PengajarController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all(), $request->lembaga['value']);
         $validated = $request->validate([
             'nik' => 'required|digits:16|numeric|unique:pengajar,nik',
             'nama' => 'required|string|max:255',
             'tempat_lahir' => 'required|max:100',
             'tgl_lahir' => 'required|date',
-            'jk' => 'required|in:laki-laki,perempuan',
+            'jk' => 'required|in:L,P',
             'jabatan' => 'required|string|max:100',
             'pendidikan_terakhir' => 'required|string|max:100',
             'jurusan' => 'required|string|max:100',
@@ -136,51 +143,36 @@ class PengajarController extends Controller
         ]);
 
         $foto = null;
+        $ktp = null;
+        $ijazah = null;
+        $skP = null;
 
         if ($request->hasFile('pas_foto')) {
             $extension = $request->file('pas_foto')->getClientOriginalExtension();
-
             $filename = time() . '_pas_foto.' . $extension;
-
             $request->file('pas_foto')->storeAs('pengajar/foto', $filename, 'public');
-
             $foto = $filename;
         }
 
-        $ktp = null;
-
         if ($request->hasFile('ktp')) {
             $extension = $request->file('ktp')->getClientOriginalExtension();
-
             $filename = time() . '_ktp.' . $extension;
-
             $request->file('ktp')->storeAs('pengajar/ktp', $filename, 'public');
-
             $ktp = $filename;
         }
 
-        $ijazah = null;
-
         if ($request->hasFile('ijazah')) {
             $extension = $request->file('ijazah')->getClientOriginalExtension();
-
             $filename = time() . '_ijazah.' . $extension;
-
             $request->file('ijazah')->storeAs('pengajar/ijazah', $filename, 'public');
-
             $ijazah = $filename;
         }
 
-        $sk_penetapan = null;
-
         if ($request->hasFile('sk_penetapan')) {
             $extension = $request->file('sk_penetapan')->getClientOriginalExtension();
-
             $filename = time() . '_sk_penetapan.' . $extension;
-
             $request->file('sk_penetapan')->storeAs('pengajar/sk_penetapan', $filename, 'public');
-
-            $sk_penetapan = $filename;
+            $skP = $filename;
         }
 
         $user = auth()->user();
@@ -191,12 +183,12 @@ class PengajarController extends Controller
             $validated['lembaga_id'] = $request->lembaga_id;
         }
 
-        DB::transaction(function () use ($request, $foto, $validated) {
+        DB::transaction(function () use ($request, $foto, $ktp, $ijazah, $skP, $validated) {
             Pengajar::create([
                 'lembaga_id' => $validated['lembaga_id'],
                 'nik' => $request->nik,
                 'nama' => $request->nama,
-                'tempat_lahir' => $request->tempat_lahir['label'],
+                'tempat_lahir' => $request->tempat_lahir['label'] ?? null,
                 'tgl_lahir' => $request->tgl_lahir,
                 'jk' => $request->jk,
                 'jabatan' => $request->jabatan,
@@ -221,11 +213,11 @@ class PengajarController extends Controller
                 'pas_foto' => $foto,
                 'ktp' => $ktp,
                 'ijazah' => $ijazah,
-                'sk_penetapan' => $sk_penetapan
+                'sk_penetapan' => $skP,
             ]);
         });
 
-        return redirect()->route('pengajar.index')->with('success', 'Pengajar berhasil ditambahkan beserta akun staff');
+        return redirect()->route('pengajar.index')->with('success', 'Pengajar berhasil ditambahkan.');
     }
 
     /**
@@ -245,13 +237,17 @@ class PengajarController extends Controller
      */
     public function edit(Pengajar $pengajar)
     {
-        $user = auth()->user();
-
-        $pengajar->load('lembaga');
-
         return Inertia::render('pengajar/create', [
-            'pengajar' => $pengajar,
-            'lembaga' => $user->hasRole(['superadmin', 'dindik']) ? Lembaga::orderBy('nama')->get() : [],
+            'pengajar' => $pengajar->load('lembaga'),
+            'lembaga' => Lembaga::orderBy('nama')->get(),
+            'pendidikanTerakhir' => PendidikanTerakhir::orderBy('urutan')->get([
+                'id',
+                'nama',
+            ]),
+            'bank' => Bank::orderBy('urutan')->get([
+                'id',
+                'nama',
+            ]),
         ]);
     }
 
@@ -263,11 +259,12 @@ class PengajarController extends Controller
         if (auth()->user()->hasRole('lembaga') && $pengajar->lembaga_id !== auth()->user()->lembaga->id) {
             abort(403);
         }
+
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'tempat_lahir' => 'required',
             'tgl_lahir' => 'required|date',
-            'jk' => 'required|in:laki-laki,perempuan',
+            'jk' => 'required|in:L,P',
             'jabatan' => 'required|string|max:100',
             'pendidikan_terakhir' => 'required|string|max:100',
             'jurusan' => 'required|string|max:100',
@@ -291,69 +288,52 @@ class PengajarController extends Controller
 
         DB::transaction(function () use ($request, $pengajar) {
             $foto = $pengajar->pas_foto;
+            $ktp = $pengajar->ktp;
+            $ijazah = $pengajar->ijazah;
+            $skP = $pengajar->sk_penetapan;
 
             if ($request->hasFile('pas_foto')) {
-                // hapus foto lama
                 if ($foto) {
-                    Storage::disk('public')->delete('pengajar/foto' . $foto);
+                    Storage::disk('public')->delete('pengajar/foto/' . $foto);
                 }
 
                 $extension = $request->file('pas_foto')->getClientOriginalExtension();
-
                 $filename = time() . '_pas_foto.' . $extension;
-
-                $request->file('pas_foto')->storeAs('pengajar', $filename, 'public');
-
+                $request->file('pas_foto')->storeAs('pengajar/foto', $filename, 'public');
                 $foto = $filename;
             }
 
-            $ktp = $pengajar->ktp;
-
             if ($request->hasFile('ktp')) {
-
                 if ($ktp) {
-                    Storage::disk('public')->delete('pengajar/ktp' . $ktp);
+                    Storage::disk('public')->delete('pengajar/ktp/' . $ktp);
                 }
 
                 $extension = $request->file('ktp')->getClientOriginalExtension();
-
                 $filename = time() . '_ktp.' . $extension;
-
                 $request->file('ktp')->storeAs('pengajar/ktp', $filename, 'public');
-
                 $ktp = $filename;
             }
 
-            $ijazah = $pengajar->ijazah;
-
             if ($request->hasFile('ijazah')) {
                 if ($ijazah) {
-                    Storage::disk('ijazah')->delete('pengajar/ijazah' . $ijazah);
+                    Storage::disk('public')->delete('pengajar/ijazah/' . $ijazah);
                 }
 
                 $extension = $request->file('ijazah')->getClientOriginalExtension();
-
                 $filename = time() . '_ijazah.' . $extension;
-
                 $request->file('ijazah')->storeAs('pengajar/ijazah', $filename, 'public');
-
                 $ijazah = $filename;
             }
 
-            $sk_penetapan = $pengajar->sk_penetapan;
-
             if ($request->hasFile('sk_penetapan')) {
-                if ($sk_penetapan) {
-                    Storage::disk('sk_penetapan')->delete('pengajar/sk_penetapan' . $sk_penetapan);
+                if ($skP) {
+                    Storage::disk('public')->delete('pengajar/sk_penetapan/' . $skP);
                 }
 
                 $extension = $request->file('sk_penetapan')->getClientOriginalExtension();
-
                 $filename = time() . '_sk_penetapan.' . $extension;
-
                 $request->file('sk_penetapan')->storeAs('pengajar/sk_penetapan', $filename, 'public');
-
-                $sk_penetapan = $filename;
+                $skP = $filename;
             }
 
             $user = auth()->user();
@@ -363,7 +343,7 @@ class PengajarController extends Controller
             } else {
                 $validated['lembaga_id'] = $request->lembaga_id;
             }
-            // update pengajar
+
             $pengajar->update([
                 'lembaga_id' => $validated['lembaga_id'],
 
@@ -405,7 +385,7 @@ class PengajarController extends Controller
                 'pas_foto' => $foto,
                 'ktp' => $ktp,
                 'ijazah' => $ijazah,
-                'sk_penetapan' => $sk_penetapan
+                'sk_penetapan' => $skP
             ]);
         });
 
