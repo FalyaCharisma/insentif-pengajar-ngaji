@@ -35,6 +35,7 @@ class Pengajar extends Model
         'ijazah',
         'sk_penetapan',
         'status',
+        'paket'
     ];
 
     public function lembaga()

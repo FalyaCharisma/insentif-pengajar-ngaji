@@ -140,6 +140,7 @@ class PengajarController extends Controller
             'ktp' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
             'ijazah' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
             'sk_penetapan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
+            'paket' => 'nullable|in:Paket A,Paket B,Paket C',
         ]);
 
         $foto = null;
@@ -214,6 +215,7 @@ class PengajarController extends Controller
                 'ktp' => $ktp,
                 'ijazah' => $ijazah,
                 'sk_penetapan' => $skP,
+                'paket' => $request->paket,
             ]);
         });
 
@@ -284,6 +286,7 @@ class PengajarController extends Controller
             'ktp' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
             'ijazah' => 'nullable|mimes:jpg,jpeg,png,pdf|max:1024',
             'sk_penetapan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:1024',
+            'paket' => 'nullable|in:Paket A,Paket B,Paket C',
         ]);
 
         DB::transaction(function () use ($request, $pengajar) {
@@ -385,7 +388,8 @@ class PengajarController extends Controller
                 'pas_foto' => $foto,
                 'ktp' => $ktp,
                 'ijazah' => $ijazah,
-                'sk_penetapan' => $skP
+                'sk_penetapan' => $skP,
+                'paket' => $request->paket,
             ]);
         });
 

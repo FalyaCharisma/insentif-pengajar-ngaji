@@ -66,6 +66,7 @@ const initialValues = {
     sk_penetapan: null as File | null,
 
     status: "aktif",
+    paket: "",
 };
 
 type FormData = typeof initialValues;
@@ -178,6 +179,7 @@ export default function CreatePengajar({ pengajar }: Props) {
             agama: pengajar?.agama ?? "",
             no_hp: pengajar?.no_hp ?? "",
             lembaga_id: pengajar?.lembaga_id ?? "",
+            paket: pengajar?.paket ?? "",
             jabatan: pengajar?.jabatan ?? "",
             pendidikan_terakhir: pengajar?.pendidikan_terakhir ?? "",
             jurusan: pengajar?.jurusan ?? "",
@@ -671,6 +673,18 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     placeholder="08xxxxxxxxxx"
                                     error={errors.no_hp}
                                     required
+                                />
+
+                                <FormSelect2
+                                    label="Paket"
+                                    value={data.paket}
+                                    options={[
+                                        { label: "Paket A", value: "Paket A" },
+                                        { label: "Paket B", value: "Paket B" },
+                                        { label: "Paket C", value: "Paket C" },
+                                    ]}
+                                    onChange={(value) => setData("paket", value)}
+                                    error={errors.paket}
                                 />
 
                                 {!isLembaga && (
