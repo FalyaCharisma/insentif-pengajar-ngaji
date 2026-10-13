@@ -1,11 +1,6 @@
 import { Head, useForm, router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
-import type {
-    ChangeEvent,
-    Dispatch,
-    FormEvent,
-    SetStateAction,
-} from "react";
+import type { ChangeEvent, Dispatch, FormEvent, SetStateAction } from "react";
 
 import AdminLayout from "@/layouts/app-layout";
 import PageHeader from "@/Components/PageHeader";
@@ -21,7 +16,15 @@ import SecondaryButton from "@/Components/SecondaryButton";
 
 import { useAlamat } from "@/hooks/useAlamat";
 import { useLembaga } from "@/hooks/useLembaga";
-import { Save, User, GraduationCap, Landmark, ImagePlus, ArrowLeft } from "lucide-react";
+import {
+    Save,
+    User,
+    GraduationCap,
+    Landmark,
+    ImagePlus,
+    ArrowLeft,
+    ShieldCheck,
+} from "lucide-react";
 import axios from "axios";
 
 type SelectOption = {
@@ -85,7 +88,6 @@ const requiredLabel = (label: string) => (
 );
 
 export default function CreatePengajar({ pengajar }: Props) {
-
     const [previewFoto, setPreviewFoto] = useState(
         pengajar?.pas_foto
             ? `/storage/pengajar/foto/${pengajar.pas_foto}`
@@ -93,15 +95,11 @@ export default function CreatePengajar({ pengajar }: Props) {
     );
 
     const [previewKtp, setPreviewKtp] = useState(
-        pengajar?.ktp
-            ? `/storage/pengajar/ktp/${pengajar.ktp}`
-            : null,
+        pengajar?.ktp ? `/storage/pengajar/ktp/${pengajar.ktp}` : null,
     );
 
     const [previewIjazah, setPreviewIjazah] = useState(
-        pengajar?.ijazah
-            ? `/storage/pengajar/ijazah/${pengajar.ijazah}`
-            : null,
+        pengajar?.ijazah ? `/storage/pengajar/ijazah/${pengajar.ijazah}` : null,
     );
 
     const [previewSkPenetapan, setPreviewSkPenetapan] = useState(
@@ -158,7 +156,10 @@ export default function CreatePengajar({ pengajar }: Props) {
 
         return {
             label: String(label),
-            value: value !== undefined && value !== null ? String(value) : String(label),
+            value:
+                value !== undefined && value !== null
+                    ? String(value)
+                    : String(label),
         };
     };
 
@@ -223,12 +224,16 @@ export default function CreatePengajar({ pengajar }: Props) {
 
     const getOptionText = (value: any) => {
         if (!value) return "";
-        return typeof value === "string" ? value : value.label ?? value.nama ?? "";
+        return typeof value === "string"
+            ? value
+            : (value.label ?? value.nama ?? "");
     };
 
     const getOptionValue = (value: any) => {
         if (!value) return "";
-        return typeof value === "string" ? value : value.value ?? value.id ?? "";
+        return typeof value === "string"
+            ? value
+            : (value.value ?? value.id ?? "");
     };
 
     const revokePreview = (url?: string | null) => {
@@ -412,7 +417,8 @@ export default function CreatePengajar({ pengajar }: Props) {
         searchProvinsi("").then((options) => {
             const selected = options.find(
                 (x: any) =>
-                    normalize(getOptionText(x)) === normalize(String(pengajar.provinsi)),
+                    normalize(getOptionText(x)) ===
+                    normalize(String(pengajar.provinsi)),
             );
 
             if (selected) setData("provinsi", selected);
@@ -425,7 +431,8 @@ export default function CreatePengajar({ pengajar }: Props) {
         searchKabkota(String(data.provinsi.value), "").then((options) => {
             const selected = options.find(
                 (x: any) =>
-                    normalize(getOptionText(x)) === normalize(String(pengajar.kabkota)),
+                    normalize(getOptionText(x)) ===
+                    normalize(String(pengajar.kabkota)),
             );
 
             if (selected) setData("kabkota", selected);
@@ -438,7 +445,8 @@ export default function CreatePengajar({ pengajar }: Props) {
         searchKecamatan(String(data.kabkota.value), "").then((options) => {
             const selected = options.find(
                 (x: any) =>
-                    normalize(getOptionText(x)) === normalize(String(pengajar.kecamatan)),
+                    normalize(getOptionText(x)) ===
+                    normalize(String(pengajar.kecamatan)),
             );
 
             if (selected) setData("kecamatan", selected);
@@ -451,14 +459,16 @@ export default function CreatePengajar({ pengajar }: Props) {
         searchKelurahan(String(data.kecamatan.value), "").then((options) => {
             const selected = options.find(
                 (x: any) =>
-                    normalize(getOptionText(x)) === normalize(String(pengajar.kelurahan)),
+                    normalize(getOptionText(x)) ===
+                    normalize(String(pengajar.kelurahan)),
             );
 
             if (selected) setData("kelurahan", selected);
         });
     }, [isEdit, pengajar?.kelurahan, data.kecamatan?.value]);
 
-    
+    const [persetujuanPrivasi, setPersetujuanPrivasi] = useState(false);
+
     const submit = (e: FormEvent) => {
         e.preventDefault();
 
@@ -482,7 +492,13 @@ export default function CreatePengajar({ pengajar }: Props) {
             return;
         }
 
-        
+        if (!persetujuanPrivasi) {
+            alert(
+                "Silakan baca dan centang persetujuan penggunaan data pribadi sebelum menyimpan.",
+            );
+            return;
+        }
+
         const payload = {
             ...data,
             tempat_lahir: data.tempat_lahir,
@@ -519,18 +535,13 @@ export default function CreatePengajar({ pengajar }: Props) {
             return;
         }
 
-        router.post(
-            route("pengajar.store"),
-            payload,
-            {
-                forceFormData: true,
-                onError: (errors) => {
-                    console.error("VALIDASI TAMBAH GAGAL:", errors);
-                },
+        router.post(route("pengajar.store"), payload, {
+            forceFormData: true,
+            onError: (errors) => {
+                console.error("VALIDASI TAMBAH GAGAL:", errors);
             },
-        );
+        });
     };
-
 
     return (
         <>
@@ -683,7 +694,9 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         { label: "Paket B", value: "Paket B" },
                                         { label: "Paket C", value: "Paket C" },
                                     ]}
-                                    onChange={(value) => setData("paket", value)}
+                                    onChange={(value) =>
+                                        setData("paket", value)
+                                    }
                                     error={errors.paket}
                                 />
 
@@ -694,8 +707,7 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         options={lembagas.map((item: any) => ({
                                             value: item.id,
                                             label: item.nama,
-                                        }))
-                                        }
+                                        }))}
                                         onChange={(value) =>
                                             setData("lembaga_id", value)
                                         }
@@ -810,12 +822,16 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("kecamatan", null);
                                         setData("kelurahan", null);
                                     }}
-                                    loadOptions={(inputValue) => searchProvinsi(inputValue)}
+                                    loadOptions={(inputValue) =>
+                                        searchProvinsi(inputValue)
+                                    }
                                     required
                                 />
 
                                 <FormAsyncSelect
-                                    key={data.provinsi?.value ?? "provinsi-empty"}
+                                    key={
+                                        data.provinsi?.value ?? "provinsi-empty"
+                                    }
                                     label="Kabupaten / Kota"
                                     value={data.kabkota}
                                     onChange={(value: any) => {
@@ -824,9 +840,13 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("kelurahan", null);
                                     }}
                                     loadOptions={(inputValue) => {
-                                        if (!data.provinsi?.value) return Promise.resolve([]);
+                                        if (!data.provinsi?.value)
+                                            return Promise.resolve([]);
 
-                                        return searchKabkota(String(data.provinsi.value), inputValue);
+                                        return searchKabkota(
+                                            String(data.provinsi.value),
+                                            inputValue,
+                                        );
                                     }}
                                     required
                                 />
@@ -840,9 +860,13 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         setData("kelurahan", null);
                                     }}
                                     loadOptions={(inputValue) => {
-                                        if (!data.kabkota?.value) return Promise.resolve([]);
+                                        if (!data.kabkota?.value)
+                                            return Promise.resolve([]);
 
-                                        return searchKecamatan(String(data.kabkota.value), inputValue);
+                                        return searchKecamatan(
+                                            String(data.kabkota.value),
+                                            inputValue,
+                                        );
                                     }}
                                     required
                                 />
@@ -851,11 +875,17 @@ export default function CreatePengajar({ pengajar }: Props) {
                                     label="Kelurahan"
                                     key={data.kecamatan?.value ?? "kec-empty"}
                                     value={data.kelurahan}
-                                    onChange={(value: any) => setData("kelurahan", value)}
+                                    onChange={(value: any) =>
+                                        setData("kelurahan", value)
+                                    }
                                     loadOptions={(inputValue) => {
-                                        if (!data.kecamatan?.value) return Promise.resolve([]);
+                                        if (!data.kecamatan?.value)
+                                            return Promise.resolve([]);
 
-                                        return searchKelurahan(String(data.kecamatan.value), inputValue);
+                                        return searchKelurahan(
+                                            String(data.kecamatan.value),
+                                            inputValue,
+                                        );
                                     }}
                                     required
                                 />
@@ -937,17 +967,26 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         label="Pas Foto"
                                         hint="Maks. 1 MB (JPG, PNG, PDF)"
                                         onChange={(e) => {
-                                            const file = e.target.files?.[0] ?? null;
+                                            const file =
+                                                e.target.files?.[0] ?? null;
 
                                             if (!validateFile(file, 1)) {
                                                 e.target.value = "";
                                                 setData("pas_foto", null);
-                                                handleFilePreview(null, setPreviewFoto, previewFoto);
+                                                handleFilePreview(
+                                                    null,
+                                                    setPreviewFoto,
+                                                    previewFoto,
+                                                );
                                                 return;
                                             }
 
                                             setData("pas_foto", file);
-                                            handleFilePreview(file, setPreviewFoto, previewFoto);
+                                            handleFilePreview(
+                                                file,
+                                                setPreviewFoto,
+                                                previewFoto,
+                                            );
                                         }}
                                         error={errors.pas_foto}
                                         required={!isEdit}
@@ -972,24 +1011,33 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 {/* KTP */}
                                 <div>
                                     <FormFile
                                         label="KTP"
                                         hint="Maks. 1 MB (JPG, PNG, PDF)"
                                         onChange={(e) => {
-                                            const file = e.target.files?.[0] ?? null;
+                                            const file =
+                                                e.target.files?.[0] ?? null;
 
                                             if (!validateFile(file, 1)) {
                                                 e.target.value = "";
                                                 setData("ktp", null);
-                                                handleFilePreview(null, setPreviewKtp, previewKtp);
+                                                handleFilePreview(
+                                                    null,
+                                                    setPreviewKtp,
+                                                    previewKtp,
+                                                );
                                                 return;
                                             }
 
                                             setData("ktp", file);
-                                            handleFilePreview(file, setPreviewKtp, previewKtp);
+                                            handleFilePreview(
+                                                file,
+                                                setPreviewKtp,
+                                                previewKtp,
+                                            );
                                         }}
                                         error={errors.ktp}
                                     />
@@ -1020,17 +1068,26 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         label="Ijazah Terakhir"
                                         hint="Maks. 1 MB (JPG, PNG, PDF)"
                                         onChange={(e) => {
-                                            const file = e.target.files?.[0] ?? null;
+                                            const file =
+                                                e.target.files?.[0] ?? null;
 
                                             if (!validateFile(file, 1)) {
                                                 e.target.value = "";
                                                 setData("ijazah", null);
-                                                handleFilePreview(null, setPreviewIjazah, previewIjazah);
+                                                handleFilePreview(
+                                                    null,
+                                                    setPreviewIjazah,
+                                                    previewIjazah,
+                                                );
                                                 return;
                                             }
 
                                             setData("ijazah", file);
-                                            handleFilePreview(file, setPreviewIjazah, previewIjazah);
+                                            handleFilePreview(
+                                                file,
+                                                setPreviewIjazah,
+                                                previewIjazah,
+                                            );
                                         }}
                                         error={errors.ijazah}
                                     />
@@ -1061,17 +1118,26 @@ export default function CreatePengajar({ pengajar }: Props) {
                                         label="SK Penetapan Pengajar"
                                         hint="Maks. 1 MB (PDF, JPG, PNG)"
                                         onChange={(e) => {
-                                            const file = e.target.files?.[0] ?? null;
+                                            const file =
+                                                e.target.files?.[0] ?? null;
 
                                             if (!validateFile(file, 1)) {
                                                 e.target.value = "";
                                                 setData("sk_penetapan", null);
-                                                handleFilePreview(null, setPreviewSkPenetapan, previewSkPenetapan);
+                                                handleFilePreview(
+                                                    null,
+                                                    setPreviewSkPenetapan,
+                                                    previewSkPenetapan,
+                                                );
                                                 return;
                                             }
 
                                             setData("sk_penetapan", file);
-                                            handleFilePreview(file, setPreviewSkPenetapan, previewSkPenetapan);
+                                            handleFilePreview(
+                                                file,
+                                                setPreviewSkPenetapan,
+                                                previewSkPenetapan,
+                                            );
                                         }}
                                         error={errors.sk_penetapan}
                                     />
@@ -1097,6 +1163,77 @@ export default function CreatePengajar({ pengajar }: Props) {
                                 </div>
                             </div>
                         </div>
+
+                        {/* ================= PERSETUJUAN DATA PRIBADI ================= */}
+                        <div className="rounded-xl border border-slate-300 border-l-4 border-l-teal-800 bg-slate-50 p-4 sm:p-5">
+                            <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                                <h2 className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                                    <ShieldCheck className="h-5 w-5 text-teal-800" />
+                                    Pernyataan & Perlindungan Data Pribadi
+                                </h2>
+
+                                <span className="shrink-0 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">
+                                    UU No. 27/2022
+                                </span>
+                            </div>
+
+                            <div className="space-y-2 pt-3 text-justify text-sm leading-relaxed text-slate-600">
+                                <p>
+                                    Dengan mengisi dan mengirimkan data pada
+                                    formulir ini, saya menyatakan bahwa data
+                                    yang diberikan adalah benar dan dapat
+                                    dipertanggungjawabkan.
+                                </p>
+
+                                <p>
+                                    Data pribadi yang disampaikan akan digunakan
+                                    untuk keperluan administrasi, verifikasi,
+                                    pengelolaan data pengajar, serta pelaksanaan
+                                    program insentif sesuai dengan ketentuan
+                                    yang berlaku.
+                                </p>
+
+                                <p>
+                                    Data pribadi akan dikelola dan dilindungi
+                                    sesuai dengan ketentuan Undang-Undang Nomor
+                                    27 Tahun 2022 tentang Perlindungan Data
+                                    Pribadi serta ketentuan peraturan
+                                    perundang-undangan lainnya.
+                                </p>
+                            </div>
+                        </div>
+
+                        <label
+                            htmlFor="persetujuan_privasi"
+                            className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:bg-slate-50"
+                        >
+                            <input
+                                id="persetujuan_privasi"
+                                type="checkbox"
+                                checked={persetujuanPrivasi}
+                                onChange={(e) =>
+                                    setPersetujuanPrivasi(e.target.checked)
+                                }
+                                className="mt-1 h-4 w-4 shrink-0 cursor-pointer rounded border-slate-300 text-teal-700 focus:ring-teal-600"
+                                aria-describedby="persetujuan-error"
+                            />
+
+                            <span className="text-sm font-semibold leading-relaxed text-slate-700">
+                                Saya telah membaca, memahami, dan menyetujui
+                                penggunaan data pribadi saya untuk tujuan
+                                sebagaimana dijelaskan di atas.
+                                <span className="ml-1 text-red-500">*</span>
+                            </span>
+                        </label>
+
+                        {!persetujuanPrivasi && (
+                            <p className="text-xs text-slate-500">
+                                Persetujuan wajib dicentang sebelum data dapat
+                                disimpan.
+                            </p>
+                        )}
+
+                        {/* ============================================================ */}
 
                         {/* ================= ACTION ================= */}
                         <div className="flex items-center justify-end gap-3 pt-2">

@@ -1,4 +1,4 @@
-import { Plus, Filter, FileSpreadsheet  } from "lucide-react";
+import { Plus, Filter, FileSpreadsheet, Upload } from "lucide-react";
 
 type Props = {
     filters: any;
@@ -22,6 +22,9 @@ type Props = {
     actionButtonIcon?: React.ReactNode;
     onAction?: () => void;
     hideActionButton?: boolean;
+    secondaryActionButtonLabel?: string;
+    onSecondaryAction?: () => void;
+    hideSecondaryActionButton?: boolean;
 
     hideSearch?: boolean;
     hideSort?: boolean;
@@ -54,6 +57,9 @@ export default function TableToolbar({
     actionButtonIcon,
     onAction,
     hideActionButton = true,
+    secondaryActionButtonLabel,
+    onSecondaryAction,
+    hideSecondaryActionButton = true,
 
     hideSearch = false,
     hideSort = false,
@@ -223,6 +229,29 @@ export default function TableToolbar({
                     >
                         {actionButtonIcon ?? <FileSpreadsheet size={18} />}
                         {actionButtonLabel}
+                    </button>
+                )}
+
+                {!hideSecondaryActionButton && onSecondaryAction && (
+                    <button
+                        onClick={onSecondaryAction}
+                        className="
+                            h-11
+                            px-5
+                            rounded-2xl
+                            bg-indigo-600
+                            hover:bg-indigo-700
+                            text-white
+                            text-sm
+                            font-medium
+                            inline-flex
+                            items-center
+                            gap-2
+                            transition
+                        "
+                    >
+                        <Upload size={18} />
+                        {secondaryActionButtonLabel}
                     </button>
                 )}
 

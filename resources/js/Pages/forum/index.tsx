@@ -11,6 +11,7 @@ import FormModal from "./form-modal";
 import { router, usePage } from "@inertiajs/react";
 import { deleteConfirm, successAlert } from "@/lib/alert";
 import DetailAkunModal from "./detail-akun-modal";
+import { useAuth } from "@/lib/auth";
 
 type Props = {
     forum: any;
@@ -20,6 +21,8 @@ type Props = {
 
 export default function Index({ forum, kategori, filters }: Props) {
     const { setParams } = useQueryParams(route("forum.index"), filters);
+    const { hasRole } = useAuth();
+    const canExport = hasRole("superadmin") || hasRole("dindik");
 
     const [open, setOpen] = useState(false);
     const [selectedForum, setSelectedForum] = useState<any>(null);
@@ -49,6 +52,11 @@ export default function Index({ forum, kategori, filters }: Props) {
                             filters={filters}
                             setParams={setParams}
                             searchPlaceholder="Cari forum..."
+                            actionButtonLabel="Export Excel"
+                            onAction={() =>
+                                window.location.assign(route("forum.export", filters))
+                            }
+                            hideActionButton={!canExport}
                             addButtonLabel="Tambah Forum"
                             onAdd={() => {
                                 setSelectedForum(null); // penting untuk mode create

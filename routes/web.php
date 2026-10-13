@@ -60,16 +60,21 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile/password', [PasswordController::class, 'update'])->name('profile.password');
 
     Route::resource('kategori', KategoriController::class);
+    Route::get('/forum/export', [ForumController::class, 'export'])->name('forum.export');
     Route::resource('forum', ForumController::class);
     Route::put('/forum/{forum}/reset-password', [ForumController::class, 'resetPassword'])->name('forum.reset-password');
 
     // Lembaga
+    Route::get('/lembaga-import/template', [LembagaController::class, 'downloadImportTemplate'])
+        ->name('lembaga.import-template');
+    Route::get('/lembaga/export', [LembagaController::class, 'export'])->name('lembaga.export');
     Route::resource('lembaga', LembagaController::class);
     Route::prefix('lembaga')
         ->name('lembaga.')
         ->controller(LembagaController::class)
         ->group(function () {
             Route::get('data', 'data')->name('data');
+            Route::post('import', 'import')->name('import');
             Route::put('{lembaga}/reset-password', 'resetPassword')->name('reset-password');
         });
 

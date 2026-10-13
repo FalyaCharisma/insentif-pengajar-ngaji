@@ -13,9 +13,30 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use App\Models\User;
+use App\Exports\ForumAccountsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ForumController extends Controller
 {
+    public function export(Request $request)
+    {
+        abort_unless($request->user()->hasAnyRole(['superadmin', 'dindik']), 403);
+
+        $query = Forum::with('user');
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('kode', 'like', '%'.$request->search.'%')
+                    ->orWhere('nama', 'like', '%'.$request->search.'%')
+                    ->orWhere('telepon', 'like', '%'.$request->search.'%');
+            });
+        }
+
+        $forums = $query->orderBy('nama')->get();
+
+        return Excel::download(new ForumAccountsExport($forums), 'akun_forum.xlsx');
+    }
+
     public function index(Request $request)
     {
         $query = Forum::with(['user', 'kategori']);

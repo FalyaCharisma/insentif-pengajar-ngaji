@@ -14,12 +14,14 @@ import { deleteConfirm, successAlert } from "@/lib/alert";
 import { Lembaga } from "@/types/lembaga";
 import { Kategori } from "@/types/kategori";
 import FormModal from "./form-modal";
+
 import DetailAkunModal from "./detail-akun-modal";
 import FormSelect2 from "@/Components/forms/FormSelect2";
 import FormAsyncSelect from "@/Components/forms/FormAsyncSelect";
 import { useAlamat } from "@/hooks/useAlamat";
 
 import { useAuth } from "@/lib/auth";
+import ImportModal from "./import-modal";
 
 type Props = {
     lembaga: any;
@@ -36,6 +38,7 @@ export default function Index({ lembaga, filters, kategori, forum }: Props) {
     const { setParams } = useQueryParams(route("lembaga.index"), filters);
 
     const [open, setOpen] = useState(false);
+    const [openImport, setOpenImport] = useState(false);
     const [selectedLembaga, setSelectedLembaga] = useState<Lembaga | null>(
         null,
     );
@@ -48,6 +51,7 @@ export default function Index({ lembaga, filters, kategori, forum }: Props) {
 
     const activeFilterCount = [
         filters.kategori_id,
+        filters.forum_id,
         filters.status,
         filters.status_verifikasi,
         filters.kecamatan,
@@ -92,6 +96,14 @@ export default function Index({ lembaga, filters, kategori, forum }: Props) {
                             addButtonLabel="Tambah Lembaga"
                             onAdd={() => setOpen(true)}
                             hideAddButton={!canCreate}
+                            actionButtonLabel="Export Excel"
+                            onAction={() =>
+                                window.location.assign(route("lembaga.export", filters))
+                            }
+                            hideActionButton={!canViewAccount}
+                            secondaryActionButtonLabel="Import Excel"
+                            onSecondaryAction={() => setOpenImport(true)}
+                            hideSecondaryActionButton={!canCreate}
                             sortOptions={[
                                 {
                                     label: "Terbaru",
@@ -112,7 +124,23 @@ export default function Index({ lembaga, filters, kategori, forum }: Props) {
 
                     {showFilter && (
                         <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5">
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-5">
+                                {/* Forum */}
+                                <FormSelect2
+                                    label="Forum"
+                                    value={filters.forum_id}
+                                    options={[
+                                        { value: "", label: "Semua Forum" },
+                                        ...forum.map((item: any) => ({
+                                            value: String(item.id),
+                                            label: item.nama,
+                                        })),
+                                    ]}
+                                    onChange={(value) =>
+                                        setParams({ forum_id: value, page: 1 })
+                                    }
+                                />
+
                                 {/* Kategori */}
                                 <FormSelect2
                                     label="Kategori"
@@ -289,6 +317,10 @@ export default function Index({ lembaga, filters, kategori, forum }: Props) {
                         }}
                         lembaga={selectedLembaga}
                         forum={forum}
+                    />
+                    <ImportModal
+                        open={openImport}
+                        onClose={() => setOpenImport(false)}
                     />
                 </div>
 
